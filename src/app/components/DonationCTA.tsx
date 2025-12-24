@@ -1,26 +1,43 @@
 import { Button } from './ui/button';
 import { motion } from 'motion/react';
-import { Heart, ArrowRight } from 'lucide-react';
+import { Heart } from 'lucide-react';
 
 export function DonationCTA() {
+
+  async function startDonation() {
+    try {
+      const res = await fetch("/.netlify/functions/create-checkout-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: 50 }), // default $50
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data?.error || "Donation checkout failed. Please try again.");
+        return;
+      }
+
+      window.location.href = data.url;
+    } catch (err) {
+      alert("Something went wrong. Please try again.");
+    }
+  }
+
   return (
     <section className="py-12 bg-gradient-to-r from-primary/10 to-primary/5 border-y border-border relative overflow-hidden">
-      {/* Animated background elements */}
+      
+      {/* Animated background */}
       <motion.div
         className="absolute top-0 left-1/4 w-64 h-64 bg-primary/10 rounded-full blur-3xl"
-        animate={{
-          y: [-20, 20, -20],
-          scale: [1, 1.1, 1],
-        }}
-        transition={{
-          duration: 8,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
+        animate={{ y: [-20, 20, -20], scale: [1, 1.1, 1] }}
+        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
       />
-      
+
       <div className="container mx-auto px-4 text-center relative">
         <div className="max-w-3xl mx-auto">
+
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             whileInView={{ opacity: 1, scale: 1 }}
@@ -29,14 +46,8 @@ export function DonationCTA() {
             className="inline-block mb-4"
           >
             <motion.div
-              animate={{
-                scale: [1, 1.2, 1],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
             >
               <Heart className="text-primary mx-auto" size={44} fill="currentColor" />
             </motion.div>
@@ -51,7 +62,7 @@ export function DonationCTA() {
           >
             Help Us Support Those in Need
           </motion.h2>
-          
+
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -62,7 +73,7 @@ export function DonationCTA() {
             Your donation provides critical relief to families and firefighters affected by wildfires. 
             Every dollar makes a difference in rebuilding lives and communities.
           </motion.p>
-          
+
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -70,22 +81,18 @@ export function DonationCTA() {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="flex justify-center"
           >
-            <Button
-              asChild
-              size="lg"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 px-10"
-            >
-              <motion.a
-                href="#donate"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                size="lg"
+                onClick={startDonation}
+                className="bg-primary text-primary-foreground hover:bg-primary/90 px-10"
               >
                 <Heart size={20} className="mr-2" />
                 Donate Now
-              </motion.a>
-            </Button>
+              </Button>
+            </motion.div>
           </motion.div>
-          
+
           <motion.p
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -95,6 +102,7 @@ export function DonationCTA() {
           >
             100% tax-deductible • Secure donation processing
           </motion.p>
+
         </div>
       </div>
     </section>
