@@ -130,27 +130,7 @@ export function EmotionalMicroCopy() {
           })}
         </div>
 
-        {/* Bottom CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.6 }}
-          className="text-center mt-16"
-        >
-          <p className="text-lg text-muted-foreground mb-6">
-            Ready to make a difference in someone's darkest hour?
-          </p>
-          <motion.a
-            href="#donate"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="inline-flex items-center gap-3 px-10 py-4 bg-gradient-to-r from-primary to-orange-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-primary/25 transition-all duration-300"
-          >
-            <Heart className="fill-white" size={20} />
-            Give Hope Today
-          </motion.a>
-        </motion.div>
+        {/* Bottom CTA removed */}
       </div>
     </section>
   );

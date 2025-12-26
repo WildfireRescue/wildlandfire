@@ -1,4 +1,3 @@
-import DonationCalculator from "../components/DonationCalculator";
 import { DonateHero } from '../components/DonateHero';
 import { FundraisingGoal } from '../components/FundraisingGoal';
 import { EmotionalMicroCopy } from '../components/EmotionalMicroCopy';

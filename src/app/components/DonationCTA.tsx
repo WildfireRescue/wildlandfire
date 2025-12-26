@@ -74,24 +74,8 @@ export function DonationCTA() {
             Every dollar makes a difference in rebuilding lives and communities.
           </motion.p>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="flex justify-center"
-          >
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button
-                size="lg"
-                onClick={startDonation}
-                className="bg-primary text-primary-foreground hover:bg-primary/90 px-10"
-              >
-                <Heart size={20} className="mr-2" />
-                Donate Now
-              </Button>
-            </motion.div>
-          </motion.div>
+          {/* Donate button removed as requested */}
+
 
           <motion.p
             initial={{ opacity: 0 }}
