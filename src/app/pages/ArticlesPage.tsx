@@ -10,12 +10,12 @@ export function ArticlesPage({ slug }: { slug?: string }) {
   const [articles, setArticles] = useState<any[]>([]);
   const [article, setArticle] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const flag = sessionStorage.getItem('allow_articles');
     if (!flag) {
-      // Not allowed — redirect to home
-      window.location.hash = 'home';
+      // Not allowed — show friendly notice instead of redirecting (better UX for troubleshooting)
       setAllowed(false);
       return;
     }
@@ -37,6 +37,7 @@ export function ArticlesPage({ slug }: { slug?: string }) {
 
   async function fetchArticles() {
     setLoading(true);
+    setErrorMessage(null);
     try {
       const url = `https://${projectId}.supabase.co/rest/v1/articles?published=eq.true&order=published_at.desc&select=id,title,slug,excerpt,cover_url,published_at`;
       const res = await fetch(url, {
@@ -45,10 +46,20 @@ export function ArticlesPage({ slug }: { slug?: string }) {
           Authorization: `Bearer ${publicAnonKey}`,
         },
       });
+      if (!res.ok) {
+        const text = await res.text();
+        const msg = `Failed to load articles (status ${res.status})` + (text ? `: ${text}` : '');
+        console.error(msg);
+        setErrorMessage(msg);
+        setArticles([]);
+        return;
+      }
       const data = await res.json();
       setArticles(data || []);
-    } catch (e) {
+    } catch (e: any) {
       console.error('Failed to fetch articles', e);
+      setErrorMessage(e?.message || 'An unexpected error occurred while fetching articles.');
+      setArticles([]);
     } finally {
       setLoading(false);
     }
@@ -56,6 +67,7 @@ export function ArticlesPage({ slug }: { slug?: string }) {
 
   async function fetchArticle(slug: string) {
     setLoading(true);
+    setErrorMessage(null);
     try {
       const url = `https://${projectId}.supabase.co/rest/v1/articles?slug=eq.${encodeURIComponent(slug)}&select=*`;
       const res = await fetch(url, {
@@ -64,10 +76,20 @@ export function ArticlesPage({ slug }: { slug?: string }) {
           Authorization: `Bearer ${publicAnonKey}`,
         },
       });
+      if (!res.ok) {
+        const text = await res.text();
+        const msg = `Failed to load article (status ${res.status})` + (text ? `: ${text}` : '');
+        console.error(msg);
+        setErrorMessage(msg);
+        setArticle(null);
+        return;
+      }
       const data = await res.json();
       setArticle(data?.[0] || null);
-    } catch (e) {
+    } catch (e: any) {
       console.error('Failed to fetch article', e);
+      setErrorMessage(e?.message || 'An unexpected error occurred while fetching the article.');
+      setArticle(null);
     } finally {
       setLoading(false);
     }
@@ -78,7 +100,32 @@ export function ArticlesPage({ slug }: { slug?: string }) {
   }
 
   if (!allowed) {
-    return null; // redirected
+    return (
+      <div className="min-h-screen pt-24 pb-20 bg-background relative">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4 }}
+            className="max-w-2xl mx-auto text-center py-24"
+          >
+            <h2 className="text-2xl font-semibold mb-4 text-foreground">Articles — Access Required</h2>
+            <p className="text-muted-foreground mb-6">This page is only accessible when opened from the footer link. Click the button below to open Articles now.</p>
+            <div className="flex justify-center gap-3">
+              <Button onClick={() => {
+                // set the session flag and navigate — the app will consume the flag and render the page
+                sessionStorage.setItem('allow_articles', '1');
+                window.location.hash = 'articles';
+              }}>
+                Open Articles
+              </Button>
+              <Button variant="ghost" onClick={() => window.location.hash = ''}>Back to Home</Button>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -109,6 +156,16 @@ export function ArticlesPage({ slug }: { slug?: string }) {
             className="max-w-4xl mx-auto"
           >
             {loading && <p className="text-muted-foreground">Loading articles…</p>}
+
+            {errorMessage && (
+              <div className="p-4 mb-4 bg-yellow-50 text-yellow-900 rounded-md">
+                <p className="font-medium">We couldn't load articles right now.</p>
+                <p className="text-sm mb-3 break-words">{errorMessage}</p>
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={fetchArticles}>Retry</Button>
+                </div>
+              </div>
+            )}
 
             <div className="grid md:grid-cols-2 gap-6 mt-6">
               {articles.map((a) => (
@@ -150,6 +207,16 @@ export function ArticlesPage({ slug }: { slug?: string }) {
             className="max-w-3xl mx-auto bg-card/50 border border-border rounded-2xl p-8 mt-6"
           >
             {loading && <p className="text-muted-foreground">Loading article…</p>}
+
+            {errorMessage && (
+              <div className="p-4 mb-4 bg-yellow-50 text-yellow-900 rounded-md">
+                <p className="font-medium">We couldn't load this article right now.</p>
+                <p className="text-sm mb-3 break-words">{errorMessage}</p>
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={() => fetchArticle(slug)}>Retry</Button>
+                </div>
+              </div>
+            )}
 
             {!loading && article && (
               <article className="prose prose-lg text-foreground max-w-none">
