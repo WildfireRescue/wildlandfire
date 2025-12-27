@@ -46,10 +46,10 @@ exports.handler = async function (event, context) {
       cancel_url: `https://thewildlandfirerecoveryfund.org/#donate?canceled=true`,
     });
 
-    // Return session details for verification (url, id, and final success URL)
+    // Return session details for verification (url, id, success_url, and base URL used by function)
     return {
       statusCode: 200,
-      body: JSON.stringify({ url: session.url, id: session.id, success_url: session.success_url }),
+      body: JSON.stringify({ url: session.url, id: session.id, success_url: session.success_url, baseUrlUsed: baseUrl }),
     };
   } catch (err) {
     console.error('create-checkout-session error:', err);
