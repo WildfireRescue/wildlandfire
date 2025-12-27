@@ -52,6 +52,7 @@ export function Footer() {
                 { name: 'Stories', url: '#stories' },
                 { name: 'Grants', url: '#grants' },
                 { name: 'Donate', url: '#donate' },
+                { name: 'Articles', url: '#articles' },
                 { name: 'Contact Us', url: '#contact' }
               ].map((link, index) => (
                 <motion.li
@@ -62,12 +63,27 @@ export function Footer() {
                   transition={{ duration: 0.3, delay: 0.2 + index * 0.05 }}
                   whileHover={{ x: 5 }}
                 >
-                  <a
-                    href={link.url}
-                    className="hover:text-primary transition-colors inline-block"
-                  >
-                    {link.name}
-                  </a>
+                  {link.name === 'Articles' ? (
+                    <a
+                      href={link.url}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        // Allow access to Articles only when navigated from the footer
+                        sessionStorage.setItem('allow_articles', '1');
+                        window.location.hash = 'articles';
+                      }}
+                      className="hover:text-primary transition-colors inline-block"
+                    >
+                      {link.name}
+                    </a>
+                  ) : (
+                    <a
+                      href={link.url}
+                      className="hover:text-primary transition-colors inline-block"
+                    >
+                      {link.name}
+                    </a>
+                  )}
                 </motion.li>
               ))}
             </ul>

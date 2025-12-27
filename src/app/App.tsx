@@ -23,7 +23,7 @@ export default function App() {
       const rawHash = window.location.hash.slice(1);
       // Support hash values with query params, e.g. '#thankyou?session_id=...'
       const page = rawHash ? rawHash.split(/[?#/]/)[0] : '';
-      if (page && ['home', 'about', 'contact', 'thankyou', 'stories', 'grants', 'donate'].includes(page)) {
+      if (page && ['home', 'about', 'contact', 'thankyou', 'stories', 'grants', 'donate', 'articles'].includes(page)) {
         setCurrentPage(page);
         window.scrollTo(0, 0);
       }
@@ -144,6 +144,8 @@ export default function App() {
         return <GrantsPage />;
       case 'donate':
         return <DonatePage />;
+      case 'articles':
+        return <ArticlesPage />;
       default:
         return <HomePage />;
     }
