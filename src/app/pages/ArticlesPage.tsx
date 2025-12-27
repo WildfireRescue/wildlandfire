@@ -83,77 +83,102 @@ export function ArticlesPage({ slug }: { slug?: string }) {
 
   return (
     <div className="min-h-screen pt-24 pb-20 bg-background relative overflow-hidden">
-      <div className="container mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="max-w-3xl mx-auto text-center"
-        >
-          {!slug && (
-            <>
-              <h1 className="text-4xl md:text-6xl mb-6">Articles</h1>
-              <p className="text-muted-foreground mb-8">
-                Curated articles and resources about wildfire recovery, prevention, and community support.
-              </p>
+      {/* Hero */}
+      <section className="py-12 bg-gradient-to-br from-background to-primary/5">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="max-w-4xl mx-auto text-center"
+          >
+            <h1 className="text-4xl md:text-6xl mb-4 text-foreground">Articles</h1>
+            <p className="text-lg md:text-xl text-muted-foreground">Curated articles and resources about wildfire recovery, prevention, and community support.</p>
+          </motion.div>
+        </div>
+      </section>
 
-              {loading && <p className="text-muted-foreground">Loading...</p>}
+      <div className="container mx-auto px-4 mt-8">
+        {!slug && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="max-w-4xl mx-auto"
+          >
+            {loading && <p className="text-muted-foreground">Loading articles…</p>}
 
-              <div className="space-y-6 text-left">
-                {articles.map((a) => (
-                  <article key={a.id} className="p-6 border border-border rounded-lg">
-                    <h2 className="text-2xl mb-2">{a.title}</h2>
-                    {a.excerpt && <p className="text-muted-foreground mb-4">{a.excerpt}</p>}
-                    <div className="flex gap-3">
+            <div className="grid md:grid-cols-2 gap-6 mt-6">
+              {articles.map((a) => (
+                <article key={a.id} className="p-6 bg-card border border-border rounded-2xl">
+                  <div className="flex flex-col h-full">
+                    <div className="mb-4">
+                      <h2 className="text-2xl font-semibold text-foreground mb-2">{a.title}</h2>
+                      {a.excerpt && <p className="text-muted-foreground">{a.excerpt}</p>}
+                    </div>
+
+                    <div className="mt-auto flex items-center">
                       <Button variant="outline" onClick={() => {
-                        // keep access flag for next page
                         sessionStorage.setItem('allow_articles', '1');
                         window.location.hash = `articles/${a.slug}`;
                       }}>
                         Read Article
                       </Button>
-                      <span className="text-sm text-muted-foreground ml-auto">{new Date(a.published_at).toLocaleDateString()}</span>
+                      <span className="text-sm text-muted-foreground ml-auto">{a.published_at ? new Date(a.published_at).toLocaleDateString() : ''}</span>
                     </div>
-                  </article>
-                ))}
-              </div>
-            </>
-          )}
-
-          {slug && (
-            <div className="text-left">
-              {loading && <p className="text-muted-foreground">Loading...</p>}
-              {!loading && article && (
-                <article>
-                  <h1 className="text-4xl mb-4">{article.title}</h1>
-                  {article.cover_url && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={article.cover_url} alt={article.title} className="w-full rounded-lg mb-4" />
-                  )}
-                  {article.published_at && <p className="text-sm text-muted-foreground mb-6">Published {new Date(article.published_at).toLocaleDateString()}</p>}
-                  <div className="prose max-w-none">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{article.content || article.excerpt || ''}</ReactMarkdown>
-                  </div>
-
-                  <div className="mt-8">
-                    <Button size="lg" onClick={() => (window.location.hash = 'articles')}>
-                      Back to Articles
-                    </Button>
                   </div>
                 </article>
-              )}
+              ))}
 
-              {!loading && !article && (
-                <div>
-                  <p className="text-muted-foreground">Article not found.</p>
+              {(!loading && articles.length === 0) && (
+                <div className="col-span-2 p-6 text-center">
+                  <p className="text-muted-foreground">No articles published yet. Add one in Supabase Studio to get started.</p>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+
+        {slug && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="max-w-3xl mx-auto bg-card/50 border border-border rounded-2xl p-8 mt-6"
+          >
+            {loading && <p className="text-muted-foreground">Loading article…</p>}
+
+            {!loading && article && (
+              <article className="prose prose-lg text-foreground max-w-none">
+                <h1 className="mb-4">{article.title}</h1>
+                {article.cover_url && (
+                  <img src={article.cover_url} alt={article.title} className="w-full rounded-lg mb-6" />
+                )}
+                {article.published_at && <p className="text-sm text-muted-foreground mb-6">Published {new Date(article.published_at).toLocaleDateString()}</p>}
+
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{article.content || article.excerpt || ''}</ReactMarkdown>
+
+                <div className="mt-8">
                   <Button size="lg" onClick={() => (window.location.hash = 'articles')}>
                     Back to Articles
                   </Button>
                 </div>
-              )}
-            </div>
-          )}
-        </motion.div>
+              </article>
+            )}
+
+            {!loading && !article && (
+              <div>
+                <p className="text-muted-foreground">Article not found.</p>
+                <Button size="lg" onClick={() => (window.location.hash = 'articles')}>
+                  Back to Articles
+                </Button>
+              </div>
+            )}
+          </motion.div>
+        )}
       </div>
     </div>
   );
