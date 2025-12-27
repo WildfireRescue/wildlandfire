@@ -44,9 +44,10 @@ exports.handler = async function (event, context) {
       cancel_url: `${baseUrl}/#donate?canceled=true`,
     });
 
+    // Return session details for verification (url, id, and final success URL)
     return {
       statusCode: 200,
-      body: JSON.stringify({ url: session.url }),
+      body: JSON.stringify({ url: session.url, id: session.id, success_url: session.success_url }),
     };
   } catch (err) {
     console.error('create-checkout-session error:', err);
