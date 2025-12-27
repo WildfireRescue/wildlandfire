@@ -102,4 +102,35 @@ app.post("/make-server-39bb2c80/record-donation", async (c) => {
   }
 });
 
+// Record subscription (created via Checkout or subscription creation)
+app.post("/make-server-39bb2c80/record-subscription", async (c) => {
+  try {
+    const body = await c.req.json();
+    const { subscriptionId, amount, customerEmail, customerName } = body;
+
+    if (!subscriptionId) {
+      return c.json({ error: 'Missing subscriptionId' }, 400);
+    }
+
+    const subscriptionKey = `subscription:${subscriptionId}`;
+    const subscriptionData = {
+      subscriptionId,
+      amount: amount || null,
+      customerEmail: customerEmail || '',
+      customerName: customerName || 'Anonymous',
+      timestamp: new Date().toISOString(),
+      status: 'active',
+    };
+
+    await kv.set(subscriptionKey, subscriptionData);
+
+    console.log(`Subscription recorded: ${subscriptionId} - ${amount ? '$' + (amount/100) : 'amount unknown'} for ${customerEmail || customerName}`);
+
+    return c.json({ success: true, message: 'Subscription recorded successfully' });
+  } catch (error) {
+    console.error('Error recording subscription:', error);
+    return c.json({ error: 'Failed to record subscription', details: error.message }, 500);
+  }
+});
+
 Deno.serve(app.fetch);

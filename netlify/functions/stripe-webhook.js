@@ -37,7 +37,7 @@ exports.handler = async function (event, context) {
     if (stripeEvent.type === 'checkout.session.completed') {
       const session = stripeEvent.data.object;
 
-      // Retrieve session to get payment_intent and customer details
+      // Retrieve session to get payment_intent, subscription or customer details
       const sessionFull = await stripe.checkout.sessions.retrieve(session.id);
 
       const paymentIntentId = sessionFull.payment_intent || sessionFull.payment_intent?.id || null;
@@ -45,10 +45,34 @@ exports.handler = async function (event, context) {
       const donorName = (sessionFull.customer_details && sessionFull.customer_details.name) || 'Anonymous';
       const donorEmail = (sessionFull.customer_details && sessionFull.customer_details.email) || '';
 
-      console.log('Checkout session completed:', { sessionId: session.id, paymentIntentId, amount, donorName, donorEmail });
+      console.log('Checkout session completed:', { sessionId: session.id, paymentIntentId, amount, donorName, donorEmail, subscription: sessionFull.subscription });
 
+      // If this was a subscription Checkout, record the subscription
+      if (sessionFull.subscription) {
+        const subscriptionId = sessionFull.subscription;
+        // Retrieve subscription details
+        const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+        const price = subscription.items?.data?.[0]?.price;
+        const recurringAmount = price?.unit_amount || null;
+        const customerEmail = subscription?.customer_email || donorEmail || '';
+        const customerName = donorName;
+
+        // Record subscription via server function
+        const subRes = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-39bb2c80/record-subscription`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${publicAnonKey}`,
+          },
+          body: JSON.stringify({ subscriptionId, amount: recurringAmount, customerEmail, customerName }),
+        });
+
+        const subJson = await subRes.json();
+        console.log('record-subscription response', subJson);
+      }
+
+      // If a payment intent exists (one-time payment or first invoice for subscription), record it as a donation
       if (paymentIntentId && amount) {
-        // Record donation via the Supabase server function
         const res = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-39bb2c80/record-donation`, {
           method: 'POST',
           headers: {
@@ -60,8 +84,46 @@ exports.handler = async function (event, context) {
 
         const json = await res.json();
         console.log('record-donation response', json);
-      } else {
-        console.warn('Missing paymentIntentId or amount on session — skipping record');
+      }
+    }
+
+    // Handle recurring payments (invoices)
+    if (stripeEvent.type === 'invoice.payment_succeeded') {
+      const invoice = stripeEvent.data.object;
+      const invoiceId = invoice.id;
+      const paymentIntentId = invoice.payment_intent || null;
+      const amount = invoice.amount_paid || null;
+      const subscriptionId = invoice.subscription || null;
+
+      // Retrieve customer info if available
+      const customer = invoice.customer;
+      let customerEmail = invoice.customer_email || '';
+      let customerName = '';
+      if (customer) {
+        try {
+          const customerObj = await stripe.customers.retrieve(customer);
+          customerEmail = customerObj.email || customerEmail;
+          customerName = customerObj.name || '';
+        } catch (e) {
+          console.warn('Failed to retrieve customer for invoice:', e.message);
+        }
+      }
+
+      console.log('Invoice payment succeeded:', { invoiceId, paymentIntentId, amount, subscriptionId, customerEmail });
+
+      // Record the recurring donation as a donation record
+      if (paymentIntentId && amount) {
+        const res = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-39bb2c80/record-donation`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${publicAnonKey}`,
+          },
+          body: JSON.stringify({ paymentIntentId, amount, donorName: customerName || 'Recurring Donor', donorEmail: customerEmail }),
+        });
+
+        const json = await res.json();
+        console.log('record-donation response (invoice):', json);
       }
     }
 
