@@ -6,6 +6,7 @@ import { StoriesPage } from './pages/StoriesPage';
 import { GrantsPage } from './pages/GrantsPage';
 import { DonatePage } from './pages/DonatePage';
 import { ThankYouPage } from './pages/ThankYouPage';
+import { ArticlesPage } from './pages/ArticlesPage';
 import { Navigation } from './components/Navigation';
 import { Footer } from './components/Footer';
 import { DonationForm } from './components/DonationForm';
@@ -15,17 +16,23 @@ import { UrgencyTopBanner } from './components/UrgencyTopBanner';
 // Wildland Fire Recovery Fund - Main Application Component
 export default function App() {
   const [currentPage, setCurrentPage] = useState('home');
+  const [articleSlug, setArticleSlug] = useState<string | null>(null);
   const [isDonationFormOpen, setIsDonationFormOpen] = useState(false);
 
   // Handle hash-based routing
   useEffect(() => {
     const handleHashChange = () => {
       const rawHash = window.location.hash.slice(1);
-      // Support hash values with query params, e.g. '#thankyou?session_id=...'
-      const page = rawHash ? rawHash.split(/[?#/]/)[0] : '';
+      // Support hash values with query params, and optional article slug: '#articles/slug?x=1'
+      const parts = rawHash ? rawHash.split(/[?#/]/) : [];
+      const page = parts[0] || '';
+      const slug = parts[1] || null;
       if (page && ['home', 'about', 'contact', 'thankyou', 'stories', 'grants', 'donate', 'articles'].includes(page)) {
         setCurrentPage(page);
+        setArticleSlug(slug);
         window.scrollTo(0, 0);
+      } else {
+        setArticleSlug(null);
       }
     };
 
@@ -145,7 +152,7 @@ export default function App() {
       case 'donate':
         return <DonatePage />;
       case 'articles':
-        return <ArticlesPage />;
+        return <ArticlesPage slug={articleSlug || undefined} />;
       default:
         return <HomePage />;
     }
