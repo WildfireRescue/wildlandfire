@@ -41,8 +41,9 @@ exports.handler = async function (event, context) {
         },
       ],
       mode: 'payment',
-      success_url: `${baseUrl}/#thankyou?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${baseUrl}/#donate?canceled=true`,
+      // Use explicit production domain for redirects
+      success_url: `https://thewildlandfirerecoveryfund.org/#thankyou?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `https://thewildlandfirerecoveryfund.org/#donate?canceled=true`,
     });
 
     // Return session details for verification (url, id, and final success URL)
