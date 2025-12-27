@@ -1,5 +1,5 @@
-import { motion } from 'motion/react';
-import { Button } from './ui/button';
+import { motion } from "motion/react";
+import { Button } from "./ui/button";
 
 export function WaysToGive() {
   return (
@@ -12,25 +12,34 @@ export function WaysToGive() {
           transition={{ duration: 0.6 }}
           className="max-w-4xl mx-auto"
         >
-          <h2 className="text-4xl md:text-5xl mb-8 text-center">More Ways to Give</h2>
-          
+          <h2 className="text-4xl md:text-5xl mb-8 text-center">
+            More Ways to Give
+          </h2>
+
           <div className="grid md:grid-cols-3 gap-6">
             {[
               {
                 title: "Monthly Giving",
-                description: "Become a Recovery Partner with recurring donations. Provide steady, reliable support.",
-                action: "Start Monthly Gift"
+                description:
+                  "Become a Recovery Partner with recurring donations. Choose a monthly amount that works for you.",
+                action: "Start Monthly Gift",
+                href: "https://buy.stripe.com/eVq9AL8hV4Sy1M13Tha7C00",
+                external: true,
               },
               {
                 title: "Corporate Matching",
-                description: "Check if your employer will match your donation to double your impact.",
-                action: "Learn About Matching"
+                description:
+                  "Check if your employer will match your donation to double your impact.",
+                action: "Learn About Matching",
+                href: "/matching",
               },
               {
                 title: "Legacy Giving",
-                description: "Include us in your estate plans to create lasting impact for future survivors.",
-                action: "Explore Legacy Options"
-              }
+                description:
+                  "Include us in your estate plans to create lasting impact for future survivors.",
+                action: "Explore Legacy Options",
+                href: "/legacy",
+              },
             ].map((option, idx) => (
               <motion.div
                 key={idx}
@@ -42,9 +51,18 @@ export function WaysToGive() {
                 className="bg-card border border-border rounded-xl p-6 flex flex-col"
               >
                 <h3 className="text-xl font-semibold mb-3">{option.title}</h3>
-                <p className="text-muted-foreground mb-6 flex-grow">{option.description}</p>
-                <Button variant="outline" className="w-full">
-                  {option.action}
+                <p className="text-muted-foreground mb-6 flex-grow">
+                  {option.description}
+                </p>
+
+                <Button asChild variant="outline" className="w-full">
+                  <a
+                    href={option.href}
+                    target={option.external ? "_blank" : undefined}
+                    rel={option.external ? "noreferrer" : undefined}
+                  >
+                    {option.action}
+                  </a>
                 </Button>
               </motion.div>
             ))}
