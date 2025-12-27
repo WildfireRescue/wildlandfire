@@ -23,7 +23,8 @@ exports.handler = async function (event, context) {
     }
 
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-    const baseUrl = process.env.SITE_URL || process.env.URL || 'https://thewildlandfirerecoveryfund.org';
+    // Prefer explicit SITE_URL env var; fallback to the public primary domain
+    const baseUrl = process.env.SITE_URL || 'https://thewildlandfirerecoveryfund.org';
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
