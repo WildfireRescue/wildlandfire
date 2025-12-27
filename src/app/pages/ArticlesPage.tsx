@@ -11,6 +11,21 @@ export function ArticlesPage({ slug }: { slug?: string }) {
   const [article, setArticle] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [copiedSQL, setCopiedSQL] = useState(false);
+
+  const SUPABASE_PROJECT_URL = `https://app.supabase.com/project/${projectId}/database/tables/public/articles`;
+
+  const createTableSQL = `-- Run in Supabase SQL editor\nCREATE EXTENSION IF NOT EXISTS "pgcrypto";\n\nCREATE TABLE public.articles (\n  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),\n  title text NOT NULL,\n  slug text UNIQUE NOT NULL,\n  excerpt text,\n  content text,\n  cover_url text,\n  published boolean DEFAULT false,\n  published_at timestamptz,\n  created_at timestamptz DEFAULT now(),\n  updated_at timestamptz DEFAULT now()\n);\n\n-- Optional: allow the public to read published rows via RLS policy\nALTER TABLE public.articles ENABLE ROW LEVEL SECURITY;\nCREATE POLICY "Allow public select on published articles" ON public.articles FOR SELECT USING (published = true);\n\nINSERT INTO public.articles (title, slug, excerpt, content, cover_url, published, published_at)\nVALUES ('Welcome to our Articles', 'welcome', 'A first article about wildfire recovery.', '## Welcome\\n\\nThis is the first article...', 'https://thewildlandfirerecoveryfund.org/assets/sample-cover.jpg', true, now());`;
+
+  async function copySQLToClipboard() {
+    try {
+      await navigator.clipboard.writeText(createTableSQL);
+      setCopiedSQL(true);
+      setTimeout(() => setCopiedSQL(false), 3000);
+    } catch (e) {
+      console.error('Failed to copy SQL to clipboard', e);
+    }
+  }
 
   useEffect(() => {
     const flag = sessionStorage.getItem('allow_articles');
@@ -158,13 +173,31 @@ export function ArticlesPage({ slug }: { slug?: string }) {
             {loading && <p className="text-muted-foreground">Loading articles…</p>}
 
             {errorMessage && (
-              <div className="p-4 mb-4 bg-yellow-50 text-yellow-900 rounded-md">
-                <p className="font-medium">We couldn't load articles right now.</p>
-                <p className="text-sm mb-3 break-words">{errorMessage}</p>
-                <div className="flex gap-2">
-                  <Button variant="outline" onClick={fetchArticles}>Retry</Button>
-                </div>
-              </div>
+              (() => {
+                const tableMissing = /Could not find the table 'public\.articles'|PGRST205/i.test(errorMessage);
+                return tableMissing ? (
+                  <div className="p-4 mb-4 bg-yellow-50 text-yellow-900 rounded-md">
+                    <p className="font-medium">No <code>articles</code> table found in Supabase.</p>
+                    <p className="text-sm mb-2">It looks like the <code>articles</code> table is not yet created in your Supabase project. You can create it using the SQL below or open the Supabase table editor:</p>
+                    <a className="text-primary underline" target="_blank" rel="noreferrer" href={SUPABASE_PROJECT_URL}>Open Supabase Table Editor</a>
+
+                    <pre className="mt-3 p-3 bg-white rounded text-sm overflow-auto"><code>{createTableSQL}</code></pre>
+
+                    <div className="flex gap-2 mt-3">
+                      <Button variant="outline" onClick={copySQLToClipboard}>{copiedSQL ? 'Copied' : 'Copy SQL'}</Button>
+                      <Button onClick={fetchArticles}>Retry</Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-4 mb-4 bg-yellow-50 text-yellow-900 rounded-md">
+                    <p className="font-medium">We couldn't load articles right now.</p>
+                    <p className="text-sm mb-3 break-words">{errorMessage}</p>
+                    <div className="flex gap-2">
+                      <Button variant="outline" onClick={fetchArticles}>Retry</Button>
+                    </div>
+                  </div>
+                );
+              })()
             )}
 
             <div className="grid md:grid-cols-2 gap-6 mt-6">
@@ -209,13 +242,31 @@ export function ArticlesPage({ slug }: { slug?: string }) {
             {loading && <p className="text-muted-foreground">Loading article…</p>}
 
             {errorMessage && (
-              <div className="p-4 mb-4 bg-yellow-50 text-yellow-900 rounded-md">
-                <p className="font-medium">We couldn't load this article right now.</p>
-                <p className="text-sm mb-3 break-words">{errorMessage}</p>
-                <div className="flex gap-2">
-                  <Button variant="outline" onClick={() => fetchArticle(slug)}>Retry</Button>
-                </div>
-              </div>
+              (() => {
+                const tableMissing = /Could not find the table 'public\.articles'|PGRST205/i.test(errorMessage);
+                return tableMissing ? (
+                  <div className="p-4 mb-4 bg-yellow-50 text-yellow-900 rounded-md">
+                    <p className="font-medium">No <code>articles</code> table found in Supabase.</p>
+                    <p className="text-sm mb-2">It looks like the <code>articles</code> table is not yet created in your Supabase project. Create it via the SQL below, then retry:</p>
+                    <a className="text-primary underline" target="_blank" rel="noreferrer" href={SUPABASE_PROJECT_URL}>Open Supabase Table Editor</a>
+
+                    <pre className="mt-3 p-3 bg-white rounded text-sm overflow-auto"><code>{createTableSQL}</code></pre>
+
+                    <div className="flex gap-2 mt-3">
+                      <Button variant="outline" onClick={copySQLToClipboard}>{copiedSQL ? 'Copied' : 'Copy SQL'}</Button>
+                      <Button onClick={() => fetchArticle(slug)}>Retry</Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-4 mb-4 bg-yellow-50 text-yellow-900 rounded-md">
+                    <p className="font-medium">We couldn't load this article right now.</p>
+                    <p className="text-sm mb-3 break-words">{errorMessage}</p>
+                    <div className="flex gap-2">
+                      <Button variant="outline" onClick={() => fetchArticle(slug)}>Retry</Button>
+                    </div>
+                  </div>
+                );
+              })()
             )}
 
             {!loading && article && (
