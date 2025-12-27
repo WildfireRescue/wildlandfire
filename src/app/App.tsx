@@ -20,9 +20,11 @@ export default function App() {
   // Handle hash-based routing
   useEffect(() => {
     const handleHashChange = () => {
-      const hash = window.location.hash.slice(1);
-      if (hash && ['home', 'about', 'contact', 'thankyou', 'stories', 'grants', 'donate'].includes(hash)) {
-        setCurrentPage(hash);
+      const rawHash = window.location.hash.slice(1);
+      // Support hash values with query params, e.g. '#thankyou?session_id=...'
+      const page = rawHash ? rawHash.split(/[?#/]/)[0] : '';
+      if (page && ['home', 'about', 'contact', 'thankyou', 'stories', 'grants', 'donate'].includes(page)) {
+        setCurrentPage(page);
         window.scrollTo(0, 0);
       }
     };
