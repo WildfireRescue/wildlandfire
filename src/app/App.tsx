@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { HomePage } from './pages/HomePage';
 import { AboutPage } from './pages/AboutPage';
 import { ContactPage } from './pages/ContactPage';
@@ -8,6 +8,8 @@ import { DonatePage } from './pages/DonatePage';
 import { ThankYouPage } from './pages/ThankYouPage';
 import { ArticlesPage } from './pages/ArticlesPage';
 import { PublishPage } from './pages/PublishPage';
+import { AuthCallbackPage } from './pages/AuthCallbackPage';
+
 import { Navigation } from './components/Navigation';
 import { Footer } from './components/Footer';
 import { DonationForm } from './components/DonationForm';
@@ -30,14 +32,18 @@ export default function App() {
     'donate',
     'articles',
     'publish',
+    'auth-callback', // ✅ added
   ];
 
   // Handle hash-based routing
   useEffect(() => {
     const handleHashChange = () => {
       const rawHash = window.location.hash.slice(1);
-      // Support hash values with query params, and optional article slug: '#articles/slug?x=1'
-      const parts = rawHash ? rawHash.split(/[?#/]/) : [];
+
+      // ✅ Keep full path segments, strip querystring only
+      // Supports: #articles/slug?x=1  and  #auth-callback?x=1
+      const [hashNoQuery] = rawHash.split('?');
+      const parts = hashNoQuery ? hashNoQuery.split('/') : [];
       const page = parts[0] || 'home';
       const slug = parts[1] || null;
 
@@ -80,7 +86,8 @@ export default function App() {
 
       switch (currentPage) {
         case 'about':
-          title = 'About Us - The Wildland Fire Recovery Fund | Our Mission & Team';
+          title =
+            'About Us - The Wildland Fire Recovery Fund | Our Mission & Team';
           description =
             "Learn about The Wildland Fire Recovery Fund's mission to help wildfire survivors rebuild their lives. Meet our team committed to transparent, rapid-response disaster relief.";
           keywords =
@@ -88,7 +95,8 @@ export default function App() {
           break;
 
         case 'donate':
-          title = 'Donate Now - Support Wildfire Survivors | Tax-Deductible Donations';
+          title =
+            'Donate Now - Support Wildfire Survivors | Tax-Deductible Donations';
           description =
             'Make a tax-deductible donation to help wildfire survivors. 75% goes directly to families in need. $5M fundraising goal for 2026. Every dollar makes a difference.';
           keywords =
@@ -112,7 +120,8 @@ export default function App() {
           break;
 
         case 'contact':
-          title = 'Contact Us - Get Help or Get Involved | Wildfire Recovery Fund';
+          title =
+            'Contact Us - Get Help or Get Involved | Wildfire Recovery Fund';
           description =
             'Contact The Wildland Fire Recovery Fund for survivor assistance, volunteer opportunities, or partnership inquiries. We respond promptly to all inquiries.';
           keywords =
@@ -123,7 +132,8 @@ export default function App() {
           title = 'Thank You - Your Donation Helps Wildfire Survivors';
           description =
             'Thank you for your generous donation! Your support helps wildfire survivors rebuild their lives with dignity and hope.';
-          keywords = 'thank you donation, wildfire donation confirmation, nonprofit thanks';
+          keywords =
+            'thank you donation, wildfire donation confirmation, nonprofit thanks';
           break;
 
         case 'publish':
@@ -132,6 +142,15 @@ export default function App() {
             'Internal publishing portal for The Wildland Fire Recovery Fund.';
           keywords = 'publisher, admin, articles';
           // Do NOT index the publish portal
+          robots = 'noindex, nofollow';
+          googlebot = 'noindex, nofollow';
+          break;
+
+        case 'auth-callback':
+          title = 'Signing you in… - The Wildland Fire Recovery Fund';
+          description =
+            'Completing sign-in for the internal publishing portal.';
+          // ✅ Do NOT index callback pages
           robots = 'noindex, nofollow';
           googlebot = 'noindex, nofollow';
           break;
@@ -164,7 +183,11 @@ export default function App() {
       updateMeta('og:title', title, true);
       updateMeta('og:description', description, true);
       updateMeta('og:type', 'website', true);
-      updateMeta('og:url', `https://wildlandfirerecoveryfund.org/#${currentPage}`, true);
+      updateMeta(
+        'og:url',
+        `https://wildlandfirerecoveryfund.org/#${currentPage}`,
+        true
+      );
       updateMeta('og:site_name', 'The Wildland Fire Recovery Fund', true);
       updateMeta('og:locale', 'en_US', true);
 
@@ -220,6 +243,8 @@ export default function App() {
         return <ArticlesPage slug={articleSlug || undefined} />;
       case 'publish':
         return <PublishPage />;
+      case 'auth-callback': // ✅ added
+        return <AuthCallbackPage />;
       default:
         return <HomePage />;
     }
