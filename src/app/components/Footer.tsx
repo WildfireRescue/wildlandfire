@@ -7,13 +7,14 @@ export function Footer() {
     { icon: Facebook, href: '#', label: 'Facebook' },
     { icon: Twitter, href: '#', label: 'Twitter' },
     { icon: Instagram, href: '#', label: 'Instagram' },
-    { icon: Mail, href: '#', label: 'Email' },
+    { icon: Mail, href: 'mailto:info@thewildlandfirerecoveryfund.org', label: 'Email' },
   ];
 
   return (
     <footer className="bg-card border-t border-border">
       <div className="container mx-auto px-4 py-12">
         <div className="grid md:grid-cols-4 gap-8 mb-8">
+          {/* Brand / Mission */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -33,11 +34,21 @@ export function Footer() {
                 For families, firefighters & children after the flames
               </div>
             </div>
-            <p className="text-muted-foreground mt-4">
-              Supporting communities devastated by wildfires through direct financial relief and recovery assistance.
+
+            <p className="text-muted-foreground mt-4 max-w-md">
+              Supporting communities devastated by wildfires through direct financial relief
+              and long-term recovery assistance.
+            </p>
+
+            {/* Entity Disambiguation */}
+            <p className="text-xs text-muted-foreground mt-4 max-w-md">
+              The Wildland Fire Recovery Fund is an independent nonprofit organization and is
+              not affiliated with the California Community Foundation or other similarly named
+              wildfire funds.
             </p>
           </motion.div>
-          
+
+          {/* Quick Links */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -68,7 +79,6 @@ export function Footer() {
                       href={link.url}
                       onClick={(e) => {
                         e.preventDefault();
-                        // Allow access to Articles only when navigated from the footer
                         sessionStorage.setItem('allow_articles', '1');
                         window.location.hash = 'articles';
                       }}
@@ -88,7 +98,8 @@ export function Footer() {
               ))}
             </ul>
           </motion.div>
-          
+
+          {/* Contact */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -97,7 +108,15 @@ export function Footer() {
           >
             <h4 className="mb-4 uppercase tracking-wider text-sm">Contact</h4>
             <ul className="space-y-2 text-muted-foreground">
-              <li>info@wildlandfirerecovery.org</li>
+              <li>
+                <a
+                  href="mailto:info@thewildlandfirerecoveryfund.org"
+                  className="hover:text-primary transition-colors"
+                >
+                  info@thewildlandfirerecoveryfund.org
+                </a>
+              </li>
+
               <li className="pt-4">
                 <div className="flex gap-4">
                   {socialLinks.map((social, index) => {
@@ -124,7 +143,8 @@ export function Footer() {
             </ul>
           </motion.div>
         </div>
-        
+
+        {/* Bottom Bar */}
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
