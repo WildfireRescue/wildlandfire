@@ -57,19 +57,32 @@
     />
 
     <!-- Organization Schema (JSON-LD) -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "NonprofitOrganization",
-      "name": "The Wildland Fire Recovery Fund",
-      "url": "https://www.thewildlandfirerecoveryfund.org/",
-      "logo": "https://thewildlandfirerecoveryfund.org/assets/e43d164f2f92fa60d5e9ac721dd31bf10ad9da66-BGX1aa5Y.png",
-      "description": "The Wildland Fire Recovery Fund supports long-term recovery for wildfire-affected communities, families, and first responders after the flames are out.",
-      "email": "info@thewildlandfirerecoveryfund.org",
-      "sameAs": []
-    }
-    </script>
+    <!-- Organization Schema (JSON-LD) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "NonprofitOrganization",
+  "name": "The Wildland Fire Recovery Fund",
+  "url": "https://www.thewildlandfirerecoveryfund.org/",
+  "logo": "https://thewildlandfirerecoveryfund.org/assets/e43d164f2f92fa60d5e9ac721dd31bf10ad9da66-BGX1aa5Y.png",
+  "description": "The Wildland Fire Recovery Fund supports long-term recovery for wildfire-affected communities, families, and first responders after the flames are out.",
+  "email": "info@thewildlandfirerecoveryfund.org",
 
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "contactType": "general inquiries",
+    "email": "info@thewildlandfirerecoveryfund.org",
+    "availableLanguage": "English"
+  },
+
+  "areaServed": {
+    "@type": "AdministrativeArea",
+    "name": "United States"
+  },
+
+  "sameAs": []
+}
+</script>
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   </head>
