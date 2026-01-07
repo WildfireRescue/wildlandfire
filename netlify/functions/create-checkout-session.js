@@ -1,61 +1,116 @@
-const Stripe = require('stripe');
+const Stripe = require("stripe");
 
-exports.handler = async function (event, context) {
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
-  }
-
+exports.handler = async (event) => {
   try {
-    const body = JSON.parse(event.body || '{}');
-    const { amount } = body;
-
-    if (amount === undefined || amount === null) {
-      return { statusCode: 400, body: JSON.stringify({ error: 'Missing amount' }) };
-    }
-
-    const cents = Math.round(Number(amount) * 100);
-    if (isNaN(cents) || cents < 100) {
-      return { statusCode: 400, body: JSON.stringify({ error: 'Donation amount must be at least $1' }) };
-    }
-
-    if (!process.env.STRIPE_SECRET_KEY) {
-      return { statusCode: 500, body: JSON.stringify({ error: 'Stripe secret key not configured' }) };
-    }
-
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-    // Force the primary domain for Checkout redirects to avoid Netlify subdomain being used
-    const baseUrl = 'https://thewildlandfirerecoveryfund.org';
 
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: [
-        {
-          price_data: {
-            currency: 'usd',
-            product_data: {
-              name: 'Donation to The Wildland Fire Recovery Fund',
+    const body = JSON.parse(event.body || "{}");
+    const {
+      frequency, // "one_time" | "monthly"
+      amount,    // number (dollars) for one-time OR selected tier amount for monthly
+      lookupKey, // e.g. "monthly_25" (optional if you map by amount)
+      successUrl,
+      cancelUrl,
+    } = body;
+
+    if (!frequency) {
+      return json(400, { error: "Missing frequency" });
+    }
+
+    const success_url =
+      successUrl || `${process.env.URL || "http://localhost:8888"}/#/thank-you`;
+    const cancel_url =
+      cancelUrl || `${process.env.URL || "http://localhost:8888"}/#/donate`;
+
+    // ---- Monthly (Subscriptions) ----
+    if (frequency === "monthly") {
+      // Prefer lookup key mapping (cleanest)
+      const priceId =
+        (lookupKey && priceFromLookupKey(lookupKey)) ||
+        priceFromAmount(amount);
+
+      if (!priceId) {
+        return json(400, { error: "Missing or invalid monthly price selection" });
+      }
+
+      const session = await stripe.checkout.sessions.create({
+        mode: "subscription",
+        line_items: [{ price: priceId, quantity: 1 }],
+        success_url: success_url + "?session_id={CHECKOUT_SESSION_ID}",
+        cancel_url,
+        // Optional but recommended:
+        billing_address_collection: "auto",
+        allow_promotion_codes: false,
+      });
+
+      return json(200, { url: session.url });
+    }
+
+    // ---- One-time (Payment) ----
+    if (frequency === "one_time") {
+      const dollars = Number(amount);
+      if (!dollars || dollars < 1) {
+        return json(400, { error: "Invalid amount" });
+      }
+
+      const cents = Math.round(dollars * 100);
+
+      const session = await stripe.checkout.sessions.create({
+        mode: "payment",
+        line_items: [
+          {
+            price_data: {
+              currency: "usd",
+              product_data: { name: "Wildland Fire Recovery Fund Donation" },
+              unit_amount: cents,
             },
-            unit_amount: cents,
+            quantity: 1,
           },
-          quantity: 1,
-        },
-      ],
-      mode: 'payment',
-      // Use explicit production domain for redirects
-      success_url: `https://thewildlandfirerecoveryfund.org/#thankyou?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `https://thewildlandfirerecoveryfund.org/#donate?canceled=true`,
-    });
+        ],
+        success_url: success_url + "?session_id={CHECKOUT_SESSION_ID}",
+        cancel_url,
+        billing_address_collection: "auto",
+      });
 
-    // Return session details for verification (url, id, success_url, and base URL used by function)
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ url: session.url, id: session.id, success_url: session.success_url, baseUrlUsed: baseUrl }),
-    };
+      return json(200, { url: session.url });
+    }
+
+    return json(400, { error: "Invalid frequency" });
   } catch (err) {
-    console.error('create-checkout-session error:', err);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: 'Failed to create checkout session', details: err.message }),
-    };
+    console.error("create-checkout-session error:", err);
+    return json(500, { error: err.message || String(err) });
   }
 };
+
+function json(statusCode, data) {
+  return {
+    statusCode,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  };
+}
+
+/**
+ * Map lookup keys -> Stripe price IDs (store price IDs in env vars)
+ */
+function priceFromLookupKey(key) {
+  const map = {
+    monthly_19: process.env.STRIPE_PRICE_MONTHLY_19,
+    monthly_25: process.env.STRIPE_PRICE_MONTHLY_25,
+    monthly_50: process.env.STRIPE_PRICE_MONTHLY_50,
+    monthly_100: process.env.STRIPE_PRICE_MONTHLY_100,
+  };
+  return map[key];
+}
+
+/**
+ * Optional fallback: map by amount
+ */
+function priceFromAmount(amount) {
+  const a = Number(amount);
+  if (a === 19) return process.env.STRIPE_PRICE_MONTHLY_19;
+  if (a === 25) return process.env.STRIPE_PRICE_MONTHLY_25;
+  if (a === 50) return process.env.STRIPE_PRICE_MONTHLY_50;
+  if (a === 100) return process.env.STRIPE_PRICE_MONTHLY_100;
+  return null;
+}

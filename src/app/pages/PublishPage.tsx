@@ -49,12 +49,14 @@ export function PublishPage() {
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
   const [saveErr, setSaveErr] = useState<string | null>(null);
 
+  // track if user manually edited slug (so we stop auto-overwriting)
   const slugTouched = useRef(false);
 
   useEffect(() => {
     if (!slugTouched.current) setSlug(autoSlug);
   }, [autoSlug]);
 
+  // Load session + listen for changes
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       setSessionEmail(data.session?.user?.email ?? null);
@@ -68,10 +70,14 @@ export function PublishPage() {
   }, []);
 
   function getEmailRedirectTo() {
+    // IMPORTANT: must be added in Supabase Auth → URL Configuration → Redirect URLs
+    // Add both:
+    //   http://localhost:5173/#publish
+    //   https://thewildlandfirerecoveryfund.org/#publish
     return `${window.location.origin}/#publish`;
   }
 
-  // ✅ FIXED MAGIC LINK LOGIN
+  // ✅ Magic link login for INVITE-ONLY projects
   async function sendMagicLink() {
     setLoginError(null);
     setLoginSent(false);
@@ -84,6 +90,7 @@ export function PublishPage() {
         return;
       }
 
+      // Frontend lock
       if (!isAllowedPublisher(email)) {
         setLoginError('This email is not authorized to publish.');
         return;
@@ -93,12 +100,20 @@ export function PublishPage() {
         email,
         options: {
           emailRedirectTo: getEmailRedirectTo(),
-          shouldCreateUser: false, // 🔒 prevents signup (FIX)
+          shouldCreateUser: false, // 🔒 KEY FIX: do NOT attempt to create users
         },
       });
 
       if (error) {
-        setLoginError(error.message);
+        const msg = error.message || 'Login failed.';
+        // Helpful hint for the exact error you’re seeing
+        if (msg.toLowerCase().includes('signups not allowed')) {
+          setLoginError(
+            `Signups are disabled (invite-only). This email must be invited first.\n\nFix:\nSupabase → Authentication → Users → Invite user → invite: ${email}\nThen try again.`
+          );
+        } else {
+          setLoginError(msg);
+        }
         return;
       }
 
@@ -118,14 +133,15 @@ export function PublishPage() {
     setSaveErr(null);
 
     try {
-      const author = sessionEmail?.toLowerCase();
+      const author = sessionEmail?.toLowerCase() ?? null;
       if (!author) throw new Error('Not signed in.');
-      if (!isAllowedPublisher(author)) throw new Error('Not authorized.');
+      if (!isAllowedPublisher(author)) throw new Error('Not authorized to publish.');
 
       const finalSlug = slugify(slug || title);
-      if (!title.trim()) throw new Error('Title required.');
-      if (!finalSlug) throw new Error('Slug required.');
-      if (!content.trim()) throw new Error('Content required.');
+
+      if (!title.trim()) throw new Error('Title is required.');
+      if (!finalSlug) throw new Error('Slug is required.');
+      if (!content.trim()) throw new Error('Content is required.');
 
       const payload = {
         title: title.trim(),
@@ -135,7 +151,7 @@ export function PublishPage() {
         content: content.trim(),
         published,
         published_at: published ? new Date().toISOString() : null,
-        author,
+        author, // match your RLS policy (author = auth.jwt()->>'email')
       };
 
       const q =
@@ -144,9 +160,9 @@ export function PublishPage() {
           : supabase.from('articles').insert(payload);
 
       const { error } = await q;
-      if (error) throw error;
+      if (error) throw new Error(error.message);
 
-      setSaveMsg(mode === 'upsert' ? '✅ Saved / Updated' : '✅ Published');
+      setSaveMsg(mode === 'upsert' ? '✅ Saved (updated if slug existed).' : '✅ Published!');
       setTitle('');
       setSlug('');
       slugTouched.current = false;
@@ -156,7 +172,7 @@ export function PublishPage() {
       setPublished(true);
       setMode('insert');
     } catch (e: any) {
-      setSaveErr(e.message ?? 'Publish failed');
+      setSaveErr(e?.message ?? 'Something went wrong.');
     } finally {
       setSaving(false);
     }
@@ -168,15 +184,20 @@ export function PublishPage() {
     setSaveErr(null);
 
     try {
+      const author = sessionEmail?.toLowerCase() ?? null;
+      if (!author) throw new Error('Not signed in.');
+      if (!isAllowedPublisher(author)) throw new Error('Not authorized.');
+
       const finalSlug = slugify(slug || title);
-      if (!finalSlug) throw new Error('Slug required');
+      if (!finalSlug) throw new Error('Enter a slug (or title) to delete.');
 
+      // RLS should enforce: only the author can delete their own articles
       const { error } = await supabase.from('articles').delete().eq('slug', finalSlug);
-      if (error) throw error;
+      if (error) throw new Error(error.message);
 
-      setSaveMsg('🗑️ Deleted (if you were the author)');
+      setSaveMsg('🗑️ Deleted (only if you were the author).');
     } catch (e: any) {
-      setSaveErr(e.message);
+      setSaveErr(e?.message ?? 'Delete failed.');
     } finally {
       setSaving(false);
     }
@@ -184,57 +205,274 @@ export function PublishPage() {
 
   // ---------- UI ----------
 
+  // Logged OUT
   if (!sessionEmail) {
     return (
-      <div style={{ maxWidth: 720, margin: '0 auto', padding: 40 }}>
-        <h1>Publisher Login</h1>
+      <div style={{ maxWidth: 720, margin: '0 auto', padding: '40px 16px' }}>
+        <h1 style={{ fontSize: 28, marginBottom: 8 }}>Publisher Login</h1>
+        <p style={{ opacity: 0.8, marginBottom: 20 }}>
+          Sign in with your email to publish articles.
+        </p>
 
-        <input
-          value={loginEmail}
-          onChange={(e) => setLoginEmail(e.target.value)}
-          placeholder="you@thewildlandfirerecoveryfund.org"
-          style={{ width: '100%', padding: 12, marginBottom: 12 }}
-        />
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          <input
+            value={loginEmail}
+            onChange={(e) => setLoginEmail(e.target.value)}
+            placeholder="you@thewildlandfirerecoveryfund.org"
+            autoComplete="email"
+            style={{
+              flex: 1,
+              padding: '12px 14px',
+              borderRadius: 12,
+              border: '1px solid rgba(255,255,255,0.15)',
+              background: 'rgba(255,255,255,0.04)',
+              color: 'inherit',
+            }}
+          />
+          <button
+            onClick={sendMagicLink}
+            disabled={loginBusy}
+            style={{
+              padding: '12px 16px',
+              borderRadius: 12,
+              border: '1px solid rgba(255,255,255,0.2)',
+              background: 'rgba(255,255,255,0.08)',
+              cursor: loginBusy ? 'not-allowed' : 'pointer',
+              opacity: loginBusy ? 0.7 : 1,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {loginBusy ? 'Sending…' : 'Send magic link'}
+          </button>
+        </div>
 
-        <button onClick={sendMagicLink} disabled={loginBusy}>
-          {loginBusy ? 'Sending…' : 'Send magic link'}
-        </button>
+        <div style={{ marginTop: 14, opacity: 0.75, fontSize: 13, lineHeight: 1.4 }}>
+          Allowed publishers:
+          <div style={{ marginTop: 6 }}>
+            earl@thewildlandfirerecoveryfund.org • jason@thewildlandfirerecoveryfund.org •
+            drew@thewildlandfirerecoveryfund.org • kendra@thewildlandfirerecoveryfund.org
+          </div>
+        </div>
 
-        {loginSent && <p>✅ Check your email</p>}
-        {loginError && <p style={{ color: 'red' }}>{loginError}</p>}
+        {loginSent && <div style={{ marginTop: 14, opacity: 0.9 }}>✅ Check your inbox for the magic link.</div>}
+        {loginError && (
+          <div style={{ marginTop: 14, color: '#ff6b6b', whiteSpace: 'pre-wrap' }}>{loginError}</div>
+        )}
       </div>
     );
   }
 
+  // Logged IN but not allowed (extra safety)
+  if (!isAllowedPublisher(sessionEmail)) {
+    return (
+      <div style={{ maxWidth: 720, margin: '0 auto', padding: '40px 16px' }}>
+        <h1 style={{ fontSize: 28, marginBottom: 8 }}>Not authorized</h1>
+        <p style={{ opacity: 0.85 }}>
+          You are signed in as <strong>{sessionEmail}</strong>, but this email is not allowed to publish.
+        </p>
+        <div style={{ marginTop: 18 }}>
+          <button
+            onClick={signOut}
+            style={{
+              padding: '10px 14px',
+              borderRadius: 12,
+              border: '1px solid rgba(255,255,255,0.2)',
+              background: 'transparent',
+              cursor: 'pointer',
+            }}
+          >
+            Sign out
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Logged IN
   return (
-    <div style={{ maxWidth: 900, margin: '0 auto', padding: 40 }}>
-      <h1>Publish Article</h1>
-      <p>Signed in as {sessionEmail}</p>
-
-      <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title" />
-      <input
-        value={slug}
-        onChange={(e) => {
-          slugTouched.current = true;
-          setSlug(e.target.value);
+    <div style={{ maxWidth: 920, margin: '0 auto', padding: '40px 16px' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          gap: 12,
+          alignItems: 'center',
+          flexWrap: 'wrap',
         }}
-        placeholder={autoSlug}
-      />
+      >
+        <div>
+          <h1 style={{ fontSize: 28, marginBottom: 6 }}>Publish an Article</h1>
+          <div style={{ opacity: 0.75, fontSize: 14 }}>
+            Signed in as <strong>{sessionEmail}</strong>
+          </div>
+        </div>
 
-      <textarea value={excerpt} onChange={(e) => setExcerpt(e.target.value)} placeholder="Excerpt" />
-      <input value={coverUrl} onChange={(e) => setCoverUrl(e.target.value)} placeholder="Cover URL" />
-      <textarea value={content} onChange={(e) => setContent(e.target.value)} rows={10} />
+        <button
+          onClick={signOut}
+          style={{
+            padding: '10px 14px',
+            borderRadius: 12,
+            border: '1px solid rgba(255,255,255,0.2)',
+            background: 'transparent',
+            cursor: 'pointer',
+          }}
+        >
+          Sign out
+        </button>
+      </div>
 
-      <button onClick={publishNow} disabled={saving}>
-        {mode === 'upsert' ? 'Save / Update' : 'Publish'}
-      </button>
+      <div style={{ marginTop: 18, display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+        <label style={{ display: 'flex', gap: 10, alignItems: 'center', opacity: 0.9 }}>
+          <input type="radio" name="mode" checked={mode === 'insert'} onChange={() => setMode('insert')} />
+          <span>Create new (insert)</span>
+        </label>
+        <label style={{ display: 'flex', gap: 10, alignItems: 'center', opacity: 0.9 }}>
+          <input type="radio" name="mode" checked={mode === 'upsert'} onChange={() => setMode('upsert')} />
+          <span>Update if slug exists (upsert)</span>
+        </label>
+      </div>
 
-      <button onClick={deleteBySlug} disabled={saving}>
-        Delete by slug
-      </button>
+      <div style={{ marginTop: 18, display: 'grid', gap: 14 }}>
+        <label>
+          <div style={{ marginBottom: 6, opacity: 0.85 }}>Title</div>
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Rebuilding After the Fire: What Recovery Really Means"
+            style={{
+              width: '100%',
+              padding: '12px 14px',
+              borderRadius: 12,
+              border: '1px solid rgba(255,255,255,0.15)',
+              background: 'rgba(255,255,255,0.04)',
+              color: 'inherit',
+            }}
+          />
+        </label>
 
-      {saveMsg && <p>{saveMsg}</p>}
-      {saveErr && <p style={{ color: 'red' }}>{saveErr}</p>}
+        <label>
+          <div style={{ marginBottom: 6, opacity: 0.85 }}>Slug (URL)</div>
+          <input
+            value={slug}
+            onChange={(e) => {
+              slugTouched.current = true;
+              setSlug(e.target.value);
+            }}
+            placeholder={autoSlug}
+            style={{
+              width: '100%',
+              padding: '12px 14px',
+              borderRadius: 12,
+              border: '1px solid rgba(255,255,255,0.15)',
+              background: 'rgba(255,255,255,0.04)',
+              color: 'inherit',
+            }}
+          />
+          <div style={{ marginTop: 6, opacity: 0.65, fontSize: 12 }}>
+            Tip: keep slugs short, like <code style={{ opacity: 0.9 }}>rebuilding-after-the-fire</code>
+          </div>
+        </label>
+
+        <label>
+          <div style={{ marginBottom: 6, opacity: 0.85 }}>Excerpt</div>
+          <textarea
+            value={excerpt}
+            onChange={(e) => setExcerpt(e.target.value)}
+            rows={3}
+            placeholder="1–2 sentences that show in the articles list + Google."
+            style={{
+              width: '100%',
+              padding: '12px 14px',
+              borderRadius: 12,
+              border: '1px solid rgba(255,255,255,0.15)',
+              background: 'rgba(255,255,255,0.04)',
+              color: 'inherit',
+              resize: 'vertical',
+            }}
+          />
+        </label>
+
+        <label>
+          <div style={{ marginBottom: 6, opacity: 0.85 }}>Cover image URL (optional)</div>
+          <input
+            value={coverUrl}
+            onChange={(e) => setCoverUrl(e.target.value)}
+            placeholder="https://..."
+            style={{
+              width: '100%',
+              padding: '12px 14px',
+              borderRadius: 12,
+              border: '1px solid rgba(255,255,255,0.15)',
+              background: 'rgba(255,255,255,0.04)',
+              color: 'inherit',
+            }}
+          />
+        </label>
+
+        <label>
+          <div style={{ marginBottom: 6, opacity: 0.85 }}>Content</div>
+          <textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            rows={12}
+            placeholder="Write your article here..."
+            style={{
+              width: '100%',
+              padding: '12px 14px',
+              borderRadius: 12,
+              border: '1px solid rgba(255,255,255,0.15)',
+              background: 'rgba(255,255,255,0.04)',
+              color: 'inherit',
+              resize: 'vertical',
+              fontFamily:
+                'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+            }}
+          />
+        </label>
+
+        <label style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          <input type="checkbox" checked={published} onChange={(e) => setPublished(e.target.checked)} />
+          <span style={{ opacity: 0.9 }}>Publish immediately</span>
+        </label>
+
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          <button
+            onClick={publishNow}
+            disabled={saving}
+            style={{
+              padding: '14px 16px',
+              borderRadius: 14,
+              border: '1px solid rgba(255,255,255,0.2)',
+              background: 'rgba(255,255,255,0.10)',
+              cursor: saving ? 'not-allowed' : 'pointer',
+              fontWeight: 700,
+              minWidth: 160,
+            }}
+          >
+            {saving ? 'Saving…' : mode === 'upsert' ? 'Save / Update' : 'Publish'}
+          </button>
+
+          <button
+            onClick={deleteBySlug}
+            disabled={saving}
+            style={{
+              padding: '14px 16px',
+              borderRadius: 14,
+              border: '1px solid rgba(255,255,255,0.2)',
+              background: 'transparent',
+              cursor: saving ? 'not-allowed' : 'pointer',
+              fontWeight: 600,
+              minWidth: 160,
+            }}
+            title="Deletes the article with this slug (only if you are the author)"
+          >
+            Delete by slug
+          </button>
+        </div>
+
+        {saveMsg && <div style={{ marginTop: 8, whiteSpace: 'pre-wrap' }}>{saveMsg}</div>}
+        {saveErr && <div style={{ marginTop: 8, color: '#ff6b6b', whiteSpace: 'pre-wrap' }}>{saveErr}</div>}
+      </div>
     </div>
   );
 }
