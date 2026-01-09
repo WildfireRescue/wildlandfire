@@ -3,6 +3,7 @@ import { HomePage } from './pages/HomePage';
 import { Navigation } from './components/Navigation';
 import { Footer } from './components/Footer';
 import { StructuredData } from './components/StructuredData';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { supabase } from '../lib/supabase';
 
 // Lazy load pages that aren't immediately needed
@@ -248,34 +249,46 @@ export default function App() {
   };
 
   const renderPage = () => {
-    const PageComponent = () => {
-      switch (currentPage) {
-        case 'about':
-          return <AboutPage />;
-        case 'contact':
-          return <ContactPage />;
-        case 'thankyou':
-          return <ThankYouPage onNavigate={handleNavigate} />;
-        case 'stories':
-          return <StoriesPage />;
-        case 'grants':
-          return <GrantsPage />;
-        case 'donate':
-          return <DonatePage />;
-        case 'articles':
-          return <ArticlesPage slug={articleSlug || undefined} />;
-        case 'publish':
-          return <PublishPage />;
-        case 'auth-callback':
-          return <AuthCallbackPage />;
-        case 'privacy':
-          return <PrivacyPolicyPage />;
-        case 'terms':
-          return <TermsOfUsePage />;
-        default:
-          return <HomePage />;
-      }
-    };
+    let pageContent;
+    
+    switch (currentPage) {
+      case 'about':
+        pageContent = <AboutPage />;
+        break;
+      case 'contact':
+        pageContent = <ContactPage />;
+        break;
+      case 'thankyou':
+        pageContent = <ThankYouPage onNavigate={handleNavigate} />;
+        break;
+      case 'stories':
+        pageContent = <StoriesPage />;
+        break;
+      case 'grants':
+        pageContent = <GrantsPage />;
+        break;
+      case 'donate':
+        pageContent = <DonatePage />;
+        break;
+      case 'articles':
+        pageContent = <ArticlesPage slug={articleSlug || undefined} />;
+        break;
+      case 'publish':
+        pageContent = <PublishPage />;
+        break;
+      case 'auth-callback':
+        pageContent = <AuthCallbackPage />;
+        break;
+      case 'privacy':
+        pageContent = <PrivacyPolicyPage />;
+        break;
+      case 'terms':
+        pageContent = <TermsOfUsePage />;
+        break;
+      default:
+        pageContent = <HomePage />;
+        break;
+    }
 
     return (
       <Suspense fallback={
@@ -286,7 +299,9 @@ export default function App() {
           </div>
         </div>
       }>
-        <PageComponent />
+        <ErrorBoundary>
+          {pageContent}
+        </ErrorBoundary>
       </Suspense>
     );
   };
