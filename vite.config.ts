@@ -41,6 +41,9 @@ export default defineConfig({
         pure_funcs: ['console.log', 'console.info'],
         passes: 2, // Multiple passes for better compression
       },
+      format: {
+        comments: false, // Remove all comments
+      },
     },
     // Code splitting configuration
     rollupOptions: {

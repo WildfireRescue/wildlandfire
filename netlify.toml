@@ -39,6 +39,8 @@
     Permissions-Policy = "geolocation=(), microphone=(), camera=()"
     # Enable early hints for faster loading
     Link = "</Images/logo-128.png>; rel=preload; as=image"
+    # Enable compression
+    Accept-Encoding = "gzip, br"
 
 # Cache static assets for longer
 [[headers]]
