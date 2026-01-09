@@ -51,19 +51,19 @@ export default defineConfig({
         manualChunks: (id) => {
           // More granular chunking for better caching
           if (id.includes('node_modules')) {
-            // React core
-            if (id.includes('react') || id.includes('react-dom') || id.includes('scheduler')) {
+            // React core - keep small and separate
+            if (id.includes('react/') || id.includes('react-dom/') || id.includes('scheduler')) {
               return 'react-vendor';
             }
-            // Motion library (large) - separate chunk
-            if (id.includes('framer-motion') || id.includes('motion')) {
+            // Motion library (large) - lazy load when possible
+            if (id.includes('motion')) {
               return 'motion-vendor';
             }
             // Radix UI components
             if (id.includes('@radix-ui')) {
               return 'radix-ui';
             }
-            // Stripe - only load when needed
+            // Stripe - only load when needed (async)
             if (id.includes('@stripe') || id.includes('stripe')) {
               return 'stripe';
             }
@@ -83,6 +83,10 @@ export default defineConfig({
             return 'vendor';
           }
         },
+        // Optimize chunk names for caching
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]',
       },
     },
     // Increase chunk size warning limit

@@ -1,58 +1,74 @@
-// Service Worker for aggressive caching
-const CACHE_NAME = 'wildland-fire-v1';
-const urlsToCache = [
+// Service Worker with improved caching strategy
+const CACHE_NAME = 'wildland-fire-v2';
+const RUNTIME = 'runtime';
+
+// Cache critical assets
+const PRECACHE_URLS = [
   '/',
   '/index.html',
-  '/Images/logo-128.png',
 ];
 
+// Install - precache critical resources
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(urlsToCache);
-    })
-  );
-  self.skipWaiting();
-});
-
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      // Cache hit - return response
-      if (response) {
-        return response;
-      }
-
-      return fetch(event.request).then((response) => {
-        // Check if we received a valid response
-        if (!response || response.status !== 200 || response.type !== 'basic') {
-          return response;
-        }
-
-        // Clone the response
-        const responseToCache = response.clone();
-
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseToCache);
-        });
-
-        return response;
-      });
-    })
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(PRECACHE_URLS))
+      .then(self.skipWaiting())
   );
 });
 
+// Activate - clean up old caches
 self.addEventListener('activate', (event) => {
-  const cacheWhitelist = [CACHE_NAME];
+  const currentCaches = [CACHE_NAME, RUNTIME];
   event.waitUntil(
     caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
-            return caches.delete(cacheName);
-          }
+      return cacheNames.filter((cacheName) => !currentCaches.includes(cacheName));
+    }).then((cachesToDelete) => {
+      return Promise.all(cachesToDelete.map((cacheToDelete) => {
+        return caches.delete(cacheToDelete);
+      }));
+    }).then(() => self.clients.claim())
+  );
+});
+
+// Fetch - network first for HTML, cache first for assets
+self.addEventListener('fetch', (event) => {
+  // Skip cross-origin requests
+  if (!event.request.url.startsWith(self.location.origin)) {
+    return;
+  }
+
+  // HTML - Network first, fall back to cache
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          return caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, response.clone());
+            return response;
+          });
         })
-      );
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // Assets - Cache first, fall back to network
+  event.respondWith(
+    caches.match(event.request).then((cachedResponse) => {
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+
+      return caches.open(RUNTIME).then((cache) => {
+        return fetch(event.request).then((response) => {
+          // Only cache successful responses
+          if (response.status === 200) {
+            cache.put(event.request, response.clone());
+          }
+          return response;
+        });
+      });
     })
   );
 });

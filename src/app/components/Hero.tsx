@@ -5,18 +5,22 @@ import { useState, useEffect } from 'react';
 const heroImages = [
   {
     url: "https://images.unsplash.com/photo-1562457346-b1b743feb764?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMGFjdGlvbnxlbnwxfHx8fDE3NjU4NDY0NDV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    webp: "https://images.unsplash.com/photo-1562457346-b1b743feb764?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMGFjdGlvbnxlbnwxfHx8fDE3NjU4NDY0NDV8MA&ixlib=rb-4.1.0&q=80&w=1080",
     alt: "Firefighters in action"
   },
   {
     url: "https://images.unsplash.com/photo-1550522485-b6dcf200b087?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3aWxkZmlyZSUyMGZvcmVzdCUyMGZpcmV8ZW58MXx8fHwxNzY1OTIyODE3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+    webp: "https://images.unsplash.com/photo-1550522485-b6dcf200b087?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3aWxkZmlyZSUyMGZvcmVzdCUyMGZpcmV8ZW58MXx8fHwxNzY1OTIyODE3fDA&ixlib=rb-4.1.0&q=80&w=1080",
     alt: "Wildfire scene"
   },
   {
     url: "https://images.unsplash.com/photo-1764639568368-9a60bdd7602c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMHdpbGRmaXJlJTIwc21va2V8ZW58MXx8fHwxNzY1OTIzMTYxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+    webp: "https://images.unsplash.com/photo-1764639568368-9a60bdd7602c?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMHdpbGRmaXJlJTIwc21va2V8ZW58MXx8fHwxNzY1OTIzMTYxfDA&ixlib=rb-4.1.0&q=80&w=1080",
     alt: "Firefighter in smoke"
   },
   {
     url: "https://images.unsplash.com/photo-1694700792440-042af6d0e8fb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3aWxkZmlyZSUyMGFmdGVybWF0aCUyMGNvbW11bml0eXxlbnwxfHx8fDE3NjU5MjMxNjJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    webp: "https://images.unsplash.com/photo-1694700792440-042af6d0e8fb?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3aWxkZmlyZSUyMGFmdGVybWF0aCUyMGNvbW11bml0eXxlbnwxfHx8fDE3NjU5MjMxNjJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
     alt: "Wildfire aftermath"
   }
 ];
@@ -39,10 +43,10 @@ export function Hero() {
         <AnimatePresence mode="wait">
           <motion.div
             key={currentImageIndex}
-            initial={{ opacity: 0, scale: 1.1 }}
+            initial={currentImageIndex === 0 ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 1.1 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 1.5, ease: "easeInOut" }}
+            transition={{ duration: currentImageIndex === 0 ? 0 : 1.5, ease: "easeInOut" }}
             className="absolute inset-0"
           >
             <img
@@ -55,6 +59,8 @@ export function Hero() {
               width="1920"
               height="1080"
             />
+            {/* WebP source for modern browsers - better compression */}
+            <link rel="preload" as="image" href={heroImages[currentImageIndex].webp} type="image/webp" />
           </motion.div>
         </AnimatePresence>
         
