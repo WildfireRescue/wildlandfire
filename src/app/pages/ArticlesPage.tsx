@@ -201,23 +201,28 @@ export function ArticlesPage({ slug }: { slug?: string }) {
             className="max-w-4xl mx-auto"
           >
             {/* Article Header */}
-            <div className="mb-8">
+            <div className="mb-12 text-center">
               <Button
                 variant="ghost"
                 onClick={() => (window.location.hash = "articles")}
-                className="mb-6"
+                className="mb-8 mx-auto"
               >
                 <ArrowLeft size={18} className="mr-2" />
                 Back to Articles
               </Button>
 
-              <h1 className="text-4xl md:text-6xl font-bold mb-4">
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
                 {article.title}
               </h1>
 
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground flex-wrap">
                 {article.author && (
-                  <span>By {article.author}</span>
+                  <span className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-semibold">
+                      {article.author.charAt(0).toUpperCase()}
+                    </div>
+                    {article.author.split('@')[0]}
+                  </span>
                 )}
                 {article.published_at && (
                   <span className="flex items-center gap-2">
@@ -234,7 +239,7 @@ export function ArticlesPage({ slug }: { slug?: string }) {
 
             {/* Cover Image */}
             {article.cover_url && (
-              <div className="mb-10 rounded-2xl overflow-hidden border border-border">
+              <div className="mb-16 rounded-3xl overflow-hidden border border-border shadow-2xl shadow-primary/5">
                 <img
                   src={article.cover_url}
                   alt={article.title}
@@ -246,23 +251,30 @@ export function ArticlesPage({ slug }: { slug?: string }) {
             {/* Article Content */}
             <article
               className="
-                prose prose-invert prose-lg max-w-none
+                prose prose-invert prose-xl max-w-none
                 prose-headings:scroll-mt-24
-                prose-h1:text-4xl prose-h1:tracking-tight prose-h1:mb-6
-                prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-4
-                prose-h3:text-2xl prose-h3:mt-10 prose-h3:mb-3
-                prose-p:leading-8 prose-p:mb-6
-                prose-ul:my-6 prose-li:my-2
-                prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-a:font-medium
-                prose-blockquote:border-l-4 prose-blockquote:border-primary/60
-                prose-blockquote:bg-card/40
-                prose-blockquote:rounded-xl
-                prose-blockquote:px-6
-                prose-blockquote:py-4
+                prose-headings:font-bold
+                prose-h1:hidden
+                prose-h2:text-4xl prose-h2:mt-16 prose-h2:mb-6 prose-h2:text-white prose-h2:border-l-4 prose-h2:border-primary prose-h2:pl-6
+                prose-h3:text-2xl prose-h3:mt-12 prose-h3:mb-4 prose-h3:text-primary
+                prose-p:leading-relaxed prose-p:mb-8 prose-p:text-foreground/90
+                prose-strong:text-white prose-strong:font-semibold
+                prose-ul:my-8 prose-ul:space-y-3
+                prose-li:text-foreground/90 prose-li:leading-relaxed
+                prose-li:pl-2
+                prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-a:font-medium prose-a:transition-all
+                prose-blockquote:border-l-4 prose-blockquote:border-primary
+                prose-blockquote:bg-primary/5
+                prose-blockquote:rounded-r-2xl
+                prose-blockquote:px-8
+                prose-blockquote:py-6
                 prose-blockquote:not-italic
-                prose-code:text-primary prose-code:bg-card/40 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded
-                prose-pre:bg-card prose-pre:border prose-pre:border-border
-                prose-img:rounded-xl prose-img:border prose-img:border-border
+                prose-blockquote:text-foreground/90
+                prose-blockquote:shadow-lg
+                prose-code:text-primary prose-code:bg-primary/10 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:font-semibold
+                prose-pre:bg-card prose-pre:border prose-pre:border-border prose-pre:shadow-xl
+                prose-img:rounded-2xl prose-img:border prose-img:border-border prose-img:shadow-lg
+                prose-hr:border-border prose-hr:my-12
               "
             >
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
@@ -271,12 +283,13 @@ export function ArticlesPage({ slug }: { slug?: string }) {
             </article>
 
             {/* Back Button */}
-            <div className="mt-12 pt-8 border-t border-border">
+            <div className="mt-16 pt-12 border-t border-border/50 text-center">
               <Button
                 size="lg"
                 onClick={() => (window.location.hash = "articles")}
+                className="text-lg px-8"
               >
-                <ArrowLeft size={18} className="mr-2" />
+                <ArrowLeft size={20} className="mr-2" />
                 Back to Articles
               </Button>
             </div>
