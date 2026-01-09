@@ -36,31 +36,32 @@ export function StoriesHero() {
             Stories of Hope
           </h1>
           
-          <p className="text-2xl text-muted-foreground mb-12 leading-relaxed">
-            Our vision is clear: every donation becomes a story of resilience, recovery, and hope. 
-            <span className="text-foreground font-semibold"> These are the lives you'll help change.</span>
+          <p className="text-2xl text-muted-foreground mb-8 leading-relaxed">
+            Every donation becomes a story of resilience, recovery, and hope. 
+            <span className="text-foreground font-semibold"> These are the lives you're helping to rebuild.</span>
           </p>
 
-          {/* Vision Stats */}
-          <div className="grid grid-cols-3 gap-6 mb-12">
+          {/* Core Values */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.6 }}
+            className="inline-flex flex-wrap gap-4 justify-center mb-12"
+          >
             {[
-              { value: "2026", label: "Launch Year" },
-              { value: "48hr", label: "Response Goal" },
-              { value: "100%", label: "Transparent" }
-            ].map((stat, idx) => (
+              { text: "Serving families nationwide" },
+              { text: "Direct, compassionate support" },
+              { text: "Dignity-first approach" }
+            ].map((value, idx) => (
               <motion.div
                 key={idx}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.3 + idx * 0.1 }}
-                whileHover={{ y: -5 }}
-                className="bg-card/50 backdrop-blur-sm border border-border rounded-xl p-6"
+                whileHover={{ scale: 1.05 }}
+                className="px-6 py-3 bg-card/60 backdrop-blur-sm border border-primary/30 rounded-full"
               >
-                <div className="text-4xl text-primary mb-2 font-bold">{stat.value}</div>
-                <div className="text-sm text-muted-foreground">{stat.label}</div>
+                <span className="text-sm font-medium text-foreground">{value.text}</span>
               </motion.div>
             ))}
-          </div>
+          </motion.div>
         </motion.div>
       </div>
     </section>

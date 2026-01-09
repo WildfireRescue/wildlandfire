@@ -1,4 +1,4 @@
-import { Menu, X, Heart, Users, TrendingUp, DollarSign, Home, Flame, Phone, FileText } from 'lucide-react';
+import { Menu, X, Heart, Users, DollarSign, Home, Phone, FileText } from 'lucide-react';
 import { Button } from './ui/button';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -185,15 +185,6 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
                             </div>
                             <p className="text-sm text-muted-foreground">{item.description}</p>
                           </div>
-                          {item.cta && (
-                            <motion.div
-                              animate={{ scale: [1, 1.1, 1] }}
-                              transition={{ duration: 2, repeat: Infinity }}
-                              className="px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-semibold"
-                            >
-                              CTA
-                            </motion.div>
-                          )}
                           {item.highlight && !isActive && (
                             <motion.div
                               animate={{ opacity: [0.5, 1, 0.5] }}

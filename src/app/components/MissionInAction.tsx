@@ -31,8 +31,8 @@ const impactAreas = [
 const values = [
   {
     icon: Shield,
-    title: "Radical Transparency",
-    quote: "Every dollar tracked. Every impact measured. Every decision made with survivors in mind. We're building trust from day one.",
+    title: "Direct Action",
+    quote: "When disaster strikes, families need immediate essentials—shelter, food, clothing. We cut through red tape to get help where it's needed most.",
   },
   {
     icon: Clock,
@@ -46,8 +46,8 @@ const values = [
   },
   {
     icon: TrendingUp,
-    title: "Built to Scale",
-    quote: "Our vision is clear: become the most trusted name in wildfire recovery. Every donation brings us closer to transforming lives at scale.",
+    title: "Sustainable Impact",
+    quote: "We're building a foundation that serves families for years to come. Your support helps us reach more communities and create lasting change.",
   }
 ];
 
@@ -65,7 +65,7 @@ export function MissionInAction() {
         >
           <h2 className="text-4xl md:text-6xl mb-4">Our Mission in Action</h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Every donation fuels our vision. Here's how we serve survivors and what guides every decision we make.
+            Turning compassion into action. Here's how we serve wildfire survivors and the values that guide our work.
           </p>
         </motion.div>
 
@@ -135,7 +135,7 @@ export function MissionInAction() {
           >
             <h3 className="text-3xl md:text-4xl mb-3">What We Stand For</h3>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Our values are unshakeable. Here's what guides every decision we make.
+              The principles that shape how we serve families in crisis.
             </p>
           </motion.div>
 

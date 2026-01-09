@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import kendraImage from '../../assets/bd945c99eca223699b8547f6f17ea75b4223a3c2.png';
+import kendraImage from '../../assets/Kendra.jpg';
 
 export function AboutKendra() {
   return (

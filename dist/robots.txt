@@ -3,7 +3,7 @@ User-agent: *
 Allow: /
 
 # Sitemap location
-Sitemap: https://wildlandfirerecoveryfund.org/sitemap.xml
+Sitemap: https://www.thewildlandfirerecoveryfund.org/sitemap.xml
 
 # Crawl-delay to be respectful of server resources
 Crawl-delay: 1

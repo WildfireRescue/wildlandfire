@@ -8,26 +8,23 @@ export function StructuredData() {
       "@type": ["NonprofitOrganization", "Organization"],
       "name": "The Wildland Fire Recovery Fund",
       "alternateName": "Wildland Fire Recovery Fund",
-      "url": "https://wildlandfirerecoveryfund.org",
-      "logo": "https://wildlandfirerecoveryfund.org/logo.png",
+      "url": "https://www.thewildlandfirerecoveryfund.org",
+      "logo": "https://www.thewildlandfirerecoveryfund.org/logo.png",
       "description": "The Wildland Fire Recovery Fund provides emergency assistance, housing support, and resources to wildfire survivors with rapid emergency response.",
       "foundingDate": "2026",
       "nonprofitStatus": "501(c)(3)",
-      "taxID": "Your-EIN-Here",
+      "taxID": "41-2905752",
       "slogan": "Rebuilding Lives, Restoring Hope",
       "mission": "To provide rapid, transparent emergency assistance to wildfire survivors, including emergency housing, mental health support, and firefighter resources.",
       "contactPoint": {
         "@type": "ContactPoint",
-        "telephone": "+1-XXX-XXX-XXXX",
         "contactType": "Customer Service",
-        "email": "info@wildlandfirerecoveryfund.org",
+        "email": "info@thewildlandfirerecoveryfund.org",
         "availableLanguage": ["English"],
         "areaServed": "US"
       },
       "sameAs": [
-        "https://facebook.com/wildlandfirerecoveryfund",
-        "https://twitter.com/wildfirerecovery",
-        "https://instagram.com/wildlandfirerecoveryfund"
+        "https://www.facebook.com/profile.php?id=61585125667396"
       ],
       "areaServed": {
         "@type": "Country",
@@ -48,7 +45,18 @@ export function StructuredData() {
       "seeks": {
         "@type": "Demand",
         "name": "Donations to support wildfire survivors"
-      }
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "US"
+      },
+      "accreditedBy": [
+        {
+          "@type": "Organization",
+          "name": "IRS",
+          "url": "https://www.irs.gov"
+        }
+      ]
     };
 
     // Website Schema
@@ -56,10 +64,10 @@ export function StructuredData() {
       "@context": "https://schema.org",
       "@type": "WebSite",
       "name": "The Wildland Fire Recovery Fund",
-      "url": "https://wildlandfirerecoveryfund.org",
+      "url": "https://www.thewildlandfirerecoveryfund.org",
       "potentialAction": {
         "@type": "SearchAction",
-        "target": "https://wildlandfirerecoveryfund.org/search?q={search_term_string}",
+        "target": "https://www.thewildlandfirerecoveryfund.org/search?q={search_term_string}",
         "query-input": "required name=search_term_string"
       }
     };
@@ -69,9 +77,9 @@ export function StructuredData() {
       "@context": "https://schema.org",
       "@type": "Charity",
       "name": "The Wildland Fire Recovery Fund",
-      "url": "https://wildlandfirerecoveryfund.org",
+      "url": "https://www.thewildlandfirerecoveryfund.org",
       "description": "Supporting wildfire survivors with emergency housing, mental health resources, and firefighter assistance through transparent, rapid-response aid.",
-      "donationUrl": "https://wildlandfirerecoveryfund.org/#donate",
+      "donationUrl": "https://www.thewildlandfirerecoveryfund.org/#donate",
       "missionCoveragePrioritiesPolicy": "We provide rapid emergency response to wildfire survivors, with 75% of donations going directly to survivors. We proactively respond to fire scenes—survivors don't need to apply.",
       "nonprofitStatus": "501(c)(3)"
     };
@@ -85,37 +93,37 @@ export function StructuredData() {
           "@type": "ListItem",
           "position": 1,
           "name": "Home",
-          "item": "https://wildlandfirerecoveryfund.org/"
+          "item": "https://www.thewildlandfirerecoveryfund.org/"
         },
         {
           "@type": "ListItem",
           "position": 2,
           "name": "About Us",
-          "item": "https://wildlandfirerecoveryfund.org/#about"
+          "item": "https://www.thewildlandfirerecoveryfund.org/#about"
         },
         {
           "@type": "ListItem",
           "position": 3,
           "name": "Donate",
-          "item": "https://wildlandfirerecoveryfund.org/#donate"
+          "item": "https://www.thewildlandfirerecoveryfund.org/#donate"
         },
         {
           "@type": "ListItem",
           "position": 4,
           "name": "Stories",
-          "item": "https://wildlandfirerecoveryfund.org/#stories"
+          "item": "https://www.thewildlandfirerecoveryfund.org/#stories"
         },
         {
           "@type": "ListItem",
           "position": 5,
           "name": "Grants",
-          "item": "https://wildlandfirerecoveryfund.org/#grants"
+          "item": "https://www.thewildlandfirerecoveryfund.org/#grants"
         },
         {
           "@type": "ListItem",
           "position": 6,
           "name": "Contact",
-          "item": "https://wildlandfirerecoveryfund.org/#contact"
+          "item": "https://www.thewildlandfirerecoveryfund.org/#contact"
         }
       ]
     };

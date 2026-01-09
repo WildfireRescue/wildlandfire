@@ -13,20 +13,11 @@ export function DonatePage() {
       <DonateHero />
       <PremiumTrustBadges />
 
-      {/* Outcomes early (why donate) */}
+      {/* Outcomes and 2026 Vision */}
       <HowYourDonationHelps />
-
-      {/* Social proof */}
-      <FundraisingGoal />
 
       {/* Mid-page ask */}
       <DonationCTA />
-
-      {/* Story for warm donors */}
-      <EmotionalMicroCopy />
-
-      {/* Tools + options */}
-      <WaysToGive />
 
       {/* Final close */}
       <TrustBadges />

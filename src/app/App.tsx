@@ -185,7 +185,7 @@ export default function App() {
       updateMeta('og:type', 'website', true);
       updateMeta(
         'og:url',
-        `https://wildlandfirerecoveryfund.org/#${currentPage}`,
+        `https://www.thewildlandfirerecoveryfund.org/#${currentPage}`,
         true
       );
       updateMeta('og:site_name', 'The Wildland Fire Recovery Fund', true);
@@ -205,7 +205,7 @@ export default function App() {
         canonical.rel = 'canonical';
         document.head.appendChild(canonical);
       }
-      canonical.href = `https://wildlandfirerecoveryfund.org/#${currentPage}`;
+      canonical.href = `https://www.thewildlandfirerecoveryfund.org/#${currentPage}`;
 
       // Language
       document.documentElement.lang = 'en';

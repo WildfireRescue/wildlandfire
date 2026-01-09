@@ -13,8 +13,7 @@ export function ContactPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // For now, just log - you can integrate with a form service later
-    console.log('Form submitted:', formData);
+    // TODO: Integrate with email service (e.g., SendGrid, Netlify Forms)
     alert('Thank you for reaching out! We\'ll get back to you soon.');
     setFormData({ name: '', email: '', subject: '', message: '' });
   };

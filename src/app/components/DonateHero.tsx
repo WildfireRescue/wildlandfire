@@ -43,11 +43,17 @@ export function DonateHero() {
 
           <h1 className="text-5xl md:text-7xl mb-4">Give Hope Today</h1>
 
-          <p className="text-2xl text-muted-foreground mb-6 leading-relaxed">
+          <p className="text-2xl text-muted-foreground mb-4 leading-relaxed">
             Your donation doesn't just help rebuild homes. It rebuilds lives, restores dignity, and
             proves to someone who's lost everything that{" "}
             <span className="text-foreground font-semibold">the world still cares about them.</span>
           </p>
+
+          {/* Active Need Indicator */}
+          <div className="flex items-center justify-center gap-2 mb-6 px-5 py-2.5 bg-primary/10 rounded-full inline-flex mx-auto border border-primary/20">
+            <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+            <span className="text-foreground font-medium text-sm">Currently serving families nationwide</span>
+          </div>
 
           {/* ✅ Donate controls (above the fold) */}
           <div className="max-w-xl mx-auto mb-10">
@@ -58,42 +64,7 @@ export function DonateHero() {
             />
           </div>
 
-          {/* Quick Impact Preview */}
-          <div className="grid md:grid-cols-3 gap-4 mb-8">
-            {[
-              {
-                amount: "$50",
-                impact: "Provides emergency supplies for a family",
-                icon: Gift,
-              },
-              {
-                amount: "$250",
-                impact: "Funds fire prevention education for a community",
-                icon: Users,
-              },
-              {
-                amount: "$1,000",
-                impact: "Provides housing assistance for multiple families",
-                icon: Heart,
-              },
-            ].map((item, idx) => {
-              const Icon = item.icon;
-              return (
-                <motion.div
-                  key={idx}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 + idx * 0.1 }}
-                  whileHover={{ y: -5, scale: 1.05 }}
-                  className="bg-card border border-primary/30 rounded-xl p-6"
-                >
-                  <Icon className="text-primary mx-auto mb-3" size={32} />
-                  <div className="text-3xl text-primary mb-2">{item.amount}</div>
-                  <p className="text-sm text-muted-foreground">{item.impact}</p>
-                </motion.div>
-              );
-            })}
-          </div>
+
         </motion.div>
       </div>
     </section>

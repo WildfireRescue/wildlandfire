@@ -1,6 +1,7 @@
 import { motion } from 'motion/react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
-import familyRubbleImage from '../../assets/8b64e532287716a0ab750837959a1c3f650e2a97.png';
+import familyRubbleImage from '../../assets/fire22222.jpg';
+import idahoMountainImage from '../../assets/fire33333.webp';
 
 const galleryImages = [
   {
@@ -34,7 +35,7 @@ const galleryImages = [
     span: "col-span-2 row-span-1"
   },
   {
-    url: "https://images.unsplash.com/photo-1542898768-b51a026826e4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpZGFobyUyMG1vdW50YWlucyUyMHdpbGRmaXJlfGVufDF8fHx8MTc2NjQ2NTA0Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+    url: idahoMountainImage,
     caption: "Idaho mountain communities threatened by raging wildfires",
     span: "col-span-2 row-span-1"
   }
@@ -92,12 +93,8 @@ export function PhotoGallery() {
           <div className="relative rounded-2xl overflow-hidden shadow-2xl">
             <img
               src={familyRubbleImage}
-              alt="Family searching through the remains of their destroyed home after wildfire"
+              alt="Family affected by wildfire"
               className="w-full h-[450px] md:h-[550px] object-cover"
-              style={{
-                filter: 'contrast(1.08) saturate(0.92) brightness(1.02) sepia(0.08)',
-                imageRendering: 'crisp-edges',
-              }}
             />
             {/* Film grain overlay for photographic realism */}
             <div 

@@ -34,7 +34,7 @@ const emotionalMessages = [
 
 export function EmotionalMicroCopy() {
   return (
-    <section className="py-24 bg-gradient-to-b from-background via-secondary/20 to-background relative overflow-hidden">
+    <section className="py-20 bg-gradient-to-b from-background via-secondary/20 to-background relative overflow-hidden">
       {/* Ambient background elements */}
       <div className="absolute inset-0 opacity-20">
         <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
@@ -47,20 +47,17 @@ export function EmotionalMicroCopy() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-16"
+          className="text-center mb-12"
         >
           <p className="text-primary uppercase tracking-widest text-xs font-semibold mb-4">
             Why Your Support Matters
           </p>
           <h2 className="text-4xl md:text-5xl mb-4">
-            Every Donation Tells a Story
+            Every Donation Makes an Impact
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Behind every dollar is a survivor's journey from devastation to hope
-          </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
           {emotionalMessages.map((item, index) => {
             const Icon = item.icon;
             return (

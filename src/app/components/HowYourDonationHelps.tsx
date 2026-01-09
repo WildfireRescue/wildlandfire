@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { Home, Heart, Shield, CheckCircle, Eye } from "lucide-react";
+import { Home, Heart, Shield, CheckCircle, Eye, Zap, Users, Package, GraduationCap } from "lucide-react";
 
 export function HowYourDonationHelps() {
   const impactAreas = [
@@ -75,43 +75,15 @@ export function HowYourDonationHelps() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-10"
+          className="text-center mb-12"
         >
           <h2 className="text-4xl md:text-5xl mb-4 max-w-4xl mx-auto">
-            Explore how your donations support affected communities
+            Your donation makes an immediate difference
           </h2>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-            Clear, direct support for families and firefighters—when it matters most.
-          </p>
-        </motion.div>
-
-        {/* Impact Ladder (fast decision helper) */}
-        <motion.div
-          initial={{ opacity: 0, y: 18 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="max-w-5xl mx-auto mb-12"
-        >
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {impactLadder.map((item, idx) => (
-              <div
-                key={idx}
-                className="bg-card border border-border rounded-2xl p-5"
-              >
-                <div className="text-primary text-2xl font-extrabold mb-2">
-                  {item.amount}
-                </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {item.text}
-                </p>
-              </div>
-            ))}
-          </div>
         </motion.div>
 
         {/* Three Impact Cards */}
-        <div className="grid md:grid-cols-3 gap-6 max-w-7xl mx-auto mb-12">
+        <div className="grid md:grid-cols-3 gap-6 max-w-7xl mx-auto">
           {impactAreas.map((area, index) => {
             const Icon = area.icon;
             return (
@@ -154,34 +126,113 @@ export function HowYourDonationHelps() {
           })}
         </div>
 
-        {/* Supporting Values */}
+        {/* Combined Mission & Campaign Section */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto"
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="max-w-6xl mx-auto mt-20"
         >
-          {values.map((value, index) => {
-            const Icon = value.icon;
-            return (
+          <div className="relative overflow-hidden bg-gradient-to-br from-primary/15 via-primary/5 to-background border-2 border-primary/30 rounded-3xl p-10 md:p-16">
+            {/* Ambient glow effects */}
+            <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
+            <div className="absolute bottom-0 left-0 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl" />
+            
+            <div className="relative z-10">
+              {/* Header */}
+              <div className="text-center mb-12">
+                <motion.div
+                  initial={{ scale: 0.9 }}
+                  whileInView={{ scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, type: "spring" }}
+                  className="inline-block"
+                >
+                  <p className="text-primary uppercase tracking-widest text-xs font-semibold mb-4">
+                    Our 2026 Vision
+                  </p>
+                  <h3 className="text-3xl md:text-4xl font-bold mb-4">Building Lasting Support for Families</h3>
+                  <p className="text-lg text-muted-foreground max-w-2xl">
+                    Together, we're creating infrastructure that serves wildfire survivors and first responders when they need it most
+                  </p>
+                </motion.div>
+              </div>
+
+              {/* Goals Grid */}
+              <div className="grid md:grid-cols-2 gap-5 mb-10">
+                {[
+                  {
+                    icon: Zap,
+                    title: "Emergency Response Team",
+                    description: "Rapid deployment capability to wildfire scenes across the country",
+                    color: "from-yellow-500/20 to-orange-500/20",
+                  },
+                  {
+                    icon: Users,
+                    title: "Direct Family Support",
+                    description: "Immediate housing, food, and essentials for hundreds of displaced families",
+                    color: "from-blue-500/20 to-purple-500/20",
+                  },
+                  {
+                    icon: Package,
+                    title: "Firefighter Resources",
+                    description: "Equipment grants and support programs for fire departments in need",
+                    color: "from-red-500/20 to-pink-500/20",
+                  },
+                  {
+                    icon: GraduationCap,
+                    title: "Education Programs",
+                    description: "Fire prevention training and wildfire preparedness for at-risk communities",
+                    color: "from-green-500/20 to-teal-500/20",
+                  },
+                ].map((goal, index) => {
+                  const Icon = goal.icon;
+                  return (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5, delay: 0.1 * index }}
+                      whileHover={{ scale: 1.03, y: -5 }}
+                      className="group flex gap-5 bg-card/80 backdrop-blur-sm border-2 border-border rounded-2xl p-7 hover:border-primary/50 hover:shadow-lg transition-all duration-300"
+                    >
+                      <div className="flex-shrink-0">
+                        <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${goal.color} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                          <Icon className="text-primary" size={28} strokeWidth={2.5} />
+                        </div>
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-bold text-xl mb-2 group-hover:text-primary transition-colors">
+                          {goal.title}
+                        </h4>
+                        <p className="text-muted-foreground leading-relaxed">
+                          {goal.description}
+                        </p>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+
+              {/* Bottom Message */}
               <motion.div
-                key={index}
-                initial={{ opacity: 0, scale: 0.98 }}
-                whileInView={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.08 }}
-                whileHover={{ y: -4 }}
-                className="bg-card border border-border rounded-xl p-6 text-center"
+                transition={{ duration: 0.6, delay: 0.5 }}
+                className="text-center pt-6 border-t border-primary/20"
               >
-                <Icon className="text-primary mb-3 mx-auto" size={30} />
-                <h3 className="text-lg mb-2 font-semibold">{value.title}</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  {value.description}
+                <p className="text-lg text-muted-foreground mb-2">
+                  Your support makes this possible. Every contribution helps us reach our goal of building these essential programs.
+                </p>
+                <p className="text-sm text-muted-foreground italic">
+                  Campaign Goal: $5 Million
                 </p>
               </motion.div>
-            );
-          })}
+            </div>
+          </div>
         </motion.div>
       </div>
     </section>

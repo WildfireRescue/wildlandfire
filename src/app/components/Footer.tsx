@@ -4,7 +4,7 @@ import logoImage from '../../assets/e43d164f2f92fa60d5e9ac721dd31bf10ad9da66.png
 
 export function Footer() {
   const socialLinks = [
-    { icon: Facebook, href: '#', label: 'Facebook' },
+    { icon: Facebook, href: 'https://www.facebook.com/profile.php?id=61585125667396', label: 'Facebook' },
     { icon: Twitter, href: '#', label: 'Twitter' },
     { icon: Instagram, href: '#', label: 'Instagram' },
     { icon: Mail, href: 'mailto:info@thewildlandfirerecoveryfund.org', label: 'Email' },
