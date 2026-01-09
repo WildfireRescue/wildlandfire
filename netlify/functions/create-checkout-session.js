@@ -95,7 +95,7 @@ function json(statusCode, data) {
  */
 function priceFromLookupKey(key) {
   const map = {
-    monthly_19: process.env.STRIPE_PRICE_MONTHLY_19,
+    monthly_10: process.env.STRIPE_PRICE_MONTHLY_10,
     monthly_25: process.env.STRIPE_PRICE_MONTHLY_25,
     monthly_50: process.env.STRIPE_PRICE_MONTHLY_50,
     monthly_100: process.env.STRIPE_PRICE_MONTHLY_100,
@@ -108,7 +108,7 @@ function priceFromLookupKey(key) {
  */
 function priceFromAmount(amount) {
   const a = Number(amount);
-  if (a === 19) return process.env.STRIPE_PRICE_MONTHLY_19;
+  if (a === 10) return process.env.STRIPE_PRICE_MONTHLY_10;
   if (a === 25) return process.env.STRIPE_PRICE_MONTHLY_25;
   if (a === 50) return process.env.STRIPE_PRICE_MONTHLY_50;
   if (a === 100) return process.env.STRIPE_PRICE_MONTHLY_100;

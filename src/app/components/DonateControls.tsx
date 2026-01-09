@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 const ONE_TIME_AMOUNTS = [25, 50, 100, 250];
 
 // Monthly presets (only tiers you created in Stripe)
-const MONTHLY_AMOUNTS = [19, 25, 50, 100];
+const MONTHLY_AMOUNTS = [10, 25, 50, 100];
 
 const OTHER = "other" as const;
 
