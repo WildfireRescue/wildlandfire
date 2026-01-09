@@ -18,7 +18,7 @@ exports.handler = async (event) => {
     }
 
     const success_url =
-      successUrl || `${process.env.URL || "http://localhost:8888"}/#/thank-you`;
+      successUrl || `${process.env.URL || "http://localhost:8888"}/#/thankyou`;
     const cancel_url =
       cancelUrl || `${process.env.URL || "http://localhost:8888"}/#/donate`;
 
