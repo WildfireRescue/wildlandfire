@@ -45,10 +45,13 @@ export function Hero() {
             transition={{ duration: 1.5, ease: "easeInOut" }}
             className="absolute inset-0"
           >
-            <ImageWithFallback
+            <img
               src={heroImages[currentImageIndex].url}
               alt={heroImages[currentImageIndex].alt}
               className="w-full h-full object-cover"
+              fetchpriority={currentImageIndex === 0 ? "high" : "low"}
+              loading={currentImageIndex === 0 ? "eager" : "lazy"}
+              decoding="async"
             />
           </motion.div>
         </AnimatePresence>
