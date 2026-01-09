@@ -14,14 +14,14 @@ export default defineConfig({
     compression({
       algorithm: 'brotliCompress',
       ext: '.br',
-      threshold: 1024,
+      threshold: 512, // Compress smaller files for mobile
       deleteOriginFile: false,
     }),
     // Gzip compression as fallback
     compression({
       algorithm: 'gzip',
       ext: '.gz',
-      threshold: 1024,
+      threshold: 512,
       deleteOriginFile: false,
     }),
   ],
@@ -38,65 +38,80 @@ export default defineConfig({
       compress: {
         drop_console: true,
         drop_debugger: true,
-        pure_funcs: ['console.log', 'console.info'],
-        passes: 2, // Multiple passes for better compression
+        pure_funcs: ['console.log', 'console.info', 'console.debug'],
+        passes: 3, // More passes for better compression
+        unsafe_arrows: true,
+        unsafe_methods: true,
+        unsafe_proto: true,
       },
       format: {
         comments: false, // Remove all comments
+      },
+      mangle: {
+        safari10: true, // Better mobile compatibility
       },
     },
     // Code splitting configuration
     rollupOptions: {
       output: {
         manualChunks: (id) => {
-          // More granular chunking for better caching
+          // Aggressive code splitting for mobile performance
           if (id.includes('node_modules')) {
-            // React core - keep small and separate
+            // React core - critical path
             if (id.includes('react/') || id.includes('react-dom/') || id.includes('scheduler')) {
-              return 'react-vendor';
+              return 'react-core';
             }
-            // Motion library (large) - lazy load when possible
-            if (id.includes('motion')) {
-              return 'motion-vendor';
+            // Motion library - defer loading
+            if (id.includes('motion') || id.includes('framer')) {
+              return 'motion';
             }
-            // Radix UI components
+            // Radix UI - load on demand
             if (id.includes('@radix-ui')) {
-              return 'radix-ui';
+              return 'ui';
             }
-            // Stripe - only load when needed (async)
+            // Stripe - async only
             if (id.includes('@stripe') || id.includes('stripe')) {
-              return 'stripe';
+              return 'payment';
             }
-            // Supabase - separate chunk
+            // Supabase - async only
             if (id.includes('@supabase') || id.includes('supabase')) {
-              return 'supabase';
+              return 'db';
             }
-            // Lucide icons - separate chunk
+            // Icons - separate
             if (id.includes('lucide-react')) {
               return 'icons';
             }
-            // React Router
+            // Router - critical
             if (id.includes('react-router')) {
               return 'router';
             }
-            // Other vendors
+            // All other vendor code
             return 'vendor';
           }
         },
-        // Optimize chunk names for caching
-        chunkFileNames: 'assets/[name]-[hash].js',
-        entryFileNames: 'assets/[name]-[hash].js',
-        assetFileNames: 'assets/[name]-[hash].[ext]',
+        // Optimize chunk names for long-term caching
+        chunkFileNames: 'js/[name].[hash].js',
+        entryFileNames: 'js/[name].[hash].js',
+        assetFileNames: (assetInfo) => {
+          // Better asset organization
+          const info = assetInfo.name.split('.');
+          const ext = info[info.length - 1];
+          if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(ext)) {
+            return 'img/[name].[hash][extname]';
+          } else if (/woff2?|ttf|eot/i.test(ext)) {
+            return 'fonts/[name].[hash][extname]';
+          }
+          return 'assets/[name].[hash][extname]';
+        },
       },
     },
-    // Increase chunk size warning limit
-    chunkSizeWarningLimit: 1000,
-    // Target modern browsers for smaller bundles
+    // Mobile-optimized settings
+    chunkSizeWarningLimit: 500, // Stricter limit
     target: 'es2015',
-    // Enable CSS code splitting
     cssCodeSplit: true,
-    // Reduce chunk size
     cssMinify: true,
+    // Enable source maps for debugging but keep them separate
+    sourcemap: false,
   },
   // Ensure public folder assets are copied
   publicDir: 'public',
