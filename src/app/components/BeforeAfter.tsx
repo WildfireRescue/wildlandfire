@@ -67,6 +67,8 @@ export function BeforeAfter() {
                       src={story.after}
                       alt={`${story.location} after recovery`}
                       className="w-full h-full object-cover"
+                      loading="lazy"
+                      decoding="async"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                     <div className="absolute bottom-4 right-4 text-white font-semibold">After</div>
@@ -83,6 +85,8 @@ export function BeforeAfter() {
                       src={story.before}
                       alt={`${story.location} before recovery`}
                       className="w-full h-full object-cover"
+                      loading="lazy"
+                      decoding="async"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                     <div className="absolute bottom-4 left-4 text-white font-semibold">Before</div>

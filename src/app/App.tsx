@@ -1,23 +1,24 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import { HomePage } from './pages/HomePage';
-import { AboutPage } from './pages/AboutPage';
-import { ContactPage } from './pages/ContactPage';
-import { StoriesPage } from './pages/StoriesPage';
-import { GrantsPage } from './pages/GrantsPage';
-import { DonatePage } from './pages/DonatePage';
-import { ThankYouPage } from './pages/ThankYouPage';
-import { ArticlesPage } from './pages/ArticlesPage';
-import { PublishPage } from './pages/PublishPage';
-import { AuthCallbackPage } from './pages/AuthCallbackPage';
-import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
-import { TermsOfUsePage } from './pages/TermsOfUsePage';
-
 import { Navigation } from './components/Navigation';
 import { Footer } from './components/Footer';
 import { DonationForm } from './components/DonationForm';
 import { StructuredData } from './components/StructuredData';
 import { UrgencyTopBanner } from './components/UrgencyTopBanner';
 import { supabase } from '../lib/supabase';
+
+// Lazy load pages that aren't immediately needed
+const AboutPage = lazy(() => import('./pages/AboutPage').then(m => ({ default: m.AboutPage })));
+const ContactPage = lazy(() => import('./pages/ContactPage').then(m => ({ default: m.ContactPage })));
+const StoriesPage = lazy(() => import('./pages/StoriesPage').then(m => ({ default: m.StoriesPage })));
+const GrantsPage = lazy(() => import('./pages/GrantsPage').then(m => ({ default: m.GrantsPage })));
+const DonatePage = lazy(() => import('./pages/DonatePage').then(m => ({ default: m.DonatePage })));
+const ThankYouPage = lazy(() => import('./pages/ThankYouPage').then(m => ({ default: m.ThankYouPage })));
+const ArticlesPage = lazy(() => import('./pages/ArticlesPage').then(m => ({ default: m.ArticlesPage })));
+const PublishPage = lazy(() => import('./pages/PublishPage').then(m => ({ default: m.PublishPage })));
+const AuthCallbackPage = lazy(() => import('./pages/AuthCallbackPage').then(m => ({ default: m.AuthCallbackPage })));
+const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage').then(m => ({ default: m.PrivacyPolicyPage })));
+const TermsOfUsePage = lazy(() => import('./pages/TermsOfUsePage').then(m => ({ default: m.TermsOfUsePage })));
 
 // Wildland Fire Recovery Fund - Main Application Component
 export default function App() {
@@ -245,32 +246,47 @@ export default function App() {
   };
 
   const renderPage = () => {
-    switch (currentPage) {
-      case 'about':
-        return <AboutPage />;
-      case 'contact':
-        return <ContactPage />;
-      case 'thankyou':
-        return <ThankYouPage onNavigate={handleNavigate} />;
-      case 'stories':
-        return <StoriesPage />;
-      case 'grants':
-        return <GrantsPage />;
-      case 'donate':
-        return <DonatePage />;
-      case 'articles':
-        return <ArticlesPage slug={articleSlug || undefined} />;
-      case 'publish':
-        return <PublishPage />;
-      case 'auth-callback':
-        return <AuthCallbackPage />;
-      case 'privacy':
-        return <PrivacyPolicyPage />;
-      case 'terms':
-        return <TermsOfUsePage />;
-      default:
-        return <HomePage />;
-    }
+    const PageComponent = () => {
+      switch (currentPage) {
+        case 'about':
+          return <AboutPage />;
+        case 'contact':
+          return <ContactPage />;
+        case 'thankyou':
+          return <ThankYouPage onNavigate={handleNavigate} />;
+        case 'stories':
+          return <StoriesPage />;
+        case 'grants':
+          return <GrantsPage />;
+        case 'donate':
+          return <DonatePage />;
+        case 'articles':
+          return <ArticlesPage slug={articleSlug || undefined} />;
+        case 'publish':
+          return <PublishPage />;
+        case 'auth-callback':
+          return <AuthCallbackPage />;
+        case 'privacy':
+          return <PrivacyPolicyPage />;
+        case 'terms':
+          return <TermsOfUsePage />;
+        default:
+          return <HomePage />;
+      }
+    };
+
+    return (
+      <Suspense fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading...</p>
+          </div>
+        </div>
+      }>
+        <PageComponent />
+      </Suspense>
+    );
   };
 
   return (

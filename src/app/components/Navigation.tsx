@@ -68,6 +68,10 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
                   src="/Images/logo-512.png" 
                   alt="Wildland Fire Recovery Fund" 
                   className="h-14 w-14 relative z-10 drop-shadow-lg" 
+                  loading="eager"
+                  decoding="async"
+                  width="56"
+                  height="56"
                 />
               </div>
               <div className="hidden md:flex flex-col leading-tight">
