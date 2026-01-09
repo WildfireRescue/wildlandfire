@@ -75,7 +75,8 @@
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.19",
-    "terser": "^5.44.1"
+    "terser": "^5.44.1",
+    "vite-plugin-compression": "^0.5.1"
   },
   "peerDependencies": {
     "react": "18.3.1",

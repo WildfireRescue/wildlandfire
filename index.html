@@ -20,13 +20,29 @@
     <link rel="preconnect" href="https://js.stripe.com">
     <link rel="dns-prefetch" href="https://js.stripe.com">
 
-    <!-- Google Analytics 4 - CRITICAL FOR GOOGLE TRUST -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-91F19C5VXB"></script>
+    <!-- Google Analytics 4 - Deferred for performance -->
     <script>
+      // Defer GA loading until after page is interactive
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
       gtag('config', 'G-91F19C5VXB');
+      
+      // Load GA after page is interactive
+      if (document.readyState === 'complete') {
+        loadGA();
+      } else {
+        window.addEventListener('load', loadGA);
+      }
+      
+      function loadGA() {
+        setTimeout(() => {
+          const script = document.createElement('script');
+          script.async = true;
+          script.src = 'https://www.googletagmanager.com/gtag/js?id=G-91F19C5VXB';
+          document.head.appendChild(script);
+        }, 1000);
+      }
     </script>
 
     <!-- Primary SEO Meta -->
@@ -114,5 +130,16 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Register Service Worker for caching -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(() => {
+            // Service worker registration failed, that's okay
+          });
+        });
+      }
+    </script>
   </body>
 </html>

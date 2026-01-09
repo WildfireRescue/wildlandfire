@@ -37,6 +37,8 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     Content-Security-Policy = "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval' www.googletagmanager.com www.google-analytics.com; img-src 'self' https: data:; script-src 'self' https: 'unsafe-inline' 'unsafe-eval' www.googletagmanager.com www.google-analytics.com"
     Permissions-Policy = "geolocation=(), microphone=(), camera=()"
+    # Enable early hints for faster loading
+    Link = "</Images/logo-128.png>; rel=preload; as=image"
 
 # Cache static assets for longer
 [[headers]]

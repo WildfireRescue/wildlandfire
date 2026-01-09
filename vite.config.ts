@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import path from 'path'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
+import viteCompression from 'vite-plugin-compression'
 
 export default defineConfig({
   plugins: [
@@ -9,6 +10,20 @@ export default defineConfig({
     // Tailwind is not being actively used – do not remove them
     react(),
     tailwindcss(),
+    // Brotli compression for even smaller files
+    viteCompression({
+      algorithm: 'brotliCompress',
+      ext: '.br',
+      threshold: 1024,
+      deleteOriginFile: false,
+    }),
+    // Gzip compression as fallback
+    viteCompression({
+      algorithm: 'gzip',
+      ext: '.gz',
+      threshold: 1024,
+      deleteOriginFile: false,
+    }),
   ],
   resolve: {
     alias: {
@@ -24,24 +39,42 @@ export default defineConfig({
         drop_console: true,
         drop_debugger: true,
         pure_funcs: ['console.log', 'console.info'],
+        passes: 2, // Multiple passes for better compression
       },
     },
     // Code splitting configuration
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Vendor chunks for better caching
-          'react-vendor': ['react', 'react-dom'],
-          'radix-ui': [
-            '@radix-ui/react-accordion',
-            '@radix-ui/react-dialog',
-            '@radix-ui/react-dropdown-menu',
-            '@radix-ui/react-popover',
-            '@radix-ui/react-select',
-            '@radix-ui/react-tabs',
-          ],
-          'stripe': ['@stripe/react-stripe-js', '@stripe/stripe-js'],
-          'supabase': ['@supabase/supabase-js'],
+        manualChunks: (id) => {
+          // More granular chunking for better caching
+          if (id.includes('node_modules')) {
+            // React core
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'react-vendor';
+            }
+            // Motion library (large)
+            if (id.includes('motion')) {
+              return 'motion-vendor';
+            }
+            // Radix UI components
+            if (id.includes('@radix-ui')) {
+              return 'radix-ui';
+            }
+            // Stripe
+            if (id.includes('stripe')) {
+              return 'stripe';
+            }
+            // Supabase
+            if (id.includes('supabase')) {
+              return 'supabase';
+            }
+            // Lucide icons
+            if (id.includes('lucide-react')) {
+              return 'icons';
+            }
+            // Other vendors
+            return 'vendor';
+          }
         },
       },
     },
@@ -51,6 +84,8 @@ export default defineConfig({
     target: 'es2015',
     // Enable CSS code splitting
     cssCodeSplit: true,
+    // Reduce chunk size
+    cssMinify: true,
   },
   // Ensure public folder assets are copied
   publicDir: 'public',

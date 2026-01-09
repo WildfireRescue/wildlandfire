@@ -2,9 +2,7 @@ import { useEffect, useState, lazy, Suspense } from 'react';
 import { HomePage } from './pages/HomePage';
 import { Navigation } from './components/Navigation';
 import { Footer } from './components/Footer';
-import { DonationForm } from './components/DonationForm';
 import { StructuredData } from './components/StructuredData';
-import { UrgencyTopBanner } from './components/UrgencyTopBanner';
 import { supabase } from '../lib/supabase';
 
 // Lazy load pages that aren't immediately needed
@@ -19,6 +17,10 @@ const PublishPage = lazy(() => import('./pages/PublishPage').then(m => ({ defaul
 const AuthCallbackPage = lazy(() => import('./pages/AuthCallbackPage').then(m => ({ default: m.AuthCallbackPage })));
 const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage').then(m => ({ default: m.PrivacyPolicyPage })));
 const TermsOfUsePage = lazy(() => import('./pages/TermsOfUsePage').then(m => ({ default: m.TermsOfUsePage })));
+
+// Lazy load components that aren't critical for initial render
+const DonationForm = lazy(() => import('./components/DonationForm').then(m => ({ default: m.DonationForm })));
+const UrgencyTopBanner = lazy(() => import('./components/UrgencyTopBanner').then(m => ({ default: m.UrgencyTopBanner })));
 
 // Wildland Fire Recovery Fund - Main Application Component
 export default function App() {
@@ -297,10 +299,14 @@ export default function App() {
         {renderPage()}
       </main>
       <Footer />
-      <UrgencyTopBanner />
+      <Suspense fallback={null}>
+        <UrgencyTopBanner />
+      </Suspense>
 
       {isDonationFormOpen && (
-        <DonationForm onClose={() => setIsDonationFormOpen(false)} />
+        <Suspense fallback={null}>
+          <DonationForm onClose={() => setIsDonationFormOpen(false)} />
+        </Suspense>
       )}
     </div>
   );
