@@ -46,6 +46,13 @@
   [headers.values]
     Cache-Control = "public, max-age=3600"
 
+# Force HTTPS
+[[redirects]]
+  from = "http://thewildlandfirerecoveryfund.org/*"
+  to = "https://thewildlandfirerecoveryfund.org/:splat"
+  status = 301
+  force = true
+
 # SPA fallback to index.html for hash-based routing
 [[redirects]]
   from = "/*"
