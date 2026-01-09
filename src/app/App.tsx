@@ -43,7 +43,7 @@ export default function App() {
       // ✅ Keep full path segments, strip querystring only
       // Supports: #articles/slug?x=1  and  #auth-callback?x=1
       const [hashNoQuery] = rawHash.split('?');
-      const parts = hashNoQuery ? hashNoQuery.split('/') : [];
+      const parts = hashNoQuery ? hashNoQuery.split('/').filter(Boolean) : [];
       const page = parts[0] || 'home';
       const slug = parts[1] || null;
 
