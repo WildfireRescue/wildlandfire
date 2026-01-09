@@ -102,6 +102,10 @@ export function MissionInAction() {
                       src={area.image}
                       alt={area.title}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      width="1080"
+                      height="720"
+                      loading="lazy"
+                      decoding="async"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent" />
                     <div className="absolute bottom-4 left-4 w-12 h-12 bg-primary/20 backdrop-blur-sm rounded-full flex items-center justify-center border border-primary/30">

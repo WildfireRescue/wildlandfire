@@ -79,17 +79,17 @@ export function MobileStickyDonateBar() {
                 <motion.a
                   href="#donate"
                   whileTap={{ scale: 0.95 }}
-                  className="px-5 py-2.5 bg-white text-primary font-bold text-sm rounded-lg shadow-lg"
+                  className="px-6 py-3 bg-white text-primary font-bold text-sm rounded-lg shadow-lg min-h-[48px] flex items-center justify-center"
                 >
                   Donate
                 </motion.a>
 
                 <button
                   onClick={handleDismiss}
-                  className="p-2 text-white/80 hover:text-white transition-colors"
+                  className="p-3 text-white/80 hover:text-white transition-colors min-h-[48px] min-w-[48px] flex items-center justify-center"
                   aria-label="Dismiss"
                 >
-                  <X size={18} />
+                  <X size={20} />
                 </button>
               </div>
             </div>

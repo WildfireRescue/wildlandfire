@@ -43,12 +43,20 @@ export default defineConfig({
         unsafe_arrows: true,
         unsafe_methods: true,
         unsafe_proto: true,
+        dead_code: true,
+        conditionals: true,
+        evaluate: true,
+        booleans: true,
+        unused: true,
+        toplevel: true,
+        side_effects: true,
       },
       format: {
         comments: false, // Remove all comments
       },
       mangle: {
         safari10: true, // Better mobile compatibility
+        toplevel: true,
       },
     },
     // Code splitting configuration
@@ -104,6 +112,11 @@ export default defineConfig({
           return 'assets/[name].[hash][extname]';
         },
       },
+      treeshake: {
+        moduleSideEffects: 'no-external',
+        propertyReadSideEffects: false,
+        tryCatchDeoptimization: false,
+      },
     },
     // Mobile-optimized settings
     chunkSizeWarningLimit: 500, // Stricter limit
@@ -112,6 +125,7 @@ export default defineConfig({
     cssMinify: true,
     // Enable source maps for debugging but keep them separate
     sourcemap: false,
+    reportCompressedSize: false, // Faster builds
   },
   // Ensure public folder assets are copied
   publicDir: 'public',

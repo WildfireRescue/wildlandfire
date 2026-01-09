@@ -117,6 +117,10 @@ export function WhoWeAre() {
                   src={firefighterWildfireImage}
                   alt="Firefighter battling wildfire"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  width="720"
+                  height="480"
+                  loading="lazy"
+                  decoding="async"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent" />
               </div>
@@ -126,6 +130,10 @@ export function WhoWeAre() {
                   src={firefightersImage}
                   alt="Firefighter team"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  width="720"
+                  height="480"
+                  loading="lazy"
+                  decoding="async"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent" />
               </div>

@@ -73,10 +73,10 @@ export function UrgencyTopBanner() {
 
             <button
               onClick={() => setIsVisible(false)}
-              className="p-1.5 text-white/80 hover:text-white transition-colors"
+              className="p-2.5 text-white/80 hover:text-white transition-colors min-h-[48px] min-w-[48px] flex items-center justify-center"
               aria-label="Close banner"
             >
-              <X size={18} />
+              <X size={20} />
             </button>
           </div>
         </div>

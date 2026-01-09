@@ -67,6 +67,8 @@ export function BeforeAfter() {
                       src={story.after}
                       alt={`${story.location} after recovery`}
                       className="w-full h-full object-cover"
+                      width="1080"
+                      height="720"
                       loading="lazy"
                       decoding="async"
                     />
@@ -85,6 +87,8 @@ export function BeforeAfter() {
                       src={story.before}
                       alt={`${story.location} before recovery`}
                       className="w-full h-full object-cover"
+                      width="1080"
+                      height="720"
                       loading="lazy"
                       decoding="async"
                     />

@@ -117,6 +117,10 @@ export function ArticlesPage({ slug }: { slug?: string }) {
                         src={a.cover_url}
                         alt={a.title}
                         className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                        width="800"
+                        height="450"
+                        loading="lazy"
+                        decoding="async"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent" />
                     </div>
@@ -244,6 +248,10 @@ export function ArticlesPage({ slug }: { slug?: string }) {
                   src={article.cover_url}
                   alt={article.title}
                   className="w-full h-auto"
+                  width="1200"
+                  height="675"
+                  loading="eager"
+                  decoding="async"
                 />
               </div>
             )}

@@ -118,7 +118,7 @@ export function Footer() {
               </li>
 
               <li className="pt-4">
-                <div className="flex gap-4">
+                <div className="flex gap-3">
                   {socialLinks.map((social, index) => {
                     const Icon = social.icon;
                     return (
@@ -131,10 +131,10 @@ export function Footer() {
                         transition={{ duration: 0.3, delay: 0.3 + index * 0.1 }}
                         whileHover={{ scale: 1.2, y: -3 }}
                         whileTap={{ scale: 0.9 }}
-                        className="hover:text-primary transition-colors"
+                        className="hover:text-primary transition-colors p-3 min-h-[48px] min-w-[48px] flex items-center justify-center"
                         aria-label={social.label}
                       >
-                        <Icon size={20} />
+                        <Icon size={24} />
                       </motion.a>
                     );
                   })}

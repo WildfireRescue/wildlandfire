@@ -43,6 +43,10 @@ export function AboutKendra() {
                   src={kendraImage}
                   alt="Kendra Talbot - Founder and Leader"
                   className="w-full h-full object-cover object-top"
+                  width="256"
+                  height="256"
+                  loading="lazy"
+                  decoding="async"
                 />
               </div>
             </div>

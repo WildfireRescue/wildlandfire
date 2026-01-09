@@ -100,7 +100,7 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
               {/* Hamburger Menu Button */}
               <motion.button
                 whileTap={{ scale: 0.9 }}
-                className="p-3 rounded-xl hover:bg-primary/10 transition-colors border border-border/50 hover:border-primary/50 relative z-[70] backdrop-blur-sm"
+                className="p-4 rounded-xl hover:bg-primary/10 transition-colors border border-border/50 hover:border-primary/50 relative z-[70] backdrop-blur-sm min-h-[48px] min-w-[48px] flex items-center justify-center"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 aria-label="Toggle menu"
               >

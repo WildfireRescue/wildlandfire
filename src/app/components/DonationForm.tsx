@@ -197,7 +197,8 @@ export function DonationForm({ onClose }: DonationFormProps) {
           <h2 className="text-2xl">Make a Donation</h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-muted rounded-lg transition-colors"
+            className="p-3 hover:bg-muted rounded-lg transition-colors min-h-[48px] min-w-[48px] flex items-center justify-center"
+            aria-label="Close donation form"
           >
             <X className="w-5 h-5" />
           </button>
