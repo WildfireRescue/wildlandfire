@@ -1,4 +1,4 @@
-import { Menu, X, Heart, Users, DollarSign, Home, Phone, FileText, PenSquare } from 'lucide-react';
+import { Menu, X, Heart, Users, DollarSign, Home, Phone, FileText } from 'lucide-react';
 import { Button } from './ui/button';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -17,7 +17,6 @@ const navItems = [
   { id: 'articles', label: 'Articles', icon: FileText, description: 'Latest updates and stories' },
   { id: 'grants', label: 'Grants', icon: FileText, description: 'Apply for support programs' },
   { id: 'contact', label: 'Contact Us', icon: Phone, description: 'Get in touch with our team' },
-  { id: 'publish', label: 'Publish', icon: PenSquare, description: 'Team members only', adminOnly: true },
 ];
 
 export function Navigation({ currentPage, onNavigate }: NavigationProps) {
