@@ -157,14 +157,14 @@ export function Footer() {
           </p>
           <div className="flex gap-6">
             <motion.a
-              href="#"
+              href="#privacy"
               whileHover={{ scale: 1.05 }}
               className="hover:text-primary transition-colors"
             >
               Privacy Policy
             </motion.a>
             <motion.a
-              href="#"
+              href="#terms"
               whileHover={{ scale: 1.05 }}
               className="hover:text-primary transition-colors"
             >

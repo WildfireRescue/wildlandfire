@@ -1,29 +1,8 @@
 import { motion } from "motion/react";
-import { Heart, Gift, Users } from "lucide-react";
+import { Heart } from "lucide-react";
 import { DonateControls } from "./DonateControls";
 
 export function DonateHero() {
-  async function startDonation(opts: { amount: number; monthly: boolean }) {
-    try {
-      const res = await fetch("/.netlify/functions/create-checkout-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: opts.amount, monthly: opts.monthly }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        alert(data?.error || "Donation checkout failed. Please try again.");
-        return;
-      }
-
-      window.location.href = data.url;
-    } catch (err) {
-      alert("Something went wrong. Please try again.");
-    }
-  }
-
   return (
     <section className="relative py-12 bg-gradient-to-b from-primary/10 to-background overflow-hidden">
       <div className="container mx-auto px-4">
@@ -60,7 +39,6 @@ export function DonateHero() {
             <DonateControls
               defaultAmount={50}
               defaultMonthly={true}
-              onDonate={({ amount, monthly }) => startDonation({ amount, monthly })}
             />
           </div>
 

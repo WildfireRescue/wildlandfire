@@ -2,7 +2,6 @@ import { Menu, X, Heart, Users, DollarSign, Home, Phone, FileText } from 'lucide
 import { Button } from './ui/button';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import logoImage from '../../assets/e43d164f2f92fa60d5e9ac721dd31bf10ad9da66.png';
 
 interface NavigationProps {
   currentPage: string;
@@ -51,37 +50,52 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
           isMenuOpen ? 'z-[60]' : 'z-50'
         } ${
           scrolled || isMenuOpen
-            ? 'bg-background/98 backdrop-blur-xl border-b border-border shadow-lg'
+            ? 'bg-background/98 backdrop-blur-xl border-b border-border shadow-2xl shadow-black/10'
             : 'bg-background/95 backdrop-blur-lg border-b border-border/50'
         }`}
       >
-        <div className="container mx-auto px-4 py-3">
+        <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            {/* Logo - Clean and Simple */}
+            {/* Logo with Professional Typography */}
             <motion.div
               whileHover={{ scale: 1.02 }}
               onClick={() => handleNavClick('home')}
-              className={`flex items-center gap-3 cursor-pointer transition-opacity ${isMenuOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+              className={`flex items-center gap-4 cursor-pointer transition-opacity group ${isMenuOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
             >
-              <img src={logoImage} alt="Logo" className="h-12 w-auto" />
+              <div className="relative">
+                <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <img 
+                  src="/Images/logo-512.png" 
+                  alt="Wildland Fire Recovery Fund" 
+                  className="h-14 w-14 relative z-10 drop-shadow-lg" 
+                />
+              </div>
+              <div className="hidden md:flex flex-col leading-tight">
+                <span className="text-base font-bold tracking-tight text-foreground">
+                  The Wildland Fire
+                </span>
+                <span className="text-base font-bold tracking-tight bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                  Recovery Fund
+                </span>
+              </div>
             </motion.div>
 
             {/* Right Side: Donate Button + Hamburger */}
-            <div className="flex items-center gap-3">
-              {/* Donate Button - Always Visible */}
+            <div className="flex items-center gap-4">
+              {/* Donate Button - Premium Style */}
               <Button
-                size="sm"
-                className={`bg-primary text-primary-foreground hover:bg-primary/90 gap-2 transition-opacity ${isMenuOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+                size="lg"
+                className={`bg-gradient-to-r from-primary to-primary/90 text-primary-foreground hover:from-primary/90 hover:to-primary gap-2 transition-all shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/40 font-semibold ${isMenuOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
                 onClick={() => handleNavClick('donate')}
               >
-                <Heart size={16} className="hidden sm:block" />
-                <span>Donate</span>
+                <Heart size={18} className="hidden sm:block" fill="currentColor" />
+                <span>Donate Now</span>
               </Button>
 
               {/* Hamburger Menu Button */}
               <motion.button
                 whileTap={{ scale: 0.9 }}
-                className="p-2.5 rounded-lg hover:bg-secondary/80 transition-colors border border-border relative z-[70]"
+                className="p-3 rounded-xl hover:bg-primary/10 transition-colors border border-border/50 hover:border-primary/50 relative z-[70] backdrop-blur-sm"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 aria-label="Toggle menu"
               >
@@ -118,23 +132,13 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
       <AnimatePresence>
         {isMenuOpen && (
           <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsMenuOpen(false)}
-              className="fixed inset-0 bg-black/80 backdrop-blur-md z-40"
-              style={{ top: '0px' }}
-            />
-
             {/* Menu Panel - Full Screen Overlay */}
             <motion.nav
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="fixed inset-0 z-50 overflow-y-auto p-4 pt-20"
+              className="fixed inset-0 z-50 overflow-y-auto p-4 pt-32 bg-background"
             >
               {/* Menu Content */}
               <div className="max-w-2xl w-full mx-auto pb-8">
@@ -145,7 +149,7 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
                   transition={{ delay: 0.1 }}
                   className="flex items-center justify-center gap-3 mb-12"
                 >
-                  <img src={logoImage} alt="Logo" className="h-16 w-auto" />
+                  <img src="/Images/logo-512.png" alt="Wildland Fire Recovery Fund" className="h-16 w-auto" />
                   <div>
                     <div className="text-lg tracking-wider uppercase">THE WILDLAND FIRE</div>
                     <div className="text-lg tracking-wider uppercase">RECOVERY FUND</div>

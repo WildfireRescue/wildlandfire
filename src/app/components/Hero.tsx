@@ -1,8 +1,6 @@
-import { Button } from './ui/button';
 import { ImageWithFallback } from './figma/ImageWithFallback';
-import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useState, useEffect } from 'react';
-import { Heart, ArrowRight } from 'lucide-react';
 
 const heroImages = [
   {
@@ -34,11 +32,8 @@ export function Hero() {
     return () => clearInterval(interval);
   }, []);
 
-  const { scrollYProgress } = useScroll();
-  const scale = useTransform(scrollYProgress, [0, 1], [1, 0.8]);
-
   return (
-    <section id="home" className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
+    <section id="home" className="relative min-h-[90vh] flex items-center justify-center overflow-hidden pt-28">
       {/* Rotating Background Slideshow */}
       <div className="absolute inset-0">
         <AnimatePresence mode="wait">

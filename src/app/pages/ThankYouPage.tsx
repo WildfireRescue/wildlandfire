@@ -9,7 +9,7 @@ interface ThankYouPageProps {
 
 export function ThankYouPage({ onNavigate }: ThankYouPageProps) {
   return (
-    <div className="min-h-screen pt-24 pb-20 bg-background relative overflow-hidden">
+    <div className="min-h-screen pt-28 pb-20 bg-background relative overflow-hidden">
       {/* Background Image */}
       <div className="absolute inset-0 opacity-20">
         <ImageWithFallback

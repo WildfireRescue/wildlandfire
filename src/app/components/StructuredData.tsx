@@ -9,7 +9,13 @@ export function StructuredData() {
       "name": "The Wildland Fire Recovery Fund",
       "alternateName": "Wildland Fire Recovery Fund",
       "url": "https://www.thewildlandfirerecoveryfund.org",
-      "logo": "https://www.thewildlandfirerecoveryfund.org/logo.png",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://www.thewildlandfirerecoveryfund.org/Images/logo-512.png",
+        "width": 512,
+        "height": 512
+      },
+      "image": "https://www.thewildlandfirerecoveryfund.org/Images/logo-512.png",
       "description": "The Wildland Fire Recovery Fund provides emergency assistance, housing support, and resources to wildfire survivors with rapid emergency response.",
       "foundingDate": "2026",
       "nonprofitStatus": "501(c)(3)",

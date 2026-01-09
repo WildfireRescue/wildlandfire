@@ -12,7 +12,7 @@ export function UrgencyTopBanner() {
       initial={{ height: 0, opacity: 0 }}
       animate={{ height: 'auto', opacity: 1 }}
       exit={{ height: 0, opacity: 0 }}
-      className="bg-gradient-to-r from-red-600/90 via-orange-600/90 to-primary/90 border-b border-primary/30 relative overflow-hidden"
+      className="relative w-full bg-gradient-to-r from-red-600/90 via-orange-600/90 to-primary/90 border-t border-primary/30 overflow-hidden"
     >
       {/* Animated background pattern */}
       <motion.div

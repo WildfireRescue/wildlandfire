@@ -9,6 +9,8 @@ import { ThankYouPage } from './pages/ThankYouPage';
 import { ArticlesPage } from './pages/ArticlesPage';
 import { PublishPage } from './pages/PublishPage';
 import { AuthCallbackPage } from './pages/AuthCallbackPage';
+import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
+import { TermsOfUsePage } from './pages/TermsOfUsePage';
 
 import { Navigation } from './components/Navigation';
 import { Footer } from './components/Footer';
@@ -33,7 +35,9 @@ export default function App() {
     'donate',
     'articles',
     'publish',
-    'auth-callback', // ✅ added
+    'auth-callback',
+    'privacy',
+    'terms',
   ];
 
   // Listen for Supabase auth state changes (magic link login)
@@ -258,8 +262,12 @@ export default function App() {
         return <ArticlesPage slug={articleSlug || undefined} />;
       case 'publish':
         return <PublishPage />;
-      case 'auth-callback': // ✅ added
+      case 'auth-callback':
         return <AuthCallbackPage />;
+      case 'privacy':
+        return <PrivacyPolicyPage />;
+      case 'terms':
+        return <TermsOfUsePage />;
       default:
         return <HomePage />;
     }
@@ -273,11 +281,11 @@ export default function App() {
         {renderPage()}
       </main>
       <Footer />
+      <UrgencyTopBanner />
 
       {isDonationFormOpen && (
         <DonationForm onClose={() => setIsDonationFormOpen(false)} />
       )}
-      <UrgencyTopBanner />
     </div>
   );
 }
