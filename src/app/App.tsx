@@ -15,6 +15,7 @@ import { Footer } from './components/Footer';
 import { DonationForm } from './components/DonationForm';
 import { StructuredData } from './components/StructuredData';
 import { UrgencyTopBanner } from './components/UrgencyTopBanner';
+import { supabase } from '../lib/supabase';
 
 // Wildland Fire Recovery Fund - Main Application Component
 export default function App() {
@@ -35,19 +36,24 @@ export default function App() {
     'auth-callback', // ✅ added
   ];
 
+  // Listen for Supabase auth state changes (magic link login)
+  useEffect(() => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      // When user signs in via magic link, redirect to publish page
+      if (event === 'SIGNED_IN' && session) {
+        window.location.hash = 'publish';
+      }
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
+
   // Handle hash-based routing
   useEffect(() => {
     const handleHashChange = () => {
       const rawHash = window.location.hash.slice(1);
-
-      // Check if URL contains Supabase auth tokens (magic link redirect)
-      if (rawHash.includes('access_token=') || rawHash.includes('type=magiclink')) {
-        // Give Supabase a moment to process the token, then redirect to publish
-        setTimeout(() => {
-          window.location.hash = 'publish';
-        }, 100);
-        return;
-      }
 
       // ✅ Keep full path segments, strip querystring only
       // Supports: #articles/slug?x=1  and  #auth-callback?x=1
