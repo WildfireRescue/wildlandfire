@@ -56,6 +56,22 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
+# Cache fonts
+[[headers]]
+  for = "*.woff2"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "*.woff"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "*.ttf"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
 # Optimize images
 [[headers]]
   for = "*.jpg"
@@ -77,11 +93,11 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# Prevent caching of HTML files
+# Short cache for HTML files to allow updates
 [[headers]]
   for = "/*.html"
   [headers.values]
-    Cache-Control = "public, max-age=3600"
+    Cache-Control = "public, max-age=0, must-revalidate"
 
 # Force HTTPS and remove www
 [[redirects]]

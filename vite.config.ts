@@ -49,28 +49,32 @@ export default defineConfig({
           // More granular chunking for better caching
           if (id.includes('node_modules')) {
             // React core
-            if (id.includes('react') || id.includes('react-dom')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('scheduler')) {
               return 'react-vendor';
             }
-            // Motion library (large)
-            if (id.includes('motion')) {
+            // Motion library (large) - separate chunk
+            if (id.includes('framer-motion') || id.includes('motion')) {
               return 'motion-vendor';
             }
             // Radix UI components
             if (id.includes('@radix-ui')) {
               return 'radix-ui';
             }
-            // Stripe
-            if (id.includes('stripe')) {
+            // Stripe - only load when needed
+            if (id.includes('@stripe') || id.includes('stripe')) {
               return 'stripe';
             }
-            // Supabase
-            if (id.includes('supabase')) {
+            // Supabase - separate chunk
+            if (id.includes('@supabase') || id.includes('supabase')) {
               return 'supabase';
             }
-            // Lucide icons
+            // Lucide icons - separate chunk
             if (id.includes('lucide-react')) {
               return 'icons';
+            }
+            // React Router
+            if (id.includes('react-router')) {
+              return 'router';
             }
             // Other vendors
             return 'vendor';
