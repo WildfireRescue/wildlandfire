@@ -221,7 +221,7 @@ export function ArticlesPage({ slug }: { slug?: string }) {
                     <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-semibold">
                       {article.author.charAt(0).toUpperCase()}
                     </div>
-                    {article.author.split('@')[0]}
+                    {article.author.split('@')[0].charAt(0).toUpperCase() + article.author.split('@')[0].slice(1)}
                   </span>
                 )}
                 {article.published_at && (
