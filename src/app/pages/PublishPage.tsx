@@ -63,10 +63,18 @@ export function PublishPage() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       setSessionEmail(data.session?.user?.email ?? null);
+      // If we have a session and we're not on the publish page, redirect there
+      if (data.session && window.location.hash && !window.location.hash.includes('publish')) {
+        window.location.hash = 'publish';
+      }
     });
 
     const { data: sub } = supabase.auth.onAuthStateChange((_event, sess) => {
       setSessionEmail(sess?.user?.email ?? null);
+      // After successful auth, redirect to publish page
+      if (sess && window.location.hash && !window.location.hash.includes('publish')) {
+        window.location.hash = 'publish';
+      }
     });
 
     return () => sub.subscription.unsubscribe();
@@ -75,9 +83,9 @@ export function PublishPage() {
   function getEmailRedirectTo() {
     // IMPORTANT: must be added in Supabase Auth → URL Configuration → Redirect URLs
     // Add both:
-    //   http://localhost:5173/#publish
-    //   https://thewildlandfirerecoveryfund.org/#publish
-    return `${window.location.origin}/#publish`;
+    //   http://localhost:5173/
+    //   https://thewildlandfirerecoveryfund.org/
+    return `${window.location.origin}/`;
   }
 
   // ✅ Magic link login for INVITE-ONLY projects
