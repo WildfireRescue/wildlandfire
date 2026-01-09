@@ -42,8 +42,10 @@ export default function App() {
 
       // Check if URL contains Supabase auth tokens (magic link redirect)
       if (rawHash.includes('access_token=') || rawHash.includes('type=magiclink')) {
-        // Redirect to publish page to complete auth
-        window.location.hash = 'publish';
+        // Give Supabase a moment to process the token, then redirect to publish
+        setTimeout(() => {
+          window.location.hash = 'publish';
+        }, 100);
         return;
       }
 

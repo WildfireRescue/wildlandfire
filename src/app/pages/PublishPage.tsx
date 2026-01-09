@@ -63,18 +63,10 @@ export function PublishPage() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       setSessionEmail(data.session?.user?.email ?? null);
-      // If we have a session and we're not on the publish page, redirect there
-      if (data.session && window.location.hash && !window.location.hash.includes('publish')) {
-        window.location.hash = 'publish';
-      }
     });
 
     const { data: sub } = supabase.auth.onAuthStateChange((_event, sess) => {
       setSessionEmail(sess?.user?.email ?? null);
-      // After successful auth, redirect to publish page
-      if (sess && window.location.hash && !window.location.hash.includes('publish')) {
-        window.location.hash = 'publish';
-      }
     });
 
     return () => sub.subscription.unsubscribe();
