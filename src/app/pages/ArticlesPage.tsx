@@ -63,7 +63,7 @@ export function ArticlesPage({ slug }: { slug?: string }) {
   // Articles List View
   if (!slug) {
     return (
-      <div className="min-h-screen pt-28 pb-20 bg-background">
+      <div className="pt-28 pb-20">
         <div className="container mx-auto px-4">
           {/* Hero Section */}
           <motion.div
@@ -170,7 +170,7 @@ export function ArticlesPage({ slug }: { slug?: string }) {
 
   // Single Article View
   return (
-    <div className="min-h-screen pt-28 pb-20 bg-background">
+    <div className="pt-28 pb-20">
       <div className="container mx-auto px-4">
         {loading && (
           <div className="text-center py-12">
