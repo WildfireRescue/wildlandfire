@@ -40,6 +40,13 @@ export default function App() {
     const handleHashChange = () => {
       const rawHash = window.location.hash.slice(1);
 
+      // Check if URL contains Supabase auth tokens (magic link redirect)
+      if (rawHash.includes('access_token=') || rawHash.includes('type=magiclink')) {
+        // Redirect to publish page to complete auth
+        window.location.hash = 'publish';
+        return;
+      }
+
       // ✅ Keep full path segments, strip querystring only
       // Supports: #articles/slug?x=1  and  #auth-callback?x=1
       const [hashNoQuery] = rawHash.split('?');
