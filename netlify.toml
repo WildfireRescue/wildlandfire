@@ -46,12 +46,56 @@
   [headers.values]
     Cache-Control = "public, max-age=3600"
 
-# Force HTTPS
+# Force HTTPS and remove www
 [[redirects]]
   from = "http://thewildlandfirerecoveryfund.org/*"
   to = "https://thewildlandfirerecoveryfund.org/:splat"
   status = 301
   force = true
+
+[[redirects]]
+  from = "http://www.thewildlandfirerecoveryfund.org/*"
+  to = "https://thewildlandfirerecoveryfund.org/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.thewildlandfirerecoveryfund.org/*"
+  to = "https://thewildlandfirerecoveryfund.org/:splat"
+  status = 301
+  force = true
+
+# Redirect deleted pages
+[[redirects]]
+  from = "/photo_store"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/photo_store/*"
+  to = "/"
+  status = 301
+
+# Redirect path-based routes to hash-based routes
+[[redirects]]
+  from = "/donate"
+  to = "/#donate"
+  status = 301
+
+[[redirects]]
+  from = "/donate/*"
+  to = "/#donate"
+  status = 301
+
+[[redirects]]
+  from = "/thank-you"
+  to = "/#thankyou"
+  status = 301
+
+[[redirects]]
+  from = "/thank-you/*"
+  to = "/#thankyou"
+  status = 301
 
 # SPA fallback to index.html for hash-based routing
 [[redirects]]
