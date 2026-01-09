@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { motion } from 'motion/react';
 import { supabase } from '../../lib/supabase';
+import { Button } from '../components/ui/button';
+import { Mail, LogOut, FileText, Link as LinkIcon, Image, Eye, EyeOff, Trash2 } from 'lucide-react';
 
 function slugify(input: string) {
   return input
@@ -208,56 +211,97 @@ export function PublishPage() {
   // Logged OUT
   if (!sessionEmail) {
     return (
-      <div style={{ maxWidth: 720, margin: '0 auto', padding: '40px 16px' }}>
-        <h1 style={{ fontSize: 28, marginBottom: 8 }}>Publisher Login</h1>
-        <p style={{ opacity: 0.8, marginBottom: 20 }}>
-          Sign in with your email to publish articles.
-        </p>
-
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <input
-            value={loginEmail}
-            onChange={(e) => setLoginEmail(e.target.value)}
-            placeholder="you@thewildlandfirerecoveryfund.org"
-            autoComplete="email"
-            style={{
-              flex: 1,
-              padding: '12px 14px',
-              borderRadius: 12,
-              border: '1px solid rgba(255,255,255,0.15)',
-              background: 'rgba(255,255,255,0.04)',
-              color: 'inherit',
-            }}
-          />
-          <button
-            onClick={sendMagicLink}
-            disabled={loginBusy}
-            style={{
-              padding: '12px 16px',
-              borderRadius: 12,
-              border: '1px solid rgba(255,255,255,0.2)',
-              background: 'rgba(255,255,255,0.08)',
-              cursor: loginBusy ? 'not-allowed' : 'pointer',
-              opacity: loginBusy ? 0.7 : 1,
-              whiteSpace: 'nowrap',
-            }}
+      <div className="min-h-screen pt-24 pb-20 bg-background">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="max-w-xl mx-auto"
           >
-            {loginBusy ? 'Sending…' : 'Send magic link'}
-          </button>
-        </div>
+            <div className="bg-card border border-border rounded-2xl p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-3 rounded-xl bg-primary/10 text-primary">
+                  <Mail size={24} />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-semibold">Publisher Login</h1>
+                  <p className="text-muted-foreground text-sm mt-1">
+                    Authorized team members only
+                  </p>
+                </div>
+              </div>
 
-        <div style={{ marginTop: 14, opacity: 0.75, fontSize: 13, lineHeight: 1.4 }}>
-          Allowed publishers:
-          <div style={{ marginTop: 6 }}>
-            earl@thewildlandfirerecoveryfund.org • jason@thewildlandfirerecoveryfund.org •
-            drew@thewildlandfirerecoveryfund.org • kendra@thewildlandfirerecoveryfund.org
-          </div>
-        </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Email Address</label>
+                  <input
+                    type="email"
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
+                    placeholder="you@thewildlandfirerecoveryfund.org"
+                    autoComplete="email"
+                    className="w-full px-4 py-3 rounded-xl border border-border bg-background/50 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                  />
+                </div>
 
-        {loginSent && <div style={{ marginTop: 14, opacity: 0.9 }}>✅ Check your inbox for the magic link.</div>}
-        {loginError && (
-          <div style={{ marginTop: 14, color: '#ff6b6b', whiteSpace: 'pre-wrap' }}>{loginError}</div>
-        )}
+                <Button
+                  onClick={sendMagicLink}
+                  disabled={loginBusy}
+                  className="w-full"
+                  size="lg"
+                >
+                  {loginBusy ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Mail size={18} className="mr-2" />
+                      Send Magic Link
+                    </>
+                  )}
+                </Button>
+              </div>
+
+              {loginSent && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-6 p-4 bg-green-500/10 border border-green-500/20 rounded-xl"
+                >
+                  <p className="text-green-400 text-sm">
+                    ✅ Check your inbox for the magic link!
+                  </p>
+                </motion.div>
+              )}
+
+              {loginError && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-6 p-4 bg-destructive/10 border border-destructive/20 rounded-xl"
+                >
+                  <p className="text-destructive text-sm whitespace-pre-wrap">{loginError}</p>
+                </motion.div>
+              )}
+
+              <div className="mt-6 pt-6 border-t border-border">
+                <p className="text-xs text-muted-foreground mb-2">Authorized Publishers:</p>
+                <div className="flex flex-wrap gap-2">
+                  {Array.from(ALLOWED_PUBLISHERS).map((email) => (
+                    <span
+                      key={email}
+                      className="px-2 py-1 bg-primary/5 border border-primary/20 rounded-lg text-xs text-muted-foreground"
+                    >
+                      {email.split('@')[0]}@...
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
       </div>
     );
   }
@@ -265,24 +309,27 @@ export function PublishPage() {
   // Logged IN but not allowed (extra safety)
   if (!isAllowedPublisher(sessionEmail)) {
     return (
-      <div style={{ maxWidth: 720, margin: '0 auto', padding: '40px 16px' }}>
-        <h1 style={{ fontSize: 28, marginBottom: 8 }}>Not authorized</h1>
-        <p style={{ opacity: 0.85 }}>
-          You are signed in as <strong>{sessionEmail}</strong>, but this email is not allowed to publish.
-        </p>
-        <div style={{ marginTop: 18 }}>
-          <button
-            onClick={signOut}
-            style={{
-              padding: '10px 14px',
-              borderRadius: 12,
-              border: '1px solid rgba(255,255,255,0.2)',
-              background: 'transparent',
-              cursor: 'pointer',
-            }}
+      <div className="min-h-screen pt-24 pb-20 bg-background">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="max-w-xl mx-auto"
           >
-            Sign out
-          </button>
+            <div className="bg-card border border-destructive/30 rounded-2xl p-8 text-center">
+              <div className="inline-flex p-4 rounded-full bg-destructive/10 text-destructive mb-4">
+                <LogOut size={32} />
+              </div>
+              <h1 className="text-2xl font-semibold mb-3">Not Authorized</h1>
+              <p className="text-muted-foreground mb-6">
+                You are signed in as <strong className="text-foreground">{sessionEmail}</strong>, but this email is not authorized to publish articles.
+              </p>
+              <Button onClick={signOut} variant="outline">
+                <LogOut size={18} className="mr-2" />
+                Sign Out
+              </Button>
+            </div>
+          </motion.div>
         </div>
       </div>
     );
@@ -290,188 +337,218 @@ export function PublishPage() {
 
   // Logged IN
   return (
-    <div style={{ maxWidth: 920, margin: '0 auto', padding: '40px 16px' }}>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          gap: 12,
-          alignItems: 'center',
-          flexWrap: 'wrap',
-        }}
-      >
-        <div>
-          <h1 style={{ fontSize: 28, marginBottom: 6 }}>Publish an Article</h1>
-          <div style={{ opacity: 0.75, fontSize: 14 }}>
-            Signed in as <strong>{sessionEmail}</strong>
-          </div>
-        </div>
-
-        <button
-          onClick={signOut}
-          style={{
-            padding: '10px 14px',
-            borderRadius: 12,
-            border: '1px solid rgba(255,255,255,0.2)',
-            background: 'transparent',
-            cursor: 'pointer',
-          }}
+    <div className="min-h-screen pt-24 pb-20 bg-background">
+      <div className="container mx-auto px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-4xl mx-auto"
         >
-          Sign out
-        </button>
-      </div>
-
-      <div style={{ marginTop: 18, display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-        <label style={{ display: 'flex', gap: 10, alignItems: 'center', opacity: 0.9 }}>
-          <input type="radio" name="mode" checked={mode === 'insert'} onChange={() => setMode('insert')} />
-          <span>Create new (insert)</span>
-        </label>
-        <label style={{ display: 'flex', gap: 10, alignItems: 'center', opacity: 0.9 }}>
-          <input type="radio" name="mode" checked={mode === 'upsert'} onChange={() => setMode('upsert')} />
-          <span>Update if slug exists (upsert)</span>
-        </label>
-      </div>
-
-      <div style={{ marginTop: 18, display: 'grid', gap: 14 }}>
-        <label>
-          <div style={{ marginBottom: 6, opacity: 0.85 }}>Title</div>
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Rebuilding After the Fire: What Recovery Really Means"
-            style={{
-              width: '100%',
-              padding: '12px 14px',
-              borderRadius: 12,
-              border: '1px solid rgba(255,255,255,0.15)',
-              background: 'rgba(255,255,255,0.04)',
-              color: 'inherit',
-            }}
-          />
-        </label>
-
-        <label>
-          <div style={{ marginBottom: 6, opacity: 0.85 }}>Slug (URL)</div>
-          <input
-            value={slug}
-            onChange={(e) => {
-              slugTouched.current = true;
-              setSlug(e.target.value);
-            }}
-            placeholder={autoSlug}
-            style={{
-              width: '100%',
-              padding: '12px 14px',
-              borderRadius: 12,
-              border: '1px solid rgba(255,255,255,0.15)',
-              background: 'rgba(255,255,255,0.04)',
-              color: 'inherit',
-            }}
-          />
-          <div style={{ marginTop: 6, opacity: 0.65, fontSize: 12 }}>
-            Tip: keep slugs short, like <code style={{ opacity: 0.9 }}>rebuilding-after-the-fire</code>
+          {/* Header */}
+          <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Publish Article</h1>
+              <p className="text-muted-foreground">
+                Signed in as <span className="text-primary font-medium">{sessionEmail}</span>
+              </p>
+            </div>
+            <Button onClick={signOut} variant="outline">
+              <LogOut size={18} className="mr-2" />
+              Sign Out
+            </Button>
           </div>
-        </label>
 
-        <label>
-          <div style={{ marginBottom: 6, opacity: 0.85 }}>Excerpt</div>
-          <textarea
-            value={excerpt}
-            onChange={(e) => setExcerpt(e.target.value)}
-            rows={3}
-            placeholder="1–2 sentences that show in the articles list + Google."
-            style={{
-              width: '100%',
-              padding: '12px 14px',
-              borderRadius: 12,
-              border: '1px solid rgba(255,255,255,0.15)',
-              background: 'rgba(255,255,255,0.04)',
-              color: 'inherit',
-              resize: 'vertical',
-            }}
-          />
-        </label>
+          {/* Mode Selection */}
+          <div className="bg-card border border-border rounded-xl p-4 mb-6">
+            <div className="flex gap-6 flex-wrap">
+              <label className="flex items-center gap-3 cursor-pointer group">
+                <input
+                  type="radio"
+                  name="mode"
+                  checked={mode === 'insert'}
+                  onChange={() => setMode('insert')}
+                  className="w-4 h-4 text-primary"
+                />
+                <span className="text-sm group-hover:text-primary transition-colors">
+                  <strong>Create New</strong> — Insert new article
+                </span>
+              </label>
+              <label className="flex items-center gap-3 cursor-pointer group">
+                <input
+                  type="radio"
+                  name="mode"
+                  checked={mode === 'upsert'}
+                  onChange={() => setMode('upsert')}
+                  className="w-4 h-4 text-primary"
+                />
+                <span className="text-sm group-hover:text-primary transition-colors">
+                  <strong>Update Existing</strong> — Upsert by slug
+                </span>
+              </label>
+            </div>
+          </div>
 
-        <label>
-          <div style={{ marginBottom: 6, opacity: 0.85 }}>Cover image URL (optional)</div>
-          <input
-            value={coverUrl}
-            onChange={(e) => setCoverUrl(e.target.value)}
-            placeholder="https://..."
-            style={{
-              width: '100%',
-              padding: '12px 14px',
-              borderRadius: 12,
-              border: '1px solid rgba(255,255,255,0.15)',
-              background: 'rgba(255,255,255,0.04)',
-              color: 'inherit',
-            }}
-          />
-        </label>
+          {/* Form */}
+          <div className="bg-card border border-border rounded-2xl p-8 space-y-6">
+            {/* Title */}
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium mb-2">
+                <FileText size={16} className="text-primary" />
+                Article Title
+              </label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Rebuilding After the Fire: What Recovery Really Means"
+                className="w-full px-4 py-3 rounded-xl border border-border bg-background/50 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-lg"
+              />
+            </div>
 
-        <label>
-          <div style={{ marginBottom: 6, opacity: 0.85 }}>Content</div>
-          <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            rows={12}
-            placeholder="Write your article here..."
-            style={{
-              width: '100%',
-              padding: '12px 14px',
-              borderRadius: 12,
-              border: '1px solid rgba(255,255,255,0.15)',
-              background: 'rgba(255,255,255,0.04)',
-              color: 'inherit',
-              resize: 'vertical',
-              fontFamily:
-                'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
-            }}
-          />
-        </label>
+            {/* Slug */}
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium mb-2">
+                <LinkIcon size={16} className="text-primary" />
+                URL Slug
+              </label>
+              <input
+                type="text"
+                value={slug}
+                onChange={(e) => {
+                  slugTouched.current = true;
+                  setSlug(e.target.value);
+                }}
+                placeholder={autoSlug || 'article-url-slug'}
+                className="w-full px-4 py-3 rounded-xl border border-border bg-background/50 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-mono text-sm"
+              />
+              <p className="text-xs text-muted-foreground mt-2">
+                Auto-generated from title. Keep it short and URL-friendly.
+              </p>
+            </div>
 
-        <label style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <input type="checkbox" checked={published} onChange={(e) => setPublished(e.target.checked)} />
-          <span style={{ opacity: 0.9 }}>Publish immediately</span>
-        </label>
+            {/* Excerpt */}
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium mb-2">
+                <FileText size={16} className="text-primary" />
+                Excerpt
+              </label>
+              <textarea
+                value={excerpt}
+                onChange={(e) => setExcerpt(e.target.value)}
+                rows={3}
+                placeholder="1-2 sentences that appear in article cards and search results..."
+                className="w-full px-4 py-3 rounded-xl border border-border bg-background/50 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-y"
+              />
+            </div>
 
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-          <button
-            onClick={publishNow}
-            disabled={saving}
-            style={{
-              padding: '14px 16px',
-              borderRadius: 14,
-              border: '1px solid rgba(255,255,255,0.2)',
-              background: 'rgba(255,255,255,0.10)',
-              cursor: saving ? 'not-allowed' : 'pointer',
-              fontWeight: 700,
-              minWidth: 160,
-            }}
-          >
-            {saving ? 'Saving…' : mode === 'upsert' ? 'Save / Update' : 'Publish'}
-          </button>
+            {/* Cover Image URL */}
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium mb-2">
+                <Image size={16} className="text-primary" />
+                Cover Image URL <span className="text-muted-foreground font-normal">(optional)</span>
+              </label>
+              <input
+                type="url"
+                value={coverUrl}
+                onChange={(e) => setCoverUrl(e.target.value)}
+                placeholder="https://..."
+                className="w-full px-4 py-3 rounded-xl border border-border bg-background/50 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+              />
+              {coverUrl && (
+                <div className="mt-3 rounded-xl overflow-hidden border border-border">
+                  <img src={coverUrl} alt="Cover preview" className="w-full h-48 object-cover" />
+                </div>
+              )}
+            </div>
 
-          <button
-            onClick={deleteBySlug}
-            disabled={saving}
-            style={{
-              padding: '14px 16px',
-              borderRadius: 14,
-              border: '1px solid rgba(255,255,255,0.2)',
-              background: 'transparent',
-              cursor: saving ? 'not-allowed' : 'pointer',
-              fontWeight: 600,
-              minWidth: 160,
-            }}
-            title="Deletes the article with this slug (only if you are the author)"
-          >
-            Delete by slug
-          </button>
-        </div>
+            {/* Content */}
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium mb-2">
+                <FileText size={16} className="text-primary" />
+                Article Content <span className="text-muted-foreground font-normal">(Markdown supported)</span>
+              </label>
+              <textarea
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                rows={16}
+                placeholder="Write your article here using Markdown formatting..."
+                className="w-full px-4 py-3 rounded-xl border border-border bg-background/50 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-y font-mono text-sm"
+              />
+            </div>
 
-        {saveMsg && <div style={{ marginTop: 8, whiteSpace: 'pre-wrap' }}>{saveMsg}</div>}
-        {saveErr && <div style={{ marginTop: 8, color: '#ff6b6b', whiteSpace: 'pre-wrap' }}>{saveErr}</div>}
+            {/* Published Toggle */}
+            <div className="flex items-center gap-3 p-4 bg-background/50 rounded-xl border border-border">
+              <input
+                type="checkbox"
+                id="published"
+                checked={published}
+                onChange={(e) => setPublished(e.target.checked)}
+                className="w-5 h-5 text-primary rounded"
+              />
+              <label htmlFor="published" className="flex items-center gap-2 cursor-pointer">
+                {published ? <Eye size={18} className="text-primary" /> : <EyeOff size={18} className="text-muted-foreground" />}
+                <span className="font-medium">
+                  {published ? 'Publish immediately' : 'Save as draft'}
+                </span>
+              </label>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-4 pt-4 flex-wrap">
+              <Button
+                onClick={publishNow}
+                disabled={saving}
+                size="lg"
+                className="flex-1 min-w-[200px]"
+              >
+                {saving ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <FileText size={18} className="mr-2" />
+                    {mode === 'upsert' ? 'Save / Update' : 'Publish Article'}
+                  </>
+                )}
+              </Button>
+
+              <Button
+                onClick={deleteBySlug}
+                disabled={saving}
+                variant="outline"
+                size="lg"
+                className="border-destructive/30 text-destructive hover:bg-destructive/10"
+                title="Deletes the article with this slug (only if you are the author)"
+              >
+                <Trash2 size={18} className="mr-2" />
+                Delete by Slug
+              </Button>
+            </div>
+
+            {/* Success/Error Messages */}
+            {saveMsg && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-4 bg-green-500/10 border border-green-500/20 rounded-xl"
+              >
+                <p className="text-green-400 whitespace-pre-wrap">{saveMsg}</p>
+              </motion.div>
+            )}
+
+            {saveErr && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-4 bg-destructive/10 border border-destructive/20 rounded-xl"
+              >
+                <p className="text-destructive whitespace-pre-wrap">{saveErr}</p>
+              </motion.div>
+            )}
+          </div>
+        </motion.div>
       </div>
     </div>
   );
