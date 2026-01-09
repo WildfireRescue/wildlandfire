@@ -91,22 +91,6 @@ export function Hero() {
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
       </div>
 
-      {/* Slideshow Indicators */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-20">
-        {heroImages.map((_, idx) => (
-          <button
-            key={idx}
-            onClick={() => setCurrentImageIndex(idx)}
-            className={`w-3 h-3 rounded-full transition-all duration-300 ${
-              idx === currentImageIndex 
-                ? 'bg-primary w-8' 
-                : 'bg-white/40 hover:bg-white/60'
-            }`}
-            aria-label={`Go to slide ${idx + 1}`}
-          />
-        ))}
-      </div>
-
       {/* Main Content */}
       <div className="relative z-10 container mx-auto px-4">
         <motion.div
