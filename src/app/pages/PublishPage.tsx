@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { supabase } from '../../lib/supabase';
 import { Button } from '../components/ui/button';
-import { Mail, LogOut, FileText, Link as LinkIcon, Image, Eye, EyeOff, Trash2 } from 'lucide-react';
+import { Mail, LogOut, FileText, Link as LinkIcon, Image, Eye, EyeOff, Trash2, Upload } from 'lucide-react';
 
 function slugify(input: string) {
   return input
@@ -51,6 +51,20 @@ export function PublishPage() {
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
   const [saveErr, setSaveErr] = useState<string | null>(null);
+
+  // CSV Import states
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importing, setImporting] = useState(false);
+  const [importResults, setImportResults] = useState<{
+    success: number;
+    failed: number;
+    errors: string[];
+  } | null>(null);
+
+  // HTML Import states
+  const [htmlFile, setHtmlFile] = useState<File | null>(null);
+  const [htmlContent, setHtmlContent] = useState('');
+  const [importMode, setImportMode] = useState<'csv' | 'html'>('csv');
 
   // track if user manually edited slug (so we stop auto-overwriting)
   const slugTouched = useRef(false);
@@ -203,6 +217,214 @@ export function PublishPage() {
       setSaveErr(e?.message ?? 'Delete failed.');
     } finally {
       setSaving(false);
+    }
+  }
+
+  // CSV Import function
+  async function handleCSVImport() {
+    if (!importFile) return;
+
+    setImporting(true);
+    setImportResults(null);
+    setSaveMsg(null);
+    setSaveErr(null);
+
+    try {
+      const author = sessionEmail?.toLowerCase() ?? null;
+      if (!author) throw new Error('Not signed in.');
+      if (!isAllowedPublisher(author)) throw new Error('Not authorized to publish.');
+
+      // Read CSV file
+      const text = await importFile.text();
+      const lines = text.split('\n').filter(line => line.trim());
+      
+      if (lines.length < 2) {
+        throw new Error('CSV file must have a header row and at least one data row.');
+      }
+
+      // Parse header
+      const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+      const requiredFields = ['title', 'content'];
+      const missingFields = requiredFields.filter(field => !headers.includes(field));
+      
+      if (missingFields.length > 0) {
+        throw new Error(`CSV missing required columns: ${missingFields.join(', ')}`);
+      }
+
+      // Parse rows
+      const results = { success: 0, failed: 0, errors: [] as string[] };
+
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i];
+        if (!line.trim()) continue;
+
+        try {
+          // Simple CSV parser (handles basic cases)
+          const values = line.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)?.map(v => 
+            v.trim().replace(/^"|"$/g, '')
+          ) || [];
+
+          const row: any = {};
+          headers.forEach((header, idx) => {
+            row[header] = values[idx] || '';
+          });
+
+          // Validate required fields
+          if (!row.title?.trim()) {
+            throw new Error(`Row ${i}: Title is required`);
+          }
+          if (!row.content?.trim()) {
+            throw new Error(`Row ${i}: Content is required`);
+          }
+
+          // Generate slug if not provided
+          const finalSlug = row.slug?.trim() 
+            ? slugify(row.slug.trim()) 
+            : slugify(row.title.trim());
+
+          if (!finalSlug) {
+            throw new Error(`Row ${i}: Could not generate valid slug`);
+          }
+
+          // Prepare article payload
+          const payload = {
+            title: row.title.trim(),
+            slug: finalSlug,
+            excerpt: row.excerpt?.trim() || null,
+            cover_url: row.cover_url?.trim() || null,
+            content: row.content.trim(),
+            published: row.published?.toLowerCase() === 'true' || row.published === '1',
+            published_at: (row.published?.toLowerCase() === 'true' || row.published === '1') 
+              ? new Date().toISOString() 
+              : null,
+            author,
+          };
+
+          // Insert into Supabase
+          const { error } = await supabase.from('articles').insert(payload);
+          
+          if (error) {
+            throw new Error(error.message);
+          }
+
+          results.success++;
+        } catch (rowError: any) {
+          results.failed++;
+          results.errors.push(rowError.message || `Row ${i}: Unknown error`);
+        }
+      }
+
+      setImportResults(results);
+      setImportFile(null);
+      
+    } catch (e: any) {
+      setSaveErr(e?.message ?? 'Import failed.');
+    } finally {
+      setImporting(false);
+    }
+  }
+
+  // HTML Import function
+  async function handleHTMLImport() {
+    setImporting(true);
+    setImportResults(null);
+    setSaveMsg(null);
+    setSaveErr(null);
+
+    try {
+      const author = sessionEmail?.toLowerCase() ?? null;
+      if (!author) throw new Error('Not signed in.');
+      if (!isAllowedPublisher(author)) throw new Error('Not authorized to publish.');
+
+      let htmlText = htmlContent;
+      
+      // If file is uploaded, read it
+      if (htmlFile) {
+        htmlText = await htmlFile.text();
+      }
+
+      if (!htmlText.trim()) {
+        throw new Error('Please provide HTML content or upload an HTML file.');
+      }
+
+      // Parse HTML
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(htmlText, 'text/html');
+
+      // Extract title (from h1, title tag, or first heading)
+      let articleTitle = 
+        doc.querySelector('h1')?.textContent?.trim() ||
+        doc.querySelector('title')?.textContent?.trim() ||
+        doc.querySelector('h2')?.textContent?.trim() ||
+        'Untitled Article';
+
+      // Extract excerpt (from meta description or first paragraph)
+      let articleExcerpt = 
+        doc.querySelector('meta[name="description"]')?.getAttribute('content')?.trim() ||
+        doc.querySelector('p')?.textContent?.trim()?.slice(0, 200) ||
+        null;
+
+      // Extract cover image (from meta og:image or first img)
+      let coverImage = 
+        doc.querySelector('meta[property="og:image"]')?.getAttribute('content')?.trim() ||
+        doc.querySelector('img')?.getAttribute('src')?.trim() ||
+        null;
+
+      // Extract main content
+      // Try to find article, main, or body content
+      let contentElement = 
+        doc.querySelector('article') ||
+        doc.querySelector('main') ||
+        doc.querySelector('.content') ||
+        doc.querySelector('#content') ||
+        doc.body;
+
+      let articleContent = contentElement?.innerHTML?.trim() || htmlText;
+
+      // Clean up the HTML content (remove scripts, styles, etc.)
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = articleContent;
+      tempDiv.querySelectorAll('script, style, nav, header, footer, aside').forEach(el => el.remove());
+      articleContent = tempDiv.innerHTML.trim();
+
+      if (!articleContent) {
+        throw new Error('Could not extract content from HTML.');
+      }
+
+      // Generate slug
+      const finalSlug = slugify(articleTitle);
+      if (!finalSlug) {
+        throw new Error('Could not generate valid slug from title.');
+      }
+
+      // Prepare article payload
+      const payload = {
+        title: articleTitle,
+        slug: finalSlug,
+        excerpt: articleExcerpt,
+        cover_url: coverImage,
+        content: articleContent,
+        published: false, // Default to draft for HTML imports
+        published_at: null,
+        author,
+      };
+
+      // Insert into Supabase
+      const { error } = await supabase.from('articles').insert(payload);
+      
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      setImportResults({ success: 1, failed: 0, errors: [] });
+      setHtmlFile(null);
+      setHtmlContent('');
+      setSaveMsg(`✅ Article "${articleTitle}" imported successfully as draft!`);
+      
+    } catch (e: any) {
+      setSaveErr(e?.message ?? 'HTML import failed.');
+    } finally {
+      setImporting(false);
     }
   }
 
@@ -386,6 +608,192 @@ export function PublishPage() {
                 </span>
               </label>
             </div>
+          </div>
+
+          {/* CSV Import Section */}
+          <div className="bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 rounded-2xl p-6 mb-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 rounded-lg bg-primary/20 text-primary">
+                <Upload size={20} />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold">Bulk Import Articles</h2>
+                <p className="text-sm text-muted-foreground">Upload from CSV or HTML</p>
+              </div>
+            </div>
+
+            {/* Import Mode Tabs */}
+            <div className="flex gap-2 mb-4">
+              <button
+                onClick={() => setImportMode('csv')}
+                className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+                  importMode === 'csv'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-card/80 text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                CSV Import
+              </button>
+              <button
+                onClick={() => setImportMode('html')}
+                className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+                  importMode === 'html'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-card/80 text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                HTML Import
+              </button>
+            </div>
+
+            {/* CSV Import */}
+            {importMode === 'csv' && (
+              <>
+                <div className="bg-card/80 backdrop-blur rounded-xl p-4 mb-4">
+                  <p className="text-sm text-muted-foreground mb-3">
+                    <strong className="text-foreground">CSV Format:</strong> Your file should include these columns:
+                  </p>
+                  <div className="font-mono text-xs bg-background/50 rounded p-3 border border-border overflow-x-auto">
+                    <div className="text-primary">title,slug,excerpt,cover_url,content,published</div>
+                    <div className="text-muted-foreground mt-1">
+                      "My Article Title","","Short excerpt...","https://...","Full article content...","true"
+                    </div>
+                  </div>
+                  <ul className="text-xs text-muted-foreground mt-3 space-y-1 ml-4">
+                    <li>• <strong className="text-foreground">Required:</strong> title, content</li>
+                    <li>• <strong className="text-foreground">Optional:</strong> slug (auto-generated if empty), excerpt, cover_url, published (true/false, default: false)</li>
+                    <li>• All articles will be attributed to: <span className="text-primary">{sessionEmail}</span></li>
+                  </ul>
+                </div>
+
+                <div className="flex gap-4 items-end flex-wrap">
+                  <div className="flex-1 min-w-[250px]">
+                    <label className="block text-sm font-medium mb-2">Select CSV File</label>
+                    <input
+                      type="file"
+                      accept=".csv"
+                      onChange={(e) => setImportFile(e.target.files?.[0] || null)}
+                      className="w-full px-4 py-3 rounded-xl border border-border bg-background/50 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+                    />
+                  </div>
+
+                  <Button
+                    onClick={handleCSVImport}
+                    disabled={!importFile || importing}
+                    size="lg"
+                    className="min-w-[180px]"
+                  >
+                    {importing ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2" />
+                        Importing...
+                      </>
+                    ) : (
+                      <>
+                        <Upload size={18} className="mr-2" />
+                        Import CSV
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </>
+            )}
+
+            {/* HTML Import */}
+            {importMode === 'html' && (
+              <>
+                <div className="bg-card/80 backdrop-blur rounded-xl p-4 mb-4">
+                  <p className="text-sm text-muted-foreground mb-3">
+                    <strong className="text-foreground">HTML Import:</strong> Upload an HTML file or paste HTML content
+                  </p>
+                  <ul className="text-xs text-muted-foreground space-y-1 ml-4">
+                    <li>• Automatically extracts title from <code className="text-primary">&lt;h1&gt;</code> or <code className="text-primary">&lt;title&gt;</code></li>
+                    <li>• Extracts excerpt from meta description or first paragraph</li>
+                    <li>• Extracts cover image from meta tags or first <code className="text-primary">&lt;img&gt;</code></li>
+                    <li>• Extracts content from <code className="text-primary">&lt;article&gt;</code>, <code className="text-primary">&lt;main&gt;</code>, or body</li>
+                    <li>• Imported as draft by default (you can publish later)</li>
+                    <li>• All articles attributed to: <span className="text-primary">{sessionEmail}</span></li>
+                  </ul>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Upload HTML File</label>
+                    <input
+                      type="file"
+                      accept=".html,.htm"
+                      onChange={(e) => setHtmlFile(e.target.files?.[0] || null)}
+                      className="w-full px-4 py-3 rounded-xl border border-border bg-background/50 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+                    />
+                  </div>
+
+                  <div className="text-center text-sm text-muted-foreground">
+                    — OR —
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Paste HTML Content</label>
+                    <textarea
+                      value={htmlContent}
+                      onChange={(e) => setHtmlContent(e.target.value)}
+                      rows={8}
+                      placeholder="<html>&#10;  <head><title>Article Title</title></head>&#10;  <body>&#10;    <article>...</article>&#10;  </body>&#10;</html>"
+                      className="w-full px-4 py-3 rounded-xl border border-border bg-background/50 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-y font-mono text-xs"
+                    />
+                  </div>
+
+                  <Button
+                    onClick={handleHTMLImport}
+                    disabled={(!htmlFile && !htmlContent.trim()) || importing}
+                    size="lg"
+                    className="w-full"
+                  >
+                    {importing ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2" />
+                        Importing...
+                      </>
+                    ) : (
+                      <>
+                        <Upload size={18} className="mr-2" />
+                        Import from HTML
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </>
+            )}
+
+            {/* Import Results */}
+            {importResults && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-4 p-4 bg-card rounded-xl border border-border"
+              >
+                <div className="flex items-center gap-4 mb-3">
+                  <div className="text-sm">
+                    <span className="text-green-400 font-semibold">✓ {importResults.success} succeeded</span>
+                  </div>
+                  {importResults.failed > 0 && (
+                    <div className="text-sm">
+                      <span className="text-destructive font-semibold">✗ {importResults.failed} failed</span>
+                    </div>
+                  )}
+                </div>
+                
+                {importResults.errors.length > 0 && (
+                  <div className="mt-3 p-3 bg-destructive/5 border border-destructive/20 rounded-lg">
+                    <p className="text-xs font-semibold text-destructive mb-2">Errors:</p>
+                    <div className="space-y-1 max-h-32 overflow-y-auto">
+                      {importResults.errors.map((error, idx) => (
+                        <p key={idx} className="text-xs text-destructive/80">• {error}</p>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+            )}
           </div>
 
           {/* Form */}
