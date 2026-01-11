@@ -64,7 +64,8 @@ export function PublishPage() {
   // HTML Import states
   const [htmlFile, setHtmlFile] = useState<File | null>(null);
   const [htmlContent, setHtmlContent] = useState('');
-  const [importMode, setImportMode] = useState<'csv' | 'html'>('csv');
+  const [importUrl, setImportUrl] = useState('');
+  const [importMode, setImportMode] = useState<'csv' | 'html' | 'url'>('url');
 
   // track if user manually edited slug (so we stop auto-overwriting)
   const slugTouched = useRef(false);
@@ -428,6 +429,161 @@ export function PublishPage() {
     }
   }
 
+  // URL Import function
+  async function handleURLImport() {
+    setImporting(true);
+    setImportResults(null);
+    setSaveMsg(null);
+    setSaveErr(null);
+
+    try {
+      const author = sessionEmail?.toLowerCase() ?? null;
+      if (!author) throw new Error('Not signed in.');
+      if (!isAllowedPublisher(author)) throw new Error('Not authorized to publish.');
+
+      if (!importUrl.trim()) {
+        throw new Error('Please enter a URL.');
+      }
+
+      // Validate URL
+      let url: URL;
+      try {
+        url = new URL(importUrl.trim());
+      } catch {
+        throw new Error('Invalid URL format.');
+      }
+
+      setSaveMsg('🔄 Fetching article from URL...');
+
+      // Fetch the HTML from the URL (using a CORS proxy if needed)
+      let htmlText: string;
+      try {
+        // Try direct fetch first
+        const response = await fetch(url.toString());
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        htmlText = await response.text();
+      } catch (fetchError: any) {
+        // If CORS error, try with a CORS proxy
+        if (fetchError.message?.includes('CORS') || fetchError.message?.includes('Failed to fetch')) {
+          setSaveMsg('🔄 CORS blocked - trying proxy...');
+          const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url.toString())}`;
+          const proxyResponse = await fetch(proxyUrl);
+          if (!proxyResponse.ok) {
+            throw new Error('Could not fetch URL. The website may be blocking automated access.');
+          }
+          htmlText = await proxyResponse.text();
+        } else {
+          throw fetchError;
+        }
+      }
+
+      setSaveMsg('🔄 Parsing article content...');
+
+      // Parse HTML
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(htmlText, 'text/html');
+
+      // Extract title (from h1, title tag, or first heading)
+      let articleTitle = 
+        doc.querySelector('h1')?.textContent?.trim() ||
+        doc.querySelector('title')?.textContent?.trim() ||
+        doc.querySelector('h2')?.textContent?.trim() ||
+        'Untitled Article';
+
+      // Extract excerpt (from meta description or first paragraph)
+      let articleExcerpt = 
+        doc.querySelector('meta[name="description"]')?.getAttribute('content')?.trim() ||
+        doc.querySelector('meta[property="og:description"]')?.getAttribute('content')?.trim() ||
+        doc.querySelector('p')?.textContent?.trim()?.slice(0, 200) ||
+        null;
+
+      // Extract cover image (from meta og:image or first img)
+      let coverImage = 
+        doc.querySelector('meta[property="og:image"]')?.getAttribute('content')?.trim() ||
+        doc.querySelector('meta[name="twitter:image"]')?.getAttribute('content')?.trim() ||
+        doc.querySelector('img')?.getAttribute('src')?.trim() ||
+        null;
+
+      // Make relative URLs absolute
+      if (coverImage && !coverImage.startsWith('http')) {
+        coverImage = new URL(coverImage, url).toString();
+      }
+
+      // Extract main content
+      let contentElement = 
+        doc.querySelector('article') ||
+        doc.querySelector('main') ||
+        doc.querySelector('[role="main"]') ||
+        doc.querySelector('.post-content') ||
+        doc.querySelector('.article-content') ||
+        doc.querySelector('.content') ||
+        doc.querySelector('#content') ||
+        doc.body;
+
+      let articleContent = contentElement?.innerHTML?.trim() || htmlText;
+
+      // Clean up the HTML content
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = articleContent;
+      
+      // Remove unwanted elements
+      tempDiv.querySelectorAll('script, style, nav, header, footer, aside, iframe, .advertisement, .ads, .social-share, .comments').forEach(el => el.remove());
+      
+      // Convert relative image URLs to absolute
+      tempDiv.querySelectorAll('img').forEach(img => {
+        const src = img.getAttribute('src');
+        if (src && !src.startsWith('http') && !src.startsWith('data:')) {
+          img.setAttribute('src', new URL(src, url).toString());
+        }
+      });
+
+      articleContent = tempDiv.innerHTML.trim();
+
+      if (!articleContent || articleContent.length < 100) {
+        throw new Error('Could not extract meaningful content from URL. The page may have dynamic content or anti-scraping protection.');
+      }
+
+      // Generate slug
+      const finalSlug = slugify(articleTitle);
+      if (!finalSlug) {
+        throw new Error('Could not generate valid slug from title.');
+      }
+
+      setSaveMsg('🔄 Saving article...');
+
+      // Prepare article payload
+      const payload = {
+        title: articleTitle,
+        slug: finalSlug,
+        excerpt: articleExcerpt,
+        cover_url: coverImage,
+        content: articleContent,
+        published: false, // Default to draft
+        published_at: null,
+        author,
+      };
+
+      // Insert into Supabase
+      const { error } = await supabase.from('articles').insert(payload);
+      
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      setImportResults({ success: 1, failed: 0, errors: [] });
+      setImportUrl('');
+      setSaveMsg(`✅ Article "${articleTitle}" imported successfully as draft!`);
+      
+    } catch (e: any) {
+      setSaveErr(e?.message ?? 'URL import failed.');
+      setSaveMsg(null);
+    } finally {
+      setImporting(false);
+    }
+  }
+
   // ---------- UI ----------
 
   // Logged OUT
@@ -625,6 +781,16 @@ export function PublishPage() {
             {/* Import Mode Tabs */}
             <div className="flex gap-2 mb-4">
               <button
+                onClick={() => setImportMode('url')}
+                className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+                  importMode === 'url'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-card/80 text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                URL Import
+              </button>
+              <button
                 onClick={() => setImportMode('csv')}
                 className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
                   importMode === 'csv'
@@ -645,6 +811,57 @@ export function PublishPage() {
                 HTML Import
               </button>
             </div>
+
+            {/* URL Import */}
+            {importMode === 'url' && (
+              <>
+                <div className="bg-card/80 backdrop-blur rounded-xl p-4 mb-4">
+                  <p className="text-sm text-muted-foreground mb-3">
+                    <strong className="text-foreground">Import from URL:</strong> Paste any article URL from Search Atlas or any website
+                  </p>
+                  <ul className="text-xs text-muted-foreground space-y-1 ml-4">
+                    <li>• Automatically fetches and parses the webpage</li>
+                    <li>• Extracts title, excerpt, cover image, and main content</li>
+                    <li>• Converts relative URLs to absolute for images</li>
+                    <li>• Removes navigation, ads, and unwanted elements</li>
+                    <li>• Imported as draft by default</li>
+                    <li>• Works with Search Atlas, Medium, blogs, news sites, etc.</li>
+                  </ul>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Article URL</label>
+                    <input
+                      type="url"
+                      value={importUrl}
+                      onChange={(e) => setImportUrl(e.target.value)}
+                      placeholder="https://example.com/article-to-import"
+                      className="w-full px-4 py-3 rounded-xl border border-border bg-background/50 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                    />
+                  </div>
+
+                  <Button
+                    onClick={handleURLImport}
+                    disabled={!importUrl.trim() || importing}
+                    size="lg"
+                    className="w-full"
+                  >
+                    {importing ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2" />
+                        Importing...
+                      </>
+                    ) : (
+                      <>
+                        <Upload size={18} className="mr-2" />
+                        Import from URL
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </>
+            )}
 
             {/* CSV Import */}
             {importMode === 'csv' && (
