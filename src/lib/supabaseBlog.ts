@@ -294,6 +294,7 @@ export async function getCurrentUserProfile() {
 // Admin allowlist - must match the list in migration 006_blog_admin_rls_fix.sql
 const ADMIN_EMAILS = [
   'earl@thewildlandfirerecoveryfund.org',
+  'jason@thewildlandfirerecoveryfund.org',
   'admin@thewildlandfirerecoveryfund.org',
   'editor@thewildlandfirerecoveryfund.org'
 ];

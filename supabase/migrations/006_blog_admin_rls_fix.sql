@@ -32,6 +32,7 @@ BEGIN
   -- ⚠️ EDIT THIS LIST: Add your admin email addresses here
   RETURN user_email IN (
     'earl@thewildlandfirerecoveryfund.org',
+    'jason@thewildlandfirerecoveryfund.org',
     'admin@thewildlandfirerecoveryfund.org',
     'editor@thewildlandfirerecoveryfund.org'
   );
