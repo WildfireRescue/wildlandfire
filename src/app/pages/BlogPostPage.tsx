@@ -271,6 +271,16 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
                 excerpt={post.excerpt ? coerceToString(post.excerpt) : null} 
               />
 
+              {/* E-E-A-T Signals (Mobile - show after content) */}
+              <div className="lg:hidden mt-12">
+                <BlogEEATSignals post={post} />
+              </div>
+
+              {/* Table of Contents (Mobile - show after E-E-A-T) */}
+              <div className="lg:hidden mt-12">
+                <BlogTableOfContents content={safeMarkdownContent(post.content_markdown)} />
+              </div>
+
               {/* Related Posts */}
               <BlogRelatedPosts category={post.category} currentSlug={post.slug} />
 
@@ -287,15 +297,14 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
               </div>
             </div>
 
-            {/* Sidebar: TOC (desktop only, sticky) */}
+            {/* Sidebar: E-E-A-T + TOC (desktop only, sticky) */}
             <aside className="hidden lg:block space-y-6">
-              <div className="sticky top-24">
-                <BlogTableOfContents content={safeMarkdownContent(post.content_markdown)} />
+              <div className="sticky top-24 space-y-6">
+                {/* E-E-A-T Signals (show first on desktop) */}
+                <BlogEEATSignals post={post} />
                 
-                {/* E-E-A-T Signals */}
-                <div className="mt-6">
-                  <BlogEEATSignals post={post} />
-                </div>
+                {/* Table of Contents */}
+                <BlogTableOfContents content={safeMarkdownContent(post.content_markdown)} />
               </div>
             </aside>
           </div>
