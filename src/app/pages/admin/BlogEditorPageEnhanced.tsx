@@ -1,0 +1,969 @@
+// =====================================================
+// ENHANCED BLOG EDITOR PAGE (ADMIN)
+// Full-featured editor with SEO, E-E-A-T, and metadata fields
+// =====================================================
+
+import { useEffect, useState, useMemo, useRef } from 'react';
+import { motion } from 'motion/react';
+import { supabase } from '../../../lib/supabase';
+import { Button } from '../../components/ui/button';
+import { Mail, LogOut, Save, Eye, ChevronDown, ChevronUp } from 'lucide-react';
+import { createPost, getCategories, isCurrentUserEditor } from '../../../lib/supabaseBlog';
+import { generateSlug, calculateReadingTime } from '../../../lib/blogHelpers';
+import type { BlogCategory, Source } from '../../../lib/blogTypes';
+
+interface CollapsibleSectionProps {
+  title: string;
+  subtitle?: string;
+  defaultOpen?: boolean;
+  children: React.ReactNode;
+}
+
+function CollapsibleSection({ title, subtitle, defaultOpen = false, children }: CollapsibleSectionProps) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+  
+  return (
+    <div className="border border-border rounded-xl overflow-hidden">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between p-4 bg-card hover:bg-muted/50 transition-colors"
+      >
+        <div className="text-left">
+          <h3 className="font-semibold">{title}</h3>
+          {subtitle && <p className="text-sm text-muted-foreground mt-0.5">{subtitle}</p>}
+        </div>
+        {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+      </button>
+      
+      {isOpen && (
+        <div className="p-6 pt-4 space-y-4 border-t border-border">
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function BlogEditorPageEnhanced() {
+  const [sessionEmail, setSessionEmail] = useState<string | null>(null);
+  const [isEditor, setIsEditor] = useState(false);
+  const [categories, setCategories] = useState<BlogCategory[]>([]);
+
+  // Login
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginSent, setLoginSent] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [loginBusy, setLoginBusy] = useState(false);
+
+  // Core fields
+  const [title, setTitle] = useState('');
+  const autoSlug = useMemo(() => generateSlug(title), [title]);
+  const [slug, setSlug] = useState('');
+  const [excerpt, setExcerpt] = useState('');
+  const [content, setContent] = useState('');
+  
+  // SEO & Metadata
+  const [metaTitle, setMetaTitle] = useState('');
+  const [metaDescription, setMetaDescription] = useState('');
+  const [canonicalUrl, setCanonicalUrl] = useState('');
+  const [focusKeyword, setFocusKeyword] = useState('');
+  const [secondaryKeywords, setSecondaryKeywords] = useState('');
+  
+  // Images & Social
+  const [featuredImageUrl, setFeaturedImageUrl] = useState('');
+  const [featuredImageAlt, setFeaturedImageAlt] = useState('');
+  const [ogImageUrl, setOgImageUrl] = useState('');
+  const [ogTitle, setOgTitle] = useState('');
+  const [ogDescription, setOgDescription] = useState('');
+  const [twitterCard, setTwitterCard] = useState('summary_large_image');
+  
+  // Publishing & Discovery
+  const [category, setCategory] = useState('');
+  const [tags, setTags] = useState('');
+  const [status, setStatus] = useState<'draft' | 'scheduled' | 'published'>('draft');
+  const [scheduledFor, setScheduledFor] = useState('');
+  const [featured, setFeatured] = useState(false);
+  const [allowIndexing, setAllowIndexing] = useState(true);
+  const [allowFollow, setAllowFollow] = useState(true);
+  const [robotsDirectives, setRobotsDirectives] = useState('index,follow');
+  const [sitemapPriority, setSitemapPriority] = useState(0.7);
+  
+  // Trust / E-E-A-T
+  const [authorName, setAuthorName] = useState('The Wildland Fire Recovery Fund');
+  const [authorRole, setAuthorRole] = useState('');
+  const [authorBio, setAuthorBio] = useState('');
+  const [reviewedBy, setReviewedBy] = useState('');
+  const [factChecked, setFactChecked] = useState(false);
+  
+  // Backlinks / Citations
+  const [sources, setSources] = useState<Source[]>([]);
+  const [outboundLinksVerified, setOutboundLinksVerified] = useState(false);
+
+  // UI states
+  const [saving, setSaving] = useState(false);
+  const [saveMsg, setSaveMsg] = useState<string | null>(null);
+  const [saveErr, setSaveErr] = useState<string | null>(null);
+
+  const slugTouched = useRef(false);
+
+  // Auto-generate slug
+  useEffect(() => {
+    if (!slugTouched.current) setSlug(autoSlug);
+  }, [autoSlug]);
+
+  // Load session + check editor status
+  useEffect(() => {
+    supabase.auth.getSession().then(async ({ data }) => {
+      const email = data.session?.user?.email ?? null;
+      setSessionEmail(email);
+      
+      if (email) {
+        const editorStatus = await isCurrentUserEditor();
+        setIsEditor(editorStatus);
+      }
+    });
+
+    const { data: sub } = supabase.auth.onAuthStateChange(async (_event, sess) => {
+      const email = sess?.user?.email ?? null;
+      setSessionEmail(email);
+      
+      if (email) {
+        const editorStatus = await isCurrentUserEditor();
+        setIsEditor(editorStatus);
+      }
+    });
+
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  // Load categories
+  useEffect(() => {
+    async function loadCategories() {
+      const { categories: cats } = await getCategories();
+      setCategories(cats || []);
+      if (cats && cats.length > 0 && !category) {
+        setCategory(cats[0].slug);
+      }
+    }
+    loadCategories();
+  }, []);
+
+  function getEmailRedirectTo() {
+    return `${window.location.origin}/`;
+  }
+
+  async function sendMagicLink() {
+    setLoginError(null);
+    setLoginSent(false);
+    setLoginBusy(true);
+
+    try {
+      const email = loginEmail.trim().toLowerCase();
+      if (!email) {
+        setLoginError('Enter an email address.');
+        return;
+      }
+
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: getEmailRedirectTo(),
+          shouldCreateUser: false,
+        },
+      });
+
+      if (error) {
+        setLoginError(error.message);
+        return;
+      }
+
+      setLoginSent(true);
+    } finally {
+      setLoginBusy(false);
+    }
+  }
+
+  async function signOut() {
+    await supabase.auth.signOut();
+  }
+
+  function addSource() {
+    setSources([...sources, { label: '', url: '' }]);
+  }
+
+  function removeSource(index: number) {
+    setSources(sources.filter((_, i) => i !== index));
+  }
+
+  function updateSource(index: number, field: 'label' | 'url', value: string) {
+    const updated = [...sources];
+    updated[index][field] = value;
+    setSources(updated);
+  }
+
+  async function savePost() {
+    setSaving(true);
+    setSaveMsg(null);
+    setSaveErr(null);
+
+    try {
+      // Validation
+      if (!title.trim()) throw new Error('Title is required');
+      if (!content.trim()) throw new Error('Content is required');
+
+      const finalSlug = slug || autoSlug;
+      if (!finalSlug) throw new Error('Slug is required');
+      
+      if (featuredImageUrl && !featuredImageAlt) {
+        throw new Error('Featured image alt text is required for accessibility');
+      }
+      
+      if (metaTitle && metaTitle.length > 60) {
+        console.warn('Meta title exceeds 60 characters');
+      }
+      
+      if (metaDescription && metaDescription.length > 160) {
+        console.warn('Meta description exceeds 160 characters');
+      }
+
+      const readingTime = calculateReadingTime(content);
+
+      // Build post data with all new fields
+      const postData = {
+        // Core
+        title: title.trim(),
+        slug: finalSlug,
+        excerpt: excerpt.trim() || null,
+        content_markdown: content.trim(),
+        
+        // SEO & Metadata
+        meta_title: metaTitle.trim() || null,
+        meta_description: metaDescription.trim() || null,
+        canonical_url: canonicalUrl.trim() || null,
+        focus_keyword: focusKeyword.trim() || null,
+        secondary_keywords: secondaryKeywords 
+          ? secondaryKeywords.split(',').map(k => k.trim()).filter(Boolean)
+          : [],
+        
+        // Images & Social
+        cover_image_url: featuredImageUrl.trim() || null,
+        featured_image_url: featuredImageUrl.trim() || null,
+        featured_image_alt_text: featuredImageAlt.trim() || null,
+        og_image_url: ogImageUrl.trim() || featuredImageUrl.trim() || null,
+        og_title: ogTitle.trim() || null,
+        og_description: ogDescription.trim() || null,
+        twitter_card: twitterCard,
+        
+        // Publishing & Discovery
+        category: category || null,
+        tags: tags ? tags.split(',').map(t => t.trim()).filter(Boolean) : [],
+        status,
+        published_at: status === 'published' ? new Date().toISOString() : null,
+        scheduled_for: status === 'scheduled' && scheduledFor ? new Date(scheduledFor).toISOString() : null,
+        featured,
+        allow_indexing: allowIndexing,
+        allow_follow: allowFollow,
+        robots_directives: robotsDirectives,
+        sitemap_priority: sitemapPriority,
+        noindex: !allowIndexing, // backwards compatibility
+        
+        // Trust / E-E-A-T
+        author_name: authorName.trim(),
+        author_email: sessionEmail!,
+        author_role: authorRole.trim() || null,
+        author_bio: authorBio.trim() || null,
+        reviewed_by: reviewedBy.trim() || null,
+        fact_checked: factChecked,
+        
+        // Metadata
+        reading_time_minutes: readingTime,
+        
+        // Backlinks / Citations
+        sources: sources.filter(s => s.label && s.url),
+        outbound_links_verified: outboundLinksVerified,
+      };
+
+      console.log('Attempting to save post:', postData);
+      
+      const { post, error } = await createPost(postData);
+      
+      console.log('Save result:', { post, error });
+      
+      if (error) {
+        console.error('Supabase error:', error);
+        throw new Error(error.message || 'Failed to save post');
+      }
+
+      setSaveMsg('✅ Post saved successfully!');
+      
+      // Reset form
+      setTimeout(() => {
+        resetForm();
+      }, 1500);
+    } catch (e: any) {
+      console.error('Save error:', e);
+      setSaveErr(e?.message || 'Failed to save post');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function resetForm() {
+    setTitle('');
+    setSlug('');
+    slugTouched.current = false;
+    setExcerpt('');
+    setContent('');
+    setMetaTitle('');
+    setMetaDescription('');
+    setCanonicalUrl('');
+    setFocusKeyword('');
+    setSecondaryKeywords('');
+    setFeaturedImageUrl('');
+    setFeaturedImageAlt('');
+    setOgImageUrl('');
+    setOgTitle('');
+    setOgDescription('');
+    setTags('');
+    setScheduledFor('');
+    setFeatured(false);
+    setAuthorRole('');
+    setAuthorBio('');
+    setReviewedBy('');
+    setFactChecked(false);
+    setSources([]);
+    setOutboundLinksVerified(false);
+    setStatus('draft');
+  }
+
+  // Character count helper
+  const CharCount = ({ current, max, warn = true }: { current: number; max: number; warn?: boolean }) => {
+    const isOver = current > max;
+    const isNear = current > max * 0.9;
+    return (
+      <span className={`text-xs ${isOver ? 'text-destructive' : isNear && warn ? 'text-yellow-500' : 'text-muted-foreground'}`}>
+        {current}/{max}
+      </span>
+    );
+  };
+
+  // Logged OUT
+  if (!sessionEmail) {
+    return (
+      <div className="min-h-screen pt-28 pb-20 bg-background">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="max-w-xl mx-auto"
+          >
+            <div className="bg-card border border-border rounded-2xl p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <Mail size={24} className="text-primary" />
+                <h1 className="text-2xl font-bold">Blog Editor Login</h1>
+              </div>
+
+              <p className="text-muted-foreground mb-6">
+                Enter your authorized email to receive a magic link.
+              </p>
+
+              <div className="space-y-4">
+                <input
+                  type="email"
+                  value={loginEmail}
+                  onChange={(e) => setLoginEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  className="w-full px-4 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
+                  disabled={loginBusy}
+                />
+
+                {loginError && (
+                  <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+                    <p className="text-destructive text-sm whitespace-pre-line">{loginError}</p>
+                  </div>
+                )}
+
+                {loginSent && (
+                  <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
+                    <p className="text-primary text-sm">✅ Check your email for the login link!</p>
+                  </div>
+                )}
+
+                <Button
+                  onClick={sendMagicLink}
+                  disabled={loginBusy || loginSent}
+                  className="w-full"
+                >
+                  {loginBusy ? 'Sending...' : loginSent ? 'Link Sent!' : 'Send Magic Link'}
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
+
+  // Logged IN but not an editor
+  if (!isEditor) {
+    return (
+      <div className="min-h-screen pt-28 pb-20 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="max-w-xl mx-auto bg-destructive/10 border border-destructive/20 rounded-xl p-8 text-center">
+            <p className="text-destructive text-lg mb-6">
+              You don't have editor permissions. Contact an administrator.
+            </p>
+            <Button onClick={signOut} variant="outline">
+              <LogOut size={18} className="mr-2" />
+              Sign Out
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Logged IN and IS EDITOR
+  return (
+    <div className="min-h-screen pt-28 pb-20 bg-background">
+      <div className="container mx-auto px-4 max-w-5xl">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold">Enhanced Blog Editor</h1>
+            <p className="text-muted-foreground mt-1">SEO-optimized publishing with E-E-A-T signals</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-muted-foreground">
+              <strong>{sessionEmail}</strong>
+            </span>
+            <Button variant="outline" size="sm" onClick={signOut}>
+              <LogOut size={16} className="mr-2" />
+              Sign Out
+            </Button>
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          {/* ==================== CORE CONTENT ==================== */}
+          <CollapsibleSection title="📝 Core Content" subtitle="Essential post information" defaultOpen={true}>
+            {/* Title */}
+            <div>
+              <label className="block text-sm font-medium mb-2">Title *</label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Compelling article title"
+                className="w-full px-4 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+
+            {/* Slug */}
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                URL Slug * <span className="text-muted-foreground font-normal">(auto-generated)</span>
+              </label>
+              <input
+                type="text"
+                value={slug}
+                onChange={(e) => {
+                  setSlug(e.target.value);
+                  slugTouched.current = true;
+                }}
+                placeholder="post-url-slug"
+                className="w-full px-4 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary font-mono text-sm"
+              />
+            </div>
+
+            {/* Excerpt */}
+            <div>
+              <label className="block text-sm font-medium mb-2">Excerpt / Summary</label>
+              <textarea
+                value={excerpt}
+                onChange={(e) => setExcerpt(e.target.value)}
+                placeholder="Brief summary for article cards and previews"
+                rows={3}
+                className="w-full px-4 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+              />
+            </div>
+
+            {/* Content */}
+            <div>
+              <label className="block text-sm font-medium mb-2">Content (Markdown) *</label>
+              <textarea
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder="Write your article content using Markdown formatting..."
+                rows={18}
+                className="w-full px-4 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none font-mono text-sm"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Reading time: ~{calculateReadingTime(content)} min
+              </p>
+            </div>
+          </CollapsibleSection>
+
+          {/* ==================== SEO OPTIMIZATION ==================== */}
+          <CollapsibleSection title="🔍 SEO Optimization" subtitle="Search engine metadata and keywords">
+            <div className="grid md:grid-cols-2 gap-4">
+              {/* Meta Title */}
+              <div className="md:col-span-2">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium">Meta Title</label>
+                  <CharCount current={metaTitle.length} max={60} />
+                </div>
+                <input
+                  type="text"
+                  value={metaTitle}
+                  onChange={(e) => setMetaTitle(e.target.value)}
+                  placeholder="SEO title (60 chars max, fallback: title)"
+                  maxLength={70}
+                  className="w-full px-4 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+
+              {/* Meta Description */}
+              <div className="md:col-span-2">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium">Meta Description</label>
+                  <CharCount current={metaDescription.length} max={160} />
+                </div>
+                <textarea
+                  value={metaDescription}
+                  onChange={(e) => setMetaDescription(e.target.value)}
+                  placeholder="SEO description (160 chars max, fallback: excerpt)"
+                  rows={2}
+                  maxLength={180}
+                  className="w-full px-4 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                />
+              </div>
+
+              {/* Focus Keyword */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Focus Keyword</label>
+                <input
+                  type="text"
+                  value={focusKeyword}
+                  onChange={(e) => setFocusKeyword(e.target.value)}
+                  placeholder="wildfire recovery"
+                  className="w-full px-4 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+
+              {/* Secondary Keywords */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Secondary Keywords</label>
+                <input
+                  type="text"
+                  value={secondaryKeywords}
+                  onChange={(e) => setSecondaryKeywords(e.target.value)}
+                  placeholder="fire aid, disaster relief (comma-separated)"
+                  className="w-full px-4 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+
+              {/* Canonical URL */}
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium mb-2">Canonical URL</label>
+                <input
+                  type="url"
+                  value={canonicalUrl}
+                  onChange={(e) => setCanonicalUrl(e.target.value)}
+                  placeholder="https://example.com/original-article (prevent duplicate content)"
+                  className="w-full px-4 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary font-mono text-sm"
+                />
+              </div>
+            </div>
+          </CollapsibleSection>
+
+          {/* ==================== IMAGES & SOCIAL SHARING ==================== */}
+          <CollapsibleSection title="🖼️ Images & Social Sharing" subtitle="Featured images and Open Graph tags">
+            <div className="space-y-4">
+              {/* Featured Image */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Featured Image URL *</label>
+                <input
+                  type="url"
+                  value={featuredImageUrl}
+                  onChange={(e) => setFeaturedImageUrl(e.target.value)}
+                  placeholder="https://example.com/featured-image.jpg"
+                  className="w-full px-4 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+
+              {/* Featured Image Alt Text */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Featured Image Alt Text *</label>
+                <input
+                  type="text"
+                  value={featuredImageAlt}
+                  onChange={(e) => setFeaturedImageAlt(e.target.value)}
+                  placeholder="Descriptive alt text for accessibility & SEO"
+                  className="w-full px-4 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Required if featured image is provided (accessibility)
+                </p>
+              </div>
+
+              {/* OG Image */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Open Graph Image URL</label>
+                <input
+                  type="url"
+                  value={ogImageUrl}
+                  onChange={(e) => setOgImageUrl(e.target.value)}
+                  placeholder="Custom social sharing image (fallback: featured image)"
+                  className="w-full px-4 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+
+              {/* OG Title */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Open Graph Title</label>
+                <input
+                  type="text"
+                  value={ogTitle}
+                  onChange={(e) => setOgTitle(e.target.value)}
+                  placeholder="Social sharing title (fallback: meta title)"
+                  className="w-full px-4 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+
+              {/* OG Description */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Open Graph Description</label>
+                <textarea
+                  value={ogDescription}
+                  onChange={(e) => setOgDescription(e.target.value)}
+                  placeholder="Social sharing description (fallback: meta description)"
+                  rows={2}
+                  className="w-full px-4 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                />
+              </div>
+
+              {/* Twitter Card */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Twitter Card Type</label>
+                <select
+                  value={twitterCard}
+                  onChange={(e) => setTwitterCard(e.target.value)}
+                  className="w-full px-4 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="summary">Summary</option>
+                  <option value="summary_large_image">Summary Large Image</option>
+                  <option value="app">App</option>
+                  <option value="player">Player</option>
+                </select>
+              </div>
+            </div>
+          </CollapsibleSection>
+
+          {/* ==================== AUTHOR & E-E-A-T ==================== */}
+          <CollapsibleSection title="✍️ Author & E-E-A-T" subtitle="Expertise, Experience, Authority, Trust signals">
+            <div className="space-y-4">
+              {/* Author Name */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Author Name *</label>
+                <input
+                  type="text"
+                  value={authorName}
+                  onChange={(e) => setAuthorName(e.target.value)}
+                  placeholder="The Wildland Fire Recovery Fund"
+                  className="w-full px-4 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+
+              {/* Author Role */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Author Role / Title</label>
+                <input
+                  type="text"
+                  value={authorRole}
+                  onChange={(e) => setAuthorRole(e.target.value)}
+                  placeholder="Executive Director, Disaster Relief Specialist, etc."
+                  className="w-full px-4 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+
+              {/* Author Bio */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Author Bio</label>
+                <textarea
+                  value={authorBio}
+                  onChange={(e) => setAuthorBio(e.target.value)}
+                  placeholder="Brief bio highlighting expertise and credentials"
+                  rows={3}
+                  className="w-full px-4 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                />
+              </div>
+
+              {/* Reviewed By */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Reviewed By</label>
+                <input
+                  type="text"
+                  value={reviewedBy}
+                  onChange={(e) => setReviewedBy(e.target.value)}
+                  placeholder="Name of fact-checker or reviewer"
+                  className="w-full px-4 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+
+              {/* Fact Checked */}
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  checked={factChecked}
+                  onChange={(e) => setFactChecked(e.target.checked)}
+                  id="factChecked"
+                  className="w-5 h-5"
+                />
+                <label htmlFor="factChecked" className="text-sm font-medium">
+                  This content has been fact-checked
+                </label>
+              </div>
+            </div>
+          </CollapsibleSection>
+
+          {/* ==================== PUBLISHING & DISCOVERY ==================== */}
+          <CollapsibleSection title="📢 Publishing & Discovery" subtitle="Publication settings and search engine directives">
+            <div className="space-y-4">
+              {/* Category & Tags */}
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Category</label>
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="w-full px-4 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    <option value="">None</option>
+                    {categories.map(cat => (
+                      <option key={cat.id} value={cat.slug}>{cat.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Tags</label>
+                  <input
+                    type="text"
+                    value={tags}
+                    onChange={(e) => setTags(e.target.value)}
+                    placeholder="wildfire, recovery, story (comma-separated)"
+                    className="w-full px-4 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                </div>
+              </div>
+
+              {/* Status */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Publication Status</label>
+                <select
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value as any)}
+                  className="w-full px-4 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="draft">Draft</option>
+                  <option value="scheduled">Scheduled</option>
+                  <option value="published">Published</option>
+                </select>
+              </div>
+
+              {/* Scheduled For */}
+              {status === 'scheduled' && (
+                <div>
+                  <label className="block text-sm font-medium mb-2">Scheduled Publication Time</label>
+                  <input
+                    type="datetime-local"
+                    value={scheduledFor}
+                    onChange={(e) => setScheduledFor(e.target.value)}
+                    className="w-full px-4 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                </div>
+              )}
+
+              {/* Checkboxes */}
+              <div className="flex flex-wrap gap-6">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={featured}
+                    onChange={(e) => setFeatured(e.target.checked)}
+                    id="featured"
+                    className="w-5 h-5"
+                  />
+                  <label htmlFor="featured" className="text-sm font-medium">Featured post</label>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={allowIndexing}
+                    onChange={(e) => {
+                      setAllowIndexing(e.target.checked);
+                      if (e.target.checked) {
+                        setRobotsDirectives(allowFollow ? 'index,follow' : 'index,nofollow');
+                      } else {
+                        setRobotsDirectives(allowFollow ? 'noindex,follow' : 'noindex,nofollow');
+                      }
+                    }}
+                    id="allowIndexing"
+                    className="w-5 h-5"
+                  />
+                  <label htmlFor="allowIndexing" className="text-sm font-medium">Allow search indexing</label>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={allowFollow}
+                    onChange={(e) => {
+                      setAllowFollow(e.target.checked);
+                      if (e.target.checked) {
+                        setRobotsDirectives(allowIndexing ? 'index,follow' : 'noindex,follow');
+                      } else {
+                        setRobotsDirectives(allowIndexing ? 'index,nofollow' : 'noindex,nofollow');
+                      }
+                    }}
+                    id="allowFollow"
+                    className="w-5 h-5"
+                  />
+                  <label htmlFor="allowFollow" className="text-sm font-medium">Allow link following</label>
+                </div>
+              </div>
+
+              {/* Robots Directives */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Robots Meta Directives</label>
+                <input
+                  type="text"
+                  value={robotsDirectives}
+                  onChange={(e) => setRobotsDirectives(e.target.value)}
+                  placeholder="index,follow"
+                  className="w-full px-4 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary font-mono text-sm"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Common: index,follow | noindex,nofollow | index,nofollow | noindex,follow
+                </p>
+              </div>
+
+              {/* Sitemap Priority */}
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Sitemap Priority: {sitemapPriority.toFixed(1)}
+                </label>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.1"
+                  value={sitemapPriority}
+                  onChange={(e) => setSitemapPriority(parseFloat(e.target.value))}
+                  className="w-full"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  0.0 (lowest) to 1.0 (highest). Default: 0.7
+                </p>
+              </div>
+            </div>
+          </CollapsibleSection>
+
+          {/* ==================== SOURCES & CITATIONS ==================== */}
+          <CollapsibleSection title="🔗 Sources & Citations" subtitle="Build trust with external references">
+            <div className="space-y-4">
+              {/* Sources List */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Citation Sources</label>
+                {sources.map((source, index) => (
+                  <div key={index} className="grid grid-cols-[1fr_2fr_auto] gap-2 mb-2">
+                    <input
+                      type="text"
+                      value={source.label}
+                      onChange={(e) => updateSource(index, 'label', e.target.value)}
+                      placeholder="Label"
+                      className="px-3 py-2 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                    />
+                    <input
+                      type="url"
+                      value={source.url}
+                      onChange={(e) => updateSource(index, 'url', e.target.value)}
+                      placeholder="https://example.com"
+                      className="px-3 py-2 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm font-mono"
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => removeSource(index)}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                ))}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={addSource}
+                  className="mt-2"
+                >
+                  + Add Source
+                </Button>
+              </div>
+
+              {/* Outbound Links Verified */}
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  checked={outboundLinksVerified}
+                  onChange={(e) => setOutboundLinksVerified(e.target.checked)}
+                  id="outboundLinksVerified"
+                  className="w-5 h-5"
+                />
+                <label htmlFor="outboundLinksVerified" className="text-sm font-medium">
+                  All outbound links have been verified for quality and relevance
+                </label>
+              </div>
+            </div>
+          </CollapsibleSection>
+
+          {/* ==================== MESSAGES & ACTIONS ==================== */}
+          <div className="bg-card border border-border rounded-xl p-6">
+            {/* Messages */}
+            {saveMsg && (
+              <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 mb-4">
+                <p className="text-primary font-medium">{saveMsg}</p>
+              </div>
+            )}
+
+            {saveErr && (
+              <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 mb-4">
+                <p className="text-destructive font-medium">{saveErr}</p>
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className="flex gap-4">
+              <Button
+                onClick={savePost}
+                disabled={saving}
+                className="flex-1"
+              >
+                <Save size={18} className="mr-2" />
+                {saving ? 'Saving...' : 'Save Post'}
+              </Button>
+
+              <Button
+                variant="outline"
+                onClick={() => window.location.hash = 'blog'}
+              >
+                <Eye size={18} className="mr-2" />
+                View Blog
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

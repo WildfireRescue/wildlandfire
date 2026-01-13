@@ -1,6 +1,7 @@
 // =====================================================
 // BLOG POST PAGE
 // Single blog post view with premium reading experience
+// Enhanced with comprehensive SEO meta tags and structured data
 // =====================================================
 
 import { useEffect, useState } from 'react';
@@ -16,7 +17,10 @@ import { BlogReadingProgress } from '../components/blog/BlogReadingProgress';
 import { BlogTableOfContents } from '../components/blog/BlogTableOfContents';
 import { BlogShareButtons } from '../components/blog/BlogShareButtons';
 import { BlogRelatedPosts } from '../components/blog/BlogRelatedPosts';
+import { BlogEEATSignals } from '../components/blog/BlogEEATSignals';
+import { BlogSources } from '../components/blog/BlogSources';
 import { getPostBySlug } from '../../lib/supabaseBlog';
+import { generateMetaTags, updateDocumentMeta, generateArticleStructuredData } from '../../lib/seoHelpers';
 import type { BlogPost } from '../../lib/blogTypes';
 
 interface BlogPostPageProps {
@@ -40,6 +44,22 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
         if (!fetchedPost) throw new Error('Post not found');
 
         setPost(fetchedPost);
+        
+        // Generate and apply SEO meta tags
+        const metaTags = generateMetaTags(fetchedPost);
+        updateDocumentMeta(metaTags);
+        
+        // Add JSON-LD structured data
+        const structuredData = generateArticleStructuredData(fetchedPost);
+        let scriptTag = document.getElementById('article-structured-data') as HTMLScriptElement;
+        if (!scriptTag) {
+          scriptTag = document.createElement('script');
+          scriptTag.id = 'article-structured-data';
+          scriptTag.type = 'application/ld+json';
+          document.head.appendChild(scriptTag);
+        }
+        scriptTag.textContent = JSON.stringify(structuredData);
+        
       } catch (err: any) {
         setError(err?.message || 'Failed to load post');
         setPost(null);
@@ -219,6 +239,9 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
                 </ReactMarkdown>
               </motion.article>
 
+              {/* Sources & Citations */}
+              <BlogSources post={post} />
+
               {/* Share Section */}
               <BlogShareButtons title={post.title} excerpt={post.excerpt} />
 
@@ -239,8 +262,15 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
             </div>
 
             {/* Sidebar: TOC (desktop only, sticky) */}
-            <aside className="hidden lg:block">
-              <BlogTableOfContents content={post.content_markdown} />
+            <aside className="hidden lg:block space-y-6">
+              <div className="sticky top-24">
+                <BlogTableOfContents content={post.content_markdown} />
+                
+                {/* E-E-A-T Signals */}
+                <div className="mt-6">
+                  <BlogEEATSignals post={post} />
+                </div>
+              </div>
             </aside>
           </div>
         </div>

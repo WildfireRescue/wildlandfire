@@ -154,8 +154,16 @@ export function BlogEditorPage() {
         author_name: sessionEmail?.split('@')[0],
       };
 
-      const { error } = await createPost(postData);
-      if (error) throw error;
+      console.log('Attempting to save post:', postData);
+      
+      const { post, error } = await createPost(postData);
+      
+      console.log('Save result:', { post, error });
+      
+      if (error) {
+        console.error('Supabase error:', error);
+        throw new Error(error.message || 'Failed to save post');
+      }
 
       setSaveMsg('✅ Post saved successfully!');
       
@@ -170,6 +178,7 @@ export function BlogEditorPage() {
       setFeatured(false);
       setStatus('draft');
     } catch (e: any) {
+      console.error('Save error:', e);
       setSaveErr(e?.message || 'Failed to save post');
     } finally {
       setSaving(false);
