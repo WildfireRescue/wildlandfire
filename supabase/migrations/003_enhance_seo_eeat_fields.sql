@@ -63,6 +63,7 @@ ALTER TABLE posts ADD COLUMN IF NOT EXISTS robots_directives TEXT DEFAULT 'index
 ALTER TABLE posts ADD COLUMN IF NOT EXISTS sitemap_priority NUMERIC(2,1) DEFAULT 0.7;
 
 -- Add constraint for sitemap_priority range
+ALTER TABLE posts DROP CONSTRAINT IF EXISTS posts_sitemap_priority_check;
 ALTER TABLE posts ADD CONSTRAINT posts_sitemap_priority_check 
   CHECK (sitemap_priority >= 0.0 AND sitemap_priority <= 1.0);
 
@@ -132,49 +133,8 @@ CREATE POLICY "Public can view published posts"
     AND (noindex = false OR allow_indexing = true)
   );
 
--- Policy for editors to view all posts (if profiles table exists)
-CREATE POLICY "Editors can view all posts"
-  ON posts FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM profiles
-      WHERE profiles.user_id = auth.uid()
-      AND profiles.role IN ('editor', 'admin')
-    )
-  );
-
--- Policy for editors to insert posts
-CREATE POLICY "Editors can insert posts"
-  ON posts FOR INSERT
-  WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM profiles
-      WHERE profiles.user_id = auth.uid()
-      AND profiles.role IN ('editor', 'admin')
-    )
-  );
-
--- Policy for editors to update posts
-CREATE POLICY "Editors can update posts"
-  ON posts FOR UPDATE
-  USING (
-    EXISTS (
-      SELECT 1 FROM profiles
-      WHERE profiles.user_id = auth.uid()
-      AND profiles.role IN ('editor', 'admin')
-    )
-  );
-
--- Policy for editors to delete posts
-CREATE POLICY "Editors can delete posts"
-  ON posts FOR DELETE
-  USING (
-    EXISTS (
-      SELECT 1 FROM profiles
-      WHERE profiles.user_id = auth.uid()
-      AND profiles.role IN ('editor', 'admin')
-    )
-  );
+-- Note: Editor policies already exist from migration 002
+-- No need to recreate them here to avoid conflicts
 
 -- =====================================================
 -- 10. SET SENSIBLE DEFAULTS FOR EXISTING RECORDS
