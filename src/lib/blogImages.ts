@@ -170,7 +170,9 @@ export function safeDangerousHTML(html: unknown): { __html: string } {
  * @returns A valid image URL (never null)
  */
 export function safeImageSrc(cover: unknown, fallback: string = PLACEHOLDER_IMAGE): string {
+  console.log('[safeImageSrc] Input:', { cover, type: typeof cover });
   const resolved = resolveCoverImageSrc(cover);
+  console.log('[safeImageSrc] Resolved:', resolved);
   return resolved || fallback;
 }
 
