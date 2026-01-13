@@ -78,6 +78,7 @@
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.19",
+    "@types/react-dom": "^19.2.3",
     "@types/react-helmet-async": "^1.0.1",
     "terser": "^5.44.1",
     "tsx": "^4.21.0"
