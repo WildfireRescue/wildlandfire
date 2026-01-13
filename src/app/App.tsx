@@ -13,8 +13,10 @@ const StoriesPage = lazy(() => import('./pages/StoriesPage').then(m => ({ defaul
 const GrantsPage = lazy(() => import('./pages/GrantsPage').then(m => ({ default: m.GrantsPage })));
 const DonatePage = lazy(() => import('./pages/DonatePage').then(m => ({ default: m.DonatePage })));
 const ThankYouPage = lazy(() => import('./pages/ThankYouPage').then(m => ({ default: m.ThankYouPage })));
-const ArticlesPage = lazy(() => import('./pages/ArticlesPage').then(m => ({ default: m.ArticlesPage })));
-const PublishPage = lazy(() => import('./pages/PublishPage').then(m => ({ default: m.PublishPage })));
+const BlogIndexPage = lazy(() => import('./pages/BlogIndexPage').then(m => ({ default: m.BlogIndexPage })));
+const BlogPostPage = lazy(() => import('./pages/BlogPostPage').then(m => ({ default: m.BlogPostPage })));
+const BlogCategoryPage = lazy(() => import('./pages/BlogCategoryPage').then(m => ({ default: m.BlogCategoryPage })));
+const BlogEditorPage = lazy(() => import('./pages/admin/BlogEditorPage').then(m => ({ default: m.BlogEditorPage })));
 const AuthCallbackPage = lazy(() => import('./pages/AuthCallbackPage').then(m => ({ default: m.AuthCallbackPage })));
 const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage').then(m => ({ default: m.PrivacyPolicyPage })));
 const TermsOfUsePage = lazy(() => import('./pages/TermsOfUsePage').then(m => ({ default: m.TermsOfUsePage })));
@@ -26,7 +28,8 @@ const UrgencyTopBanner = lazy(() => import('./components/UrgencyTopBanner').then
 // Wildland Fire Recovery Fund - Main Application Component
 export default function App() {
   const [currentPage, setCurrentPage] = useState('home');
-  const [articleSlug, setArticleSlug] = useState<string | null>(null);
+  const [blogSlug, setBlogSlug] = useState<string | null>(null);
+  const [blogCategory, setBlogCategory] = useState<string | null>(null);
   const [isDonationFormOpen, setIsDonationFormOpen] = useState(false);
 
   const allowedPages = [
@@ -37,8 +40,8 @@ export default function App() {
     'stories',
     'grants',
     'donate',
-    'articles',
-    'publish',
+    'blog',
+    'admin',
     'auth-callback',
     'privacy',
     'terms',
@@ -63,27 +66,55 @@ export default function App() {
     const handleHashChange = () => {
       const rawHash = window.location.hash.slice(1);
 
+      // ✅ Redirect old articles routes to blog
+      if (rawHash.startsWith('articles')) {
+        const newHash = rawHash.replace('articles', 'blog');
+        window.location.replace(`#${newHash}`);
+        return;
+      }
+
+      // ✅ Redirect old publish route to admin/blog
+      if (rawHash === 'publish') {
+        window.location.replace('#admin/blog');
+        return;
+      }
+
       // ✅ Keep full path segments, strip querystring only
-      // Supports: #articles/slug?x=1  and  #auth-callback?x=1
       const [hashNoQuery] = rawHash.split('?');
       const parts = hashNoQuery ? hashNoQuery.split('/').filter(Boolean) : [];
       const page = parts[0] || 'home';
-      const slug = parts[1] || null;
 
       if (allowedPages.includes(page)) {
         setCurrentPage(page);
 
-        if (page === 'articles') {
-          setArticleSlug(slug);
+        // Handle blog routing
+        if (page === 'blog') {
+          if (parts[1] === 'category' && parts[2]) {
+            // #blog/category/news
+            setBlogCategory(parts[2]);
+            setBlogSlug(null);
+          } else if (parts[1]) {
+            // #blog/post-slug
+            setBlogSlug(parts[1]);
+            setBlogCategory(null);
+          } else {
+            // #blog
+            setBlogSlug(null);
+            setBlogCategory(null);
+          }
+        } else if (page === 'admin' && parts[1] === 'blog') {
+          // #admin/blog - handled in render
         } else {
-          setArticleSlug(null);
+          setBlogSlug(null);
+          setBlogCategory(null);
         }
 
         window.scrollTo(0, 0);
       } else {
         // Unknown hash → go home
         setCurrentPage('home');
-        setArticleSlug(null);
+        setBlogSlug(null);
+        setBlogCategory(null);
       }
     };
 
@@ -270,11 +301,17 @@ export default function App() {
       case 'donate':
         pageContent = <DonatePage />;
         break;
-      case 'articles':
-        pageContent = <ArticlesPage slug={articleSlug || undefined} />;
+      case 'blog':
+        if (blogCategory) {
+          pageContent = <BlogCategoryPage categorySlug={blogCategory} />;
+        } else if (blogSlug) {
+          pageContent = <BlogPostPage slug={blogSlug} />;
+        } else {
+          pageContent = <BlogIndexPage />;
+        }
         break;
-      case 'publish':
-        pageContent = <PublishPage />;
+      case 'admin':
+        pageContent = <BlogEditorPage />;
         break;
       case 'auth-callback':
         pageContent = <AuthCallbackPage />;

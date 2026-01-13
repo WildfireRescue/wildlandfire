@@ -148,6 +148,21 @@
 
 # Redirect path-based routes to hash-based routes
 [[redirects]]
+  from = "/articles"
+  to = "/#blog"
+  status = 301
+
+[[redirects]]
+  from = "/articles/*"
+  to = "/#blog/:splat"
+  status = 301
+
+[[redirects]]
+  from = "/publish"
+  to = "/#admin/blog"
+  status = 301
+
+[[redirects]]
   from = "/donate"
   to = "/#donate"
   status = 301

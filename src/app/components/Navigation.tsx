@@ -13,7 +13,7 @@ const navItems = [
   { id: 'about', label: 'About Us', icon: Users, description: 'Learn about our mission and purpose' },
   { id: 'donate', label: 'Donate', icon: DollarSign, description: 'Make a difference today', highlight: true },
   { id: 'stories', label: 'Stories', icon: Users, description: 'See the lives you can change' },
-  { id: 'articles', label: 'Articles', icon: FileText, description: 'Latest updates and stories' },
+  { id: 'blog', label: 'Blog', icon: FileText, description: 'Latest updates and insights' },
   { id: 'grants', label: 'Grants', icon: FileText, description: 'Apply for support programs' },
   { id: 'contact', label: 'Contact Us', icon: Phone, description: 'Get in touch with our team' },
 ];
