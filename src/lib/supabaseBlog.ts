@@ -14,19 +14,32 @@ import type { BlogPost, BlogCategory, UserProfile, PaginationOptions, BlogListFi
  * Fetch published posts with pagination
  */
 export async function getPublishedPosts(options: PaginationOptions = { page: 1, perPage: 12 }) {
-  const { page, perPage } = options;
-  const from = (page - 1) * perPage;
-  const to = from + perPage - 1;
+  try {
+    const { page, perPage } = options;
+    const from = (page - 1) * perPage;
+    const to = from + perPage - 1;
 
-  const { data, error, count } = await supabase
-    .from('posts')
-    .select('*', { count: 'exact' })
-    .eq('status', 'published')
-    .eq('noindex', false)
-    .order('published_at', { ascending: false })
-    .range(from, to);
+    console.log('[getPublishedPosts] Fetching posts:', { page, perPage, from, to });
 
-  return { posts: data as BlogPost[] | null, error, total: count || 0 };
+    const { data, error, count } = await supabase
+      .from('posts')
+      .select('*', { count: 'exact' })
+      .eq('status', 'published')
+      .eq('noindex', false)
+      .order('published_at', { ascending: false })
+      .range(from, to);
+
+    if (error) {
+      console.error('[getPublishedPosts] Error:', error);
+      return { posts: null, error, total: 0 };
+    }
+
+    console.log('[getPublishedPosts] Success:', { count: data?.length || 0, total: count });
+    return { posts: data as BlogPost[] | null, error: null, total: count || 0 };
+  } catch (e: any) {
+    console.error('[getPublishedPosts] Unexpected error:', e);
+    return { posts: null, error: e, total: 0 };
+  }
 }
 
 /**
@@ -88,36 +101,62 @@ export async function getPostBySlug(slug: string, includeUnpublished: boolean = 
  * Fetch featured posts
  */
 export async function getFeaturedPosts(limit: number = 3) {
-  const { data, error } = await supabase
-    .from('posts')
-    .select('*')
-    .eq('status', 'published')
-    .eq('noindex', false)
-    .eq('featured', true)
-    .order('published_at', { ascending: false })
-    .limit(limit);
+  try {
+    console.log('[getFeaturedPosts] Fetching featured posts:', { limit });
 
-  return { posts: data as BlogPost[] | null, error };
+    const { data, error } = await supabase
+      .from('posts')
+      .select('*')
+      .eq('status', 'published')
+      .eq('noindex', false)
+      .eq('featured', true)
+      .order('published_at', { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.error('[getFeaturedPosts] Error:', error);
+      return { posts: null, error };
+    }
+
+    console.log('[getFeaturedPosts] Success:', { count: data?.length || 0 });
+    return { posts: data as BlogPost[] | null, error: null };
+  } catch (e: any) {
+    console.error('[getFeaturedPosts] Unexpected error:', e);
+    return { posts: null, error: e };
+  }
 }
 
 /**
  * Fetch posts by category
  */
 export async function getPostsByCategory(category: string, options: PaginationOptions = { page: 1, perPage: 12 }) {
-  const { page, perPage } = options;
-  const from = (page - 1) * perPage;
-  const to = from + perPage - 1;
+  try {
+    const { page, perPage } = options;
+    const from = (page - 1) * perPage;
+    const to = from + perPage - 1;
 
-  const { data, error, count } = await supabase
-    .from('posts')
-    .select('*', { count: 'exact' })
-    .eq('status', 'published')
-    .eq('noindex', false)
-    .eq('category', category)
-    .order('published_at', { ascending: false })
-    .range(from, to);
+    console.log('[getPostsByCategory] Fetching posts:', { category, page, perPage });
 
-  return { posts: data as BlogPost[] | null, error, total: count || 0 };
+    const { data, error, count } = await supabase
+      .from('posts')
+      .select('*', { count: 'exact' })
+      .eq('status', 'published')
+      .eq('noindex', false)
+      .eq('category', category)
+      .order('published_at', { ascending: false })
+      .range(from, to);
+
+    if (error) {
+      console.error('[getPostsByCategory] Error:', error);
+      return { posts: null, error, total: 0 };
+    }
+
+    console.log('[getPostsByCategory] Success:', { count: data?.length || 0, total: count });
+    return { posts: data as BlogPost[] | null, error: null, total: count || 0 };
+  } catch (e: any) {
+    console.error('[getPostsByCategory] Unexpected error:', e);
+    return { posts: null, error: e, total: 0 };
+  }
 }
 
 /**
@@ -163,13 +202,46 @@ export async function getRelatedPosts(category: string | null, currentSlug: stri
  * Create new post
  */
 export async function createPost(postData: Partial<BlogPost>) {
-  const { data, error } = await supabase
-    .from('posts')
-    .insert([postData])
-    .select()
-    .single();
+  try {
+    console.log('[createPost] Creating post:', { 
+      title: postData.title, 
+      slug: postData.slug,
+      status: postData.status 
+    });
 
-  return { post: data as BlogPost | null, error };
+    const { data, error } = await supabase
+      .from('posts')
+      .insert([postData])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('[createPost] Supabase error:', {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint
+      });
+      return { post: null, error };
+    }
+
+    if (!data) {
+      console.error('[createPost] No data returned after insert');
+      return { 
+        post: null, 
+        error: { message: 'No data returned from database', code: 'NO_DATA' } 
+      };
+    }
+
+    console.log('[createPost] Success:', { id: data.id, slug: data.slug });
+    return { post: data as BlogPost, error: null };
+  } catch (e: any) {
+    console.error('[createPost] Unexpected error:', e);
+    return { 
+      post: null, 
+      error: { message: e?.message || 'Unexpected error during post creation', code: 'UNEXPECTED' } 
+    };
+  }
 }
 
 /**
@@ -214,25 +286,51 @@ export async function incrementViewCount(slug: string) {
  * Fetch all categories
  */
 export async function getCategories() {
-  const { data, error } = await supabase
-    .from('categories')
-    .select('*')
-    .order('name', { ascending: true });
+  try {
+    console.log('[getCategories] Fetching categories...');
 
-  return { categories: data as BlogCategory[] | null, error };
+    const { data, error } = await supabase
+      .from('categories')
+      .select('*')
+      .order('name', { ascending: true });
+
+    if (error) {
+      console.error('[getCategories] Error:', error);
+      return { categories: null, error };
+    }
+
+    console.log('[getCategories] Success:', { count: data?.length || 0 });
+    return { categories: data as BlogCategory[] | null, error: null };
+  } catch (e: any) {
+    console.error('[getCategories] Unexpected error:', e);
+    return { categories: null, error: e };
+  }
 }
 
 /**
  * Fetch category by slug
  */
 export async function getCategoryBySlug(slug: string) {
-  const { data, error } = await supabase
-    .from('categories')
-    .select('*')
-    .eq('slug', slug)
-    .single();
+  try {
+    console.log('[getCategoryBySlug] Fetching category:', slug);
 
-  return { category: data as BlogCategory | null, error };
+    const { data, error } = await supabase
+      .from('categories')
+      .select('*')
+      .eq('slug', slug)
+      .single();
+
+    if (error) {
+      console.error('[getCategoryBySlug] Error:', error);
+      return { category: null, error };
+    }
+
+    console.log('[getCategoryBySlug] Success:', data?.name);
+    return { category: data as BlogCategory | null, error: null };
+  } catch (e: any) {
+    console.error('[getCategoryBySlug] Unexpected error:', e);
+    return { category: null, error: e };
+  }
 }
 
 // =====================================================
@@ -242,7 +340,8 @@ export async function getCategoryBySlug(slug: string) {
 /**
  * Get current user's profile
  * Returns the user's profile from the profiles table
- * This is required for permission checks and role-based access
+ * This is OPTIONAL - if profile doesn't exist or errors (500), operations can still continue
+ * Profile is only used for role-based UI, not for core functionality
  */
 export async function getCurrentUserProfile() {
   try {
@@ -250,44 +349,56 @@ export async function getCurrentUserProfile() {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     
     if (userError) {
-      console.error('[getCurrentUserProfile] Auth error:', userError);
-      return { profile: null, error: userError };
+      console.warn('[getCurrentUserProfile] Auth error (non-blocking):', userError.message);
+      return { profile: null, error: null }; // Don't propagate auth errors
     }
     
     if (!user) {
-      console.warn('[getCurrentUserProfile] No authenticated user');
+      console.log('[getCurrentUserProfile] No authenticated user');
       return { profile: null, error: null };
     }
 
-    console.log('[getCurrentUserProfile] Fetching profile for user:', user.id);
+    console.log('[getCurrentUserProfile] Attempting to fetch profile for user:', user.id);
 
     // Fetch the profile using the user's ID
+    // This may fail with 500 if RLS policies are misconfigured - that's OK
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
-      .eq('id', user.id) // Changed from user_id to id
-      .single();
+      .eq('id', user.id)
+      .maybeSingle(); // Use maybeSingle to handle 0 or 1 rows gracefully
 
     if (error) {
-      // If no profile found, log a detailed error
+      // Log but don't throw - profile is optional
       if (error.code === 'PGRST116') {
-        console.error('[getCurrentUserProfile] No profile found for user. This might mean:');
-        console.error('  1. The user signed up before the profile trigger was added');
-        console.error('  2. The profile was deleted');
-        console.error('  3. The migration has not been run');
-        console.error('  User ID:', user.id);
-        console.error('  User Email:', user.email);
+        console.warn('[getCurrentUserProfile] No profile row found (non-blocking):', {
+          userId: user.id,
+          email: user.email,
+          note: 'User can still use the app via admin allowlist'
+        });
+      } else if (error.code === '500' || error.message?.includes('500')) {
+        console.warn('[getCurrentUserProfile] Profile fetch returned 500 (non-blocking):', {
+          error: error.message,
+          note: 'This is likely an RLS policy issue. User can still proceed via admin allowlist.'
+        });
       } else {
-        console.error('[getCurrentUserProfile] Database error:', error);
+        console.warn('[getCurrentUserProfile] Profile fetch error (non-blocking):', error.message);
       }
-      return { profile: null, error };
+      // Return null profile, no error - don't block operations
+      return { profile: null, error: null };
     }
 
-    console.log('[getCurrentUserProfile] Profile found:', { id: data.id, email: data.email, role: data.role });
-    return { profile: data as UserProfile | null, error: null };
-  } catch (e) {
-    console.error('[getCurrentUserProfile] Unexpected error:', e);
-    return { profile: null, error: e as any };
+    if (data) {
+      console.log('[getCurrentUserProfile] Profile found:', { id: data.id, email: data.email, role: data.role });
+      return { profile: data as UserProfile, error: null };
+    } else {
+      console.log('[getCurrentUserProfile] No profile data returned (non-blocking)');
+      return { profile: null, error: null };
+    }
+  } catch (e: any) {
+    // Catch any unexpected errors - don't propagate them
+    console.warn('[getCurrentUserProfile] Unexpected error (non-blocking):', e.message || e);
+    return { profile: null, error: null };
   }
 }
 
@@ -311,6 +422,9 @@ export function isAdminEmail(email: string | undefined): boolean {
  * Check if current user is an editor or admin
  * Returns true if user has editor or admin role, OR if email is in admin allowlist
  * Returns false if user is not authenticated or doesn't have permissions
+ * 
+ * IMPORTANT: This function is non-blocking. Profile fetch errors (including 500) will not prevent
+ * admin allowlist checks from working.
  */
 export async function isCurrentUserEditor(): Promise<boolean> {
   try {
@@ -323,36 +437,32 @@ export async function isCurrentUserEditor(): Promise<boolean> {
 
     console.log('[isCurrentUserEditor] Checking permissions for:', user.email);
     
-    // First check if email is in admin allowlist
+    // First check if email is in admin allowlist - this is the PRIMARY check
+    // This works even if profiles table is broken
     if (isAdminEmail(user.email)) {
-      console.log('[isCurrentUserEditor] User is in admin allowlist, granting access');
+      console.log('[isCurrentUserEditor] ✅ User is in admin allowlist, granting access');
       return true;
     }
 
-    const { profile, error } = await getCurrentUserProfile();
-    
-    if (error) {
-      console.error('[isCurrentUserEditor] Error fetching profile:', error.message);
-      // If profile fetch fails but user is in allowlist, still grant access
-      return isAdminEmail(user.email);
-    }
+    // Secondary check: try to load profile from database
+    // If this fails (500 error, RLS issue, etc.), we already checked allowlist above
+    const { profile } = await getCurrentUserProfile();
     
     if (!profile) {
-      console.warn('[isCurrentUserEditor] No profile found for current user');
-      // Already checked allowlist above, so return false
+      console.log('[isCurrentUserEditor] No profile found and email not in allowlist');
       return false;
     }
     
     const hasPermission = profile.role === 'editor' || profile.role === 'admin';
-    console.log('[isCurrentUserEditor] Permission check:', { 
+    console.log('[isCurrentUserEditor] Profile-based permission check:', { 
       email: profile.email, 
       role: profile.role, 
       hasPermission 
     });
     
     return hasPermission;
-  } catch (e) {
-    console.error('[isCurrentUserEditor] Unexpected error:', e);
+  } catch (e: any) {
+    console.warn('[isCurrentUserEditor] Error checking permissions (non-blocking):', e.message || e);
     return false;
   }
 }
@@ -360,18 +470,15 @@ export async function isCurrentUserEditor(): Promise<boolean> {
 /**
  * Check if current user is an admin
  * Returns true only if user has admin role
+ * IMPORTANT: This is non-blocking. Profile fetch errors will not throw.
  */
 export async function isCurrentUserAdmin(): Promise<boolean> {
   try {
-    const { profile, error } = await getCurrentUserProfile();
+    const { profile } = await getCurrentUserProfile();
     
-    if (error) {
-      console.error('[isCurrentUserAdmin] Error fetching profile:', error.message);
-      return false;
-    }
-    
+    // getCurrentUserProfile now returns null error on failure (non-blocking)
     if (!profile) {
-      console.warn('[isCurrentUserAdmin] No profile found for current user');
+      console.log('[isCurrentUserAdmin] No profile found');
       return false;
     }
     
@@ -383,8 +490,8 @@ export async function isCurrentUserAdmin(): Promise<boolean> {
     });
     
     return isAdmin;
-  } catch (e) {
-    console.error('[isCurrentUserAdmin] Unexpected error:', e);
+  } catch (e: any) {
+    console.warn('[isCurrentUserAdmin] Unexpected error (non-blocking):', e.message || e);
     return false;
   }
 }

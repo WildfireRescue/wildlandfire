@@ -9,6 +9,7 @@ import { Helmet } from 'react-helmet-async';
 import { BlogPostCard } from '../components/blog/BlogPostCard';
 import { BlogPagination } from '../components/blog/BlogPagination';
 import { getPublishedPosts, getFeaturedPosts, getCategories } from '../../lib/supabaseBlog';
+import { withTimeout, TimeoutError } from '../../lib/promiseUtils';
 import type { BlogPost, BlogCategory } from '../../lib/blogTypes';
 
 export function BlogIndexPage() {
@@ -26,51 +27,162 @@ export function BlogIndexPage() {
 
   // Fetch categories
   useEffect(() => {
+    let mounted = true;
+    
     async function loadCategories() {
-      const { categories: cats } = await getCategories();
-      setCategories(cats || []);
+      try {
+        console.log('[BlogIndex] Loading categories...');
+        
+        const categoriesPromise = getCategories();
+        const { categories: cats, error } = await withTimeout(
+          categoriesPromise,
+          10000,
+          'Failed to load categories: Request timed out'
+        );
+        
+        if (!mounted) return; // Component unmounted
+        
+        if (error) {
+          console.error('[BlogIndex] Error loading categories:', error);
+          return;
+        }
+        
+        setCategories(cats || []);
+      } catch (e: any) {
+        if (!mounted) return;
+        console.error('[BlogIndex] Failed to load categories:', e);
+      }
     }
+    
     loadCategories();
+    
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   // Fetch featured posts (only on first page)
   useEffect(() => {
+    let mounted = true;
+    
     if (currentPage === 1 && !selectedCategory) {
       async function loadFeatured() {
-        const { posts: featured } = await getFeaturedPosts(1);
-        setFeaturedPosts(featured || []);
+        try {
+          console.log('[BlogIndex] Loading featured posts...');
+          
+          const featuredPromise = getFeaturedPosts(1);
+          const { posts: featured, error } = await withTimeout(
+            featuredPromise,
+            10000,
+            'Failed to load featured posts: Request timed out'
+          );
+          
+          if (!mounted) return; // Component unmounted
+          
+          if (error) {
+            console.error('[BlogIndex] Error loading featured posts:', error);
+            setFeaturedPosts([]);
+            return;
+          }
+          
+          setFeaturedPosts(featured || []);
+        } catch (e: any) {
+          if (!mounted) return;
+          console.error('[BlogIndex] Failed to load featured posts:', e);
+          setFeaturedPosts([]);
+        }
       }
       loadFeatured();
     } else {
       setFeaturedPosts([]);
     }
+    
+    return () => {
+      mounted = false;
+    };
   }, [currentPage, selectedCategory]);
 
   // Fetch posts
   useEffect(() => {
+    let mounted = true;
+    
     async function loadPosts() {
       setLoading(true);
       setError(null);
 
       try {
-        const { posts: fetchedPosts, total, error: fetchError } = await getPublishedPosts({
+        console.log('[BlogIndex] Loading posts...', { page: currentPage, perPage });
+        
+        const postsPromise = getPublishedPosts({
           page: currentPage,
           perPage
         });
+        
+        const { posts: fetchedPosts, total, error: fetchError } = await withTimeout(
+          postsPromise,
+          15000,
+          'Failed to load posts: Request timed out. Please check your connection and try again.'
+        );
 
-        if (fetchError) throw fetchError;
+        if (!mounted) return; // Component unmounted
+
+        if (fetchError) {
+          console.error('[BlogIndex] Supabase error:', fetchError);
+          
+          let errorMessage = 'Failed to load posts';
+          
+          if (fetchError.message) {
+            errorMessage = fetchError.message;
+          }
+          
+          // Handle specific error codes
+          if (fetchError.code === 'PGRST116') {
+            errorMessage = 'No posts found. Please check back later!';
+          } else if (fetchError.code === '42501') {
+            errorMessage = 'Database permission error. Please contact support.';
+          } else if (fetchError.code === '500') {
+            errorMessage = 'Server error. Our team has been notified. Please try again later.';
+          }
+          
+          throw new Error(errorMessage);
+        }
 
         setPosts(fetchedPosts || []);
         setTotalPages(Math.ceil((total || 0) / perPage));
+        
+        console.log('[BlogIndex] Posts loaded successfully:', {
+          count: fetchedPosts?.length || 0,
+          total,
+          totalPages: Math.ceil((total || 0) / perPage)
+        });
+        
       } catch (err: any) {
-        setError(err?.message || 'Failed to load posts');
+        if (!mounted) return; // Component unmounted
+        
+        console.error('[BlogIndex] Load posts error:', err);
+        
+        let errorMessage = 'Failed to load posts';
+        
+        if (err instanceof TimeoutError) {
+          errorMessage = err.message;
+        } else if (err?.message) {
+          errorMessage = err.message;
+        }
+        
+        setError(errorMessage);
         setPosts([]);
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     }
 
     loadPosts();
+    
+    return () => {
+      mounted = false;
+    };
   }, [currentPage]);
 
   const handlePageChange = (page: number) => {

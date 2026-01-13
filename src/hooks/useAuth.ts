@@ -29,10 +29,13 @@ export function isAdminEmail(email: string | undefined): boolean {
  * 
  * Features:
  * - Loads session on mount using getSession()
- * - Loads user profile from public.profiles
- * - Listens for auth state changes
+ * - Loads user profile from public.profiles (optional - may fail with 500)
+ * - DOES NOT listen for auth state changes (handled by App.tsx)
  * - Provides loading state to prevent premature redirects
  * - Comprehensive logging for debugging
+ * 
+ * IMPORTANT: This hook does NOT register an auth listener.
+ * The listener is registered ONCE in App.tsx to avoid multiple subscriptions.
  */
 export function useAuth(): AuthState {
   const [session, setSession] = useState<Session | null>(null);
@@ -72,6 +75,7 @@ export function useAuth(): AuthState {
         setSession(currentSession);
 
         // Load profile if user is authenticated
+        // Profile fetch may fail with 500 - that's OK, it's optional
         if (currentSession?.user) {
           await loadProfile(currentSession.user);
         } else {
@@ -97,78 +101,63 @@ export function useAuth(): AuthState {
       try {
         console.log('[useAuth] Loading profile for user:', user.id, user.email);
         
+        // Profile fetch may return 500 or PGRST116 - handle gracefully
         const { data, error: profileError } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', user.id)
-          .single();
+          .maybeSingle(); // Use maybeSingle instead of single to handle 0 rows
 
         if (profileError) {
+          // Profile errors are non-blocking
           if (profileError.code === 'PGRST116') {
-            console.warn('[useAuth] No profile found for user:', user.id);
-            console.log('[useAuth] Checking admin allowlist...');
-            
-            // Check if user is in admin allowlist
-            if (isAdminEmail(user.email)) {
-              console.log('[useAuth] User email is in admin allowlist, treating as admin');
-              // Create a virtual admin profile
-              const virtualProfile: UserProfile = {
-                id: user.id,
-                email: user.email || '',
-                role: 'admin',
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-              };
-              if (mounted) setProfile(virtualProfile);
-            } else {
-              console.log('[useAuth] User email NOT in admin allowlist');
-              if (mounted) setProfile(null);
-            }
+            console.warn('[useAuth] No profile found for user (non-blocking):', user.id);
+          } else if (profileError.message?.includes('500')) {
+            console.warn('[useAuth] Profile fetch returned 500 (non-blocking):', profileError.message);
           } else {
-            console.error('[useAuth] Profile fetch error:', profileError);
+            console.warn('[useAuth] Profile fetch error (non-blocking):', profileError.message);
+          }
+          
+          // Check if user is in admin allowlist as fallback
+          if (isAdminEmail(user.email)) {
+            console.log('[useAuth] User email is in admin allowlist, creating virtual profile');
+            const virtualProfile: UserProfile = {
+              id: user.id,
+              email: user.email || '',
+              role: 'admin',
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            };
+            if (mounted) setProfile(virtualProfile);
+          } else {
+            console.log('[useAuth] User email NOT in admin allowlist, no profile available');
             if (mounted) setProfile(null);
           }
-        } else {
+        } else if (data) {
           console.log('[useAuth] Profile loaded:', {
             id: data.id,
             email: data.email,
             role: data.role
           });
           if (mounted) setProfile(data as UserProfile);
+        } else {
+          console.log('[useAuth] No profile data (non-blocking)');
+          if (mounted) setProfile(null);
         }
-      } catch (e) {
-        console.error('[useAuth] Profile load error:', e);
+      } catch (e: any) {
+        console.warn('[useAuth] Profile load error (non-blocking):', e.message || e);
         if (mounted) setProfile(null);
       }
     }
 
     initAuth();
 
-    // Listen for auth changes
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event, newSession) => {
-        console.log('[useAuth] Auth state changed:', event, {
-          hasSession: !!newSession,
-          email: newSession?.user?.email,
-        });
-
-        if (mounted) {
-          setSession(newSession);
-          
-          if (newSession?.user) {
-            await loadProfile(newSession.user);
-          } else {
-            setProfile(null);
-          }
-          
-          setError(null);
-        }
-      }
-    );
-
+    // ❌ DO NOT register auth listener here - it's handled in App.tsx
+    // Multiple listeners cause AbortError and stuck states
+    
     return () => {
       mounted = false;
-      authListener.subscription.unsubscribe();
+      console.log('[useAuth] Cleanup');
     };
   }, []);
 

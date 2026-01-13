@@ -12,6 +12,7 @@ import { BlogPostCard } from '../components/blog/BlogPostCard';
 import { BlogPagination } from '../components/blog/BlogPagination';
 import { BlogBreadcrumbs } from '../components/blog/BlogBreadcrumbs';
 import { getPostsByCategory, getCategoryBySlug } from '../../lib/supabaseBlog';
+import { withTimeout, TimeoutError } from '../../lib/promiseUtils';
 import { formatTag } from '../../lib/blogHelpers';
 import type { BlogPost, BlogCategory } from '../../lib/blogTypes';
 
@@ -31,38 +32,93 @@ export function BlogCategoryPage({ categorySlug }: BlogCategoryPageProps) {
 
   // Fetch category info
   useEffect(() => {
+    let mounted = true;
+    
     async function loadCategory() {
-      const { category: cat } = await getCategoryBySlug(categorySlug);
-      setCategory(cat);
+      try {
+        const categoryPromise = getCategoryBySlug(categorySlug);
+        const { category: cat, error } = await withTimeout(
+          categoryPromise,
+          10000,
+          'Failed to load category: Request timed out'
+        );
+        
+        if (!mounted) return;
+        
+        if (error) {
+          console.error('[BlogCategory] Error loading category:', error);
+        }
+        
+        setCategory(cat);
+      } catch (e: any) {
+        if (!mounted) return;
+        console.error('[BlogCategory] Failed to load category:', e);
+      }
     }
+    
     loadCategory();
+    
+    return () => {
+      mounted = false;
+    };
   }, [categorySlug]);
 
   // Fetch posts for category
   useEffect(() => {
+    let mounted = true;
+    
     async function loadPosts() {
       setLoading(true);
       setError(null);
 
       try {
-        const { posts: fetchedPosts, total, error: fetchError } = await getPostsByCategory(
+        console.log('[BlogCategory] Loading posts for category:', categorySlug);
+        
+        const postsPromise = getPostsByCategory(
           categorySlug,
           { page: currentPage, perPage }
         );
+        
+        const { posts: fetchedPosts, total, error: fetchError } = await withTimeout(
+          postsPromise,
+          15000,
+          'Failed to load posts: Request timed out'
+        );
 
-        if (fetchError) throw fetchError;
+        if (!mounted) return;
+
+        if (fetchError) {
+          console.error('[BlogCategory] Error:', fetchError);
+          throw new Error(fetchError.message || 'Failed to load posts');
+        }
 
         setPosts(fetchedPosts || []);
         setTotalPages(Math.ceil((total || 0) / perPage));
       } catch (err: any) {
-        setError(err?.message || 'Failed to load posts');
+        if (!mounted) return;
+        
+        let errorMessage = 'Failed to load posts';
+        
+        if (err instanceof TimeoutError) {
+          errorMessage = err.message;
+        } else if (err?.message) {
+          errorMessage = err.message;
+        }
+        
+        setError(errorMessage);
         setPosts([]);
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     }
 
     loadPosts();
+    
+    return () => {
+      mounted = false;
+    };
   }, [categorySlug, currentPage]);
 
   const handlePageChange = (page: number) => {

@@ -11,6 +11,7 @@ import { Button } from '../../components/ui/button';
 import { Mail, LogOut, Save, Eye } from 'lucide-react';
 import { createPost, getCategories, isCurrentUserEditor, getCurrentUserProfile } from '../../../lib/supabaseBlog';
 import { generateSlug, calculateReadingTime } from '../../../lib/blogHelpers';
+import { withTimeout, TimeoutError } from '../../../lib/promiseUtils';
 import type { BlogCategory } from '../../../lib/blogTypes';
 
 export function BlogEditorPage() {
@@ -51,7 +52,10 @@ export function BlogEditorPage() {
   }, [autoSlug]);
 
   // Load session + check editor status
+  // DO NOT register auth listener here - it's handled in App.tsx
   useEffect(() => {
+    let mounted = true;
+    
     async function checkAuth() {
       setIsCheckingAuth(true);
       setAuthError(null);
@@ -59,6 +63,8 @@ export function BlogEditorPage() {
       try {
         console.log('[BlogEditor] Checking auth...');
         const { data, error: sessionError } = await supabase.auth.getSession();
+        
+        if (!mounted) return; // Component unmounted, stop processing
         
         if (sessionError) {
           console.error('[BlogEditor] Session error:', sessionError);
@@ -80,15 +86,24 @@ export function BlogEditorPage() {
         
         if (email) {
           console.log('[BlogEditor] Checking editor status for:', email);
+          
+          // This call is now non-blocking - profile 500 errors won't break it
           const editorStatus = await isCurrentUserEditor();
+          
+          if (!mounted) return; // Component unmounted, stop processing
+          
           console.log('[BlogEditor] Editor status:', editorStatus);
           setIsEditor(editorStatus);
           
           if (!editorStatus) {
+            // This call is also non-blocking now
             const { profile } = await getCurrentUserProfile();
+            
+            if (!mounted) return; // Component unmounted, stop processing
+            
             console.log('[BlogEditor] User profile:', profile);
             if (!profile) {
-              setAuthError('No profile found. Please contact an administrator.');
+              setAuthError('No profile found and email not in admin allowlist. Please contact an administrator.');
             } else {
               setAuthError(`Your role is: ${profile.role}. You need editor or admin role.`);
             }
@@ -97,31 +112,27 @@ export function BlogEditorPage() {
           console.log('[BlogEditor] No authenticated user');
         }
       } catch (e: any) {
+        if (!mounted) return; // Component unmounted, stop processing
         console.error('[BlogEditor] Auth check error:', e);
         setAuthError(`Unexpected error: ${e?.message || 'Unknown error'}`);
       } finally {
-        setIsCheckingAuth(false);
+        if (mounted) {
+          setIsCheckingAuth(false);
+        }
       }
     }
     
     checkAuth();
 
-    const { data: sub } = supabase.auth.onAuthStateChange(async (event, sess) => {
-      console.log('[BlogEditor] Auth state changed:', event);
-      const email = sess?.user?.email ?? null;
-      setSessionEmail(email);
-      
-      if (email) {
-        setIsCheckingAuth(true);
-        const editorStatus = await isCurrentUserEditor();
-        setIsEditor(editorStatus);
-        setIsCheckingAuth(false);
-      } else {
-        setIsEditor(false);
-      }
-    });
+    // ❌ DO NOT subscribe to auth state changes here
+    // The listener is already registered in App.tsx
+    // Multiple listeners cause AbortError, memory leaks, and stuck states
 
-    return () => sub.subscription.unsubscribe();
+    // Cleanup function
+    return () => {
+      mounted = false;
+      console.log('[BlogEditor] Component unmounted');
+    };
   }, []);
 
   // Load categories
@@ -176,16 +187,24 @@ export function BlogEditorPage() {
   }
 
   async function savePost() {
+    // Clear previous messages and set saving state
     setSaving(true);
     setSaveMsg(null);
     setSaveErr(null);
 
     try {
-      if (!title.trim()) throw new Error('Title is required');
-      if (!content.trim()) throw new Error('Content is required');
+      // Validate required fields
+      if (!title.trim()) {
+        throw new Error('Title is required');
+      }
+      if (!content.trim()) {
+        throw new Error('Content is required');
+      }
 
       const finalSlug = slug || autoSlug;
-      if (!finalSlug) throw new Error('Slug is required');
+      if (!finalSlug) {
+        throw new Error('Slug is required');
+      }
 
       const readingTime = calculateReadingTime(content);
 
@@ -205,20 +224,47 @@ export function BlogEditorPage() {
         author_name: sessionEmail?.split('@')[0],
       };
 
-      console.log('Attempting to save post:', postData);
+      console.log('[BlogEditor] Attempting to save post:', postData);
       
-      const { post, error } = await createPost(postData);
+      // Wrap the createPost call with a 15-second timeout
+      const savePromise = createPost(postData);
+      const { post, error } = await withTimeout(
+        savePromise,
+        15000,
+        'Save operation timed out. Please check your connection and try again.'
+      );
       
-      console.log('Save result:', { post, error });
+      console.log('[BlogEditor] Save result:', { post, error });
       
       if (error) {
-        console.error('Supabase error:', error);
-        throw new Error(error.message || 'Failed to save post');
+        console.error('[BlogEditor] Supabase error:', error);
+        
+        // Provide detailed error messages
+        let errorMessage = 'Failed to save post';
+        
+        if (error.message) {
+          errorMessage = error.message;
+        }
+        
+        if (error.code === 'PGRST301') {
+          errorMessage = 'Permission denied. You may not have the required permissions to create posts.';
+        } else if (error.code === '23505') {
+          errorMessage = 'A post with this slug already exists. Please use a different slug.';
+        } else if (error.code === '42501') {
+          errorMessage = 'Database permission denied. Please ensure RLS policies are configured correctly.';
+        }
+        
+        throw new Error(errorMessage);
       }
 
-      setSaveMsg('✅ Post saved successfully!');
+      if (!post) {
+        throw new Error('Post was not created. No data returned from database.');
+      }
+
+      console.log('[BlogEditor] Post saved successfully:', post.id);
+      setSaveMsg(`✅ Post saved successfully! ${status === 'published' ? 'Post is now live.' : 'Saved as draft.'}`);
       
-      // Reset form
+      // Reset form after successful save
       setTitle('');
       setSlug('');
       slugTouched.current = false;
@@ -228,10 +274,27 @@ export function BlogEditorPage() {
       setTags('');
       setFeatured(false);
       setStatus('draft');
+      
+      // Clear success message after 5 seconds
+      setTimeout(() => setSaveMsg(null), 5000);
+      
     } catch (e: any) {
-      console.error('Save error:', e);
-      setSaveErr(e?.message || 'Failed to save post');
+      console.error('[BlogEditor] Save error:', e);
+      
+      let errorMessage = 'Failed to save post';
+      
+      if (e instanceof TimeoutError) {
+        errorMessage = e.message;
+      } else if (e?.message) {
+        errorMessage = e.message;
+      }
+      
+      setSaveErr(errorMessage);
+      
+      // Clear error message after 10 seconds
+      setTimeout(() => setSaveErr(null), 10000);
     } finally {
+      // ALWAYS clear saving state
       setSaving(false);
     }
   }
