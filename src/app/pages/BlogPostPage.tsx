@@ -21,6 +21,7 @@ import { BlogEEATSignals } from '../components/blog/BlogEEATSignals';
 import { BlogSources } from '../components/blog/BlogSources';
 import { getPostBySlug } from '../../lib/supabaseBlog';
 import { generateMetaTags, updateDocumentMeta, generateArticleStructuredData } from '../../lib/seoHelpers';
+import { safeImageSrc, safeMarkdownContent, coerceToString, PLACEHOLDER_IMAGE } from '../../lib/blogImages';
 import type { BlogPost } from '../../lib/blogTypes';
 
 interface BlogPostPageProps {
@@ -38,10 +39,26 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
       setError(null);
 
       try {
+        console.log('[BlogPostPage] Loading post:', slug);
+        
         const { post: fetchedPost, error: fetchError } = await getPostBySlug(slug);
 
-        if (fetchError) throw fetchError;
-        if (!fetchedPost) throw new Error('Post not found');
+        if (fetchError) {
+          console.error('[BlogPostPage] Fetch error:', fetchError);
+          throw fetchError;
+        }
+        
+        if (!fetchedPost) {
+          console.warn('[BlogPostPage] Post not found:', slug);
+          throw new Error('Post not found');
+        }
+
+        console.log('[BlogPostPage] Post loaded successfully:', {
+          title: fetchedPost.title,
+          slug: fetchedPost.slug,
+          hasContent: !!fetchedPost.content_markdown,
+          contentType: typeof fetchedPost.content_markdown
+        });
 
         setPost(fetchedPost);
         
@@ -61,6 +78,7 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
         scriptTag.textContent = JSON.stringify(structuredData);
         
       } catch (err: any) {
+        console.error('[BlogPostPage] Error loading post:', err);
         setError(err?.message || 'Failed to load post');
         setPost(null);
       } finally {
@@ -154,12 +172,12 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
                 className="mb-12"
               >
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-[1.1] tracking-tight text-heading">
-                  {post.title}
+                  {coerceToString(post.title)}
                 </h1>
 
                 {post.excerpt && (
                   <p className="text-xl md:text-2xl leading-relaxed text-body-text-muted mb-8 font-light">
-                    {post.excerpt}
+                    {coerceToString(post.excerpt)}
                   </p>
                 )}
 
@@ -181,11 +199,15 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
                   className="mb-12"
                 >
                   <img
-                    src={post.cover_image_url}
-                    alt={post.title}
+                    src={safeImageSrc(post.cover_image_url, PLACEHOLDER_IMAGE)}
+                    alt={coerceToString(post.title) || 'Blog post cover'}
                     className="rounded-xl w-full border border-border/30 shadow-2xl"
                     loading="eager"
                     decoding="async"
+                    onError={(e) => {
+                      console.warn('[BlogPostPage] Cover image failed to load:', post.cover_image_url);
+                      e.currentTarget.src = PLACEHOLDER_IMAGE;
+                    }}
                   />
                 </motion.div>
               )}
@@ -235,7 +257,7 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
                   first:prose-p:text-[1.1875rem] first:prose-p:leading-[1.65] first:prose-p:text-heading first:prose-p:font-medium first:prose-p:mb-8"
               >
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {post.content_markdown}
+                  {safeMarkdownContent(post.content_markdown)}
                 </ReactMarkdown>
               </motion.article>
 
@@ -243,7 +265,10 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
               <BlogSources post={post} />
 
               {/* Share Section */}
-              <BlogShareButtons title={post.title} excerpt={post.excerpt} />
+              <BlogShareButtons 
+                title={coerceToString(post.title)} 
+                excerpt={post.excerpt ? coerceToString(post.excerpt) : null} 
+              />
 
               {/* Related Posts */}
               <BlogRelatedPosts category={post.category} currentSlug={post.slug} />
@@ -264,7 +289,7 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
             {/* Sidebar: TOC (desktop only, sticky) */}
             <aside className="hidden lg:block space-y-6">
               <div className="sticky top-24">
-                <BlogTableOfContents content={post.content_markdown} />
+                <BlogTableOfContents content={safeMarkdownContent(post.content_markdown)} />
                 
                 {/* E-E-A-T Signals */}
                 <div className="mt-6">

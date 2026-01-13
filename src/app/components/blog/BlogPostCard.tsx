@@ -8,6 +8,7 @@ import { Calendar, Clock } from 'lucide-react';
 import { Button } from '../ui/button';
 import { BlogCategoryBadge } from './BlogCategoryBadge';
 import { formatDate, getReadTimeText } from '../../../lib/blogHelpers';
+import { safeImageSrc, safeSlug, PLACEHOLDER_IMAGE } from '../../../lib/blogImages';
 import type { BlogPost } from '../../../lib/blogTypes';
 
 interface BlogPostCardProps {
@@ -18,8 +19,11 @@ interface BlogPostCardProps {
 
 export function BlogPostCard({ post, index = 0, featured = false }: BlogPostCardProps) {
   const handleClick = () => {
-    window.location.hash = `blog/${post.slug}`;
+    window.location.hash = `blog/${safeSlug(post.slug)}`;
   };
+
+  // Resolve cover image with fallback
+  const coverImageSrc = safeImageSrc(post.cover_image_url, PLACEHOLDER_IMAGE);
 
   if (featured) {
     return (
@@ -32,25 +36,27 @@ export function BlogPostCard({ post, index = 0, featured = false }: BlogPostCard
       >
         <div className="grid md:grid-cols-2 gap-6">
           {/* Cover Image */}
-          {post.cover_image_url && (
-            <div className="relative h-72 md:h-full overflow-hidden">
-              <img
-                src={post.cover_image_url}
-                alt={post.title}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                loading="lazy"
-                decoding="async"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent md:bg-gradient-to-r" />
-              {post.featured && (
-                <div className="absolute top-4 left-4">
-                  <span className="bg-primary text-primary-foreground text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wide">
-                    Featured
-                  </span>
-                </div>
-              )}
-            </div>
-          )}
+          <div className="relative h-72 md:h-full overflow-hidden">
+            <img
+              src={coverImageSrc}
+              alt={post.title || 'Blog post cover'}
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              loading="lazy"
+              decoding="async"
+              onError={(e) => {
+                console.warn('[BlogPostCard] Image failed to load:', post.cover_image_url);
+                e.currentTarget.src = PLACEHOLDER_IMAGE;
+              }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent md:bg-gradient-to-r" />
+            {post.featured && (
+              <div className="absolute top-4 left-4">
+                <span className="bg-primary text-primary-foreground text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wide">
+                  Featured
+                </span>
+              </div>
+            )}
+          </div>
           
           {/* Content */}
           <div className="p-8 flex flex-col justify-center">
@@ -104,25 +110,27 @@ export function BlogPostCard({ post, index = 0, featured = false }: BlogPostCard
       onClick={handleClick}
     >
       {/* Cover Image */}
-      {post.cover_image_url && (
-        <div className="relative h-64 overflow-hidden">
-          <img
-            src={post.cover_image_url}
-            alt={post.title}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-            loading="lazy"
-            decoding="async"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent opacity-80" />
-          {post.featured && (
-            <div className="absolute top-4 right-4">
-              <span className="bg-primary text-primary-foreground text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">
-                Featured
-              </span>
-            </div>
-          )}
-        </div>
-      )}
+      <div className="relative h-64 overflow-hidden">
+        <img
+          src={coverImageSrc}
+          alt={post.title || 'Blog post cover'}
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          loading="lazy"
+          decoding="async"
+          onError={(e) => {
+            console.warn('[BlogPostCard] Image failed to load:', post.cover_image_url);
+            e.currentTarget.src = PLACEHOLDER_IMAGE;
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent opacity-80" />
+        {post.featured && (
+          <div className="absolute top-4 right-4">
+            <span className="bg-primary text-primary-foreground text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">
+              Featured
+            </span>
+          </div>
+        )}
+      </div>
       
       {/* Content */}
       <div className="p-6 flex flex-col flex-1">

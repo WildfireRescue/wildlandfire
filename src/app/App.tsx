@@ -312,13 +312,17 @@ export default function App() {
         pageContent = <DonatePage />;
         break;
       case 'blog':
-        if (blogCategory) {
-          pageContent = <BlogCategoryPage categorySlug={blogCategory} />;
-        } else if (blogSlug) {
-          pageContent = <BlogPostPage slug={blogSlug} />;
-        } else {
-          pageContent = <BlogIndexPage />;
-        }
+        pageContent = (
+          <ErrorBoundary>
+            {blogCategory ? (
+              <BlogCategoryPage categorySlug={blogCategory} />
+            ) : blogSlug ? (
+              <BlogPostPage slug={blogSlug} />
+            ) : (
+              <BlogIndexPage />
+            )}
+          </ErrorBoundary>
+        );
         break;
       case 'admin':
         pageContent = <BlogEditorPage />;
