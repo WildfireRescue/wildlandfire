@@ -82,10 +82,9 @@ export interface BlogCategory {
 }
 
 export interface UserProfile {
-  id: string;
-  user_id: string;
+  id: string; // This is the auth.users.id
   email: string;
-  role: 'viewer' | 'editor' | 'admin';
+  role: 'user' | 'editor' | 'admin';
   created_at: string;
   updated_at: string;
 }

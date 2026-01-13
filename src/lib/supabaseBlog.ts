@@ -241,26 +241,151 @@ export async function getCategoryBySlug(slug: string) {
 
 /**
  * Get current user's profile
+ * Returns the user's profile from the profiles table
+ * This is required for permission checks and role-based access
  */
 export async function getCurrentUserProfile() {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { profile: null, error: null };
+  try {
+    // Get the current user from auth
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    
+    if (userError) {
+      console.error('[getCurrentUserProfile] Auth error:', userError);
+      return { profile: null, error: userError };
+    }
+    
+    if (!user) {
+      console.warn('[getCurrentUserProfile] No authenticated user');
+      return { profile: null, error: null };
+    }
 
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('user_id', user.id)
-    .single();
+    console.log('[getCurrentUserProfile] Fetching profile for user:', user.id);
 
-  return { profile: data as UserProfile | null, error };
+    // Fetch the profile using the user's ID
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id) // Changed from user_id to id
+      .single();
+
+    if (error) {
+      // If no profile found, log a detailed error
+      if (error.code === 'PGRST116') {
+        console.error('[getCurrentUserProfile] No profile found for user. This might mean:');
+        console.error('  1. The user signed up before the profile trigger was added');
+        console.error('  2. The profile was deleted');
+        console.error('  3. The migration has not been run');
+        console.error('  User ID:', user.id);
+        console.error('  User Email:', user.email);
+      } else {
+        console.error('[getCurrentUserProfile] Database error:', error);
+      }
+      return { profile: null, error };
+    }
+
+    console.log('[getCurrentUserProfile] Profile found:', { id: data.id, email: data.email, role: data.role });
+    return { profile: data as UserProfile | null, error: null };
+  } catch (e) {
+    console.error('[getCurrentUserProfile] Unexpected error:', e);
+    return { profile: null, error: e as any };
+  }
+}
+
+// Admin allowlist - must match the list in migration 006_blog_admin_rls_fix.sql
+const ADMIN_EMAILS = [
+  'earl@thewildlandfirerecoveryfund.org',
+  'admin@thewildlandfirerecoveryfund.org',
+  'editor@thewildlandfirerecoveryfund.org'
+];
+
+/**
+ * Check if an email is in the admin allowlist
+ */
+export function isAdminEmail(email: string | undefined): boolean {
+  if (!email) return false;
+  return ADMIN_EMAILS.includes(email.toLowerCase());
 }
 
 /**
- * Check if current user is an editor
+ * Check if current user is an editor or admin
+ * Returns true if user has editor or admin role, OR if email is in admin allowlist
+ * Returns false if user is not authenticated or doesn't have permissions
  */
 export async function isCurrentUserEditor(): Promise<boolean> {
-  const { profile } = await getCurrentUserProfile();
-  return profile?.role === 'editor' || profile?.role === 'admin';
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      console.log('[isCurrentUserEditor] No authenticated user');
+      return false;
+    }
+
+    console.log('[isCurrentUserEditor] Checking permissions for:', user.email);
+    
+    // First check if email is in admin allowlist
+    if (isAdminEmail(user.email)) {
+      console.log('[isCurrentUserEditor] User is in admin allowlist, granting access');
+      return true;
+    }
+
+    const { profile, error } = await getCurrentUserProfile();
+    
+    if (error) {
+      console.error('[isCurrentUserEditor] Error fetching profile:', error.message);
+      // If profile fetch fails but user is in allowlist, still grant access
+      return isAdminEmail(user.email);
+    }
+    
+    if (!profile) {
+      console.warn('[isCurrentUserEditor] No profile found for current user');
+      // Already checked allowlist above, so return false
+      return false;
+    }
+    
+    const hasPermission = profile.role === 'editor' || profile.role === 'admin';
+    console.log('[isCurrentUserEditor] Permission check:', { 
+      email: profile.email, 
+      role: profile.role, 
+      hasPermission 
+    });
+    
+    return hasPermission;
+  } catch (e) {
+    console.error('[isCurrentUserEditor] Unexpected error:', e);
+    return false;
+  }
+}
+
+/**
+ * Check if current user is an admin
+ * Returns true only if user has admin role
+ */
+export async function isCurrentUserAdmin(): Promise<boolean> {
+  try {
+    const { profile, error } = await getCurrentUserProfile();
+    
+    if (error) {
+      console.error('[isCurrentUserAdmin] Error fetching profile:', error.message);
+      return false;
+    }
+    
+    if (!profile) {
+      console.warn('[isCurrentUserAdmin] No profile found for current user');
+      return false;
+    }
+    
+    const isAdmin = profile.role === 'admin';
+    console.log('[isCurrentUserAdmin] Admin check:', { 
+      email: profile.email, 
+      role: profile.role, 
+      isAdmin 
+    });
+    
+    return isAdmin;
+  } catch (e) {
+    console.error('[isCurrentUserAdmin] Unexpected error:', e);
+    return false;
+  }
 }
 
 // =====================================================

@@ -8,9 +8,10 @@ import { motion } from 'motion/react';
 import { supabase } from '../../../lib/supabase';
 import { Button } from '../../components/ui/button';
 import { Mail, LogOut, Save, Eye, ChevronDown, ChevronUp } from 'lucide-react';
-import { createPost, getCategories, isCurrentUserEditor, getCurrentUserProfile } from '../../../lib/supabaseBlog';
+import { createPost, getCategories, isAdminEmail } from '../../../lib/supabaseBlog';
 import { generateSlug, calculateReadingTime } from '../../../lib/blogHelpers';
 import type { BlogCategory, Source } from '../../../lib/blogTypes';
+import { useAuth } from '../../../hooks/useAuth';
 
 interface CollapsibleSectionProps {
   title: string;
@@ -45,10 +46,10 @@ function CollapsibleSection({ title, subtitle, defaultOpen = false, children }: 
 }
 
 export function BlogEditorPageEnhanced() {
-  const [sessionEmail, setSessionEmail] = useState<string | null>(null);
-  const [isEditor, setIsEditor] = useState(false);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  const [authError, setAuthError] = useState<string | null>(null);
+  // Use centralized auth hook
+  const { session, user, profile, loading: authLoading, error: authHookError } = useAuth();
+  
+  const [canPublish, setCanPublish] = useState(false);
   const [categories, setCategories] = useState<BlogCategory[]>([]);
 
   // Login
@@ -113,83 +114,58 @@ export function BlogEditorPageEnhanced() {
     if (!slugTouched.current) setSlug(autoSlug);
   }, [autoSlug]);
 
-  // Load session + check editor status
+  // Determine permissions based on auth state
   useEffect(() => {
-    async function checkAuth() {
-      setIsCheckingAuth(true);
-      setAuthError(null);
-      
-      try {
-        console.log('[BlogEditorEnhanced] Checking auth...');
-        const { data, error: sessionError } = await supabase.auth.getSession();
-        
-        if (sessionError) {
-          console.error('[BlogEditorEnhanced] Session error:', sessionError);
-          setAuthError(`Session error: ${sessionError.message}`);
-          setIsCheckingAuth(false);
-          return;
-        }
-        
-        const session = data.session;
-        const email = session?.user?.email ?? null;
-        
-        console.log('[BlogEditorEnhanced] Session check:', {
-          hasSession: !!session,
-          email,
-          userId: session?.user?.id,
-        });
-        
-        setSessionEmail(email);
-        
-        if (email) {
-          console.log('[BlogEditorEnhanced] User authenticated:', email);
-          
-          // Check if user is an editor
-          const editorStatus = await isCurrentUserEditor();
-          console.log('[BlogEditorEnhanced] Editor status:', editorStatus);
-          setIsEditor(editorStatus);
-          
-          if (!editorStatus) {
-            console.warn('[BlogEditorEnhanced] User does not have editor permissions');
-            // Check if profile exists
-            const { profile } = await getCurrentUserProfile();
-            console.log('[BlogEditorEnhanced] User profile:', profile);
-            if (!profile) {
-              setAuthError('No profile found. Please contact an administrator to set up your account.');
-            } else {
-              setAuthError(`Your role is: ${profile.role}. You need editor or admin role.`);
-            }
-          }
-        } else {
-          console.log('[BlogEditorEnhanced] No authenticated user');
-        }
-      } catch (e: any) {
-        console.error('[BlogEditorEnhanced] Auth check error:', e);
-        setAuthError(`Unexpected error: ${e?.message || 'Unknown error'}`);
-      } finally {
-        setIsCheckingAuth(false);
+    console.log('[BlogEditorEnhanced] === AUTH CHECK START ===');
+    console.log('[BlogEditorEnhanced] Auth loading:', authLoading);
+    console.log('[BlogEditorEnhanced] Session exists:', !!session);
+    console.log('[BlogEditorEnhanced] User ID:', user?.id);
+    console.log('[BlogEditorEnhanced] User email:', user?.email);
+    console.log('[BlogEditorEnhanced] Profile exists:', !!profile);
+    console.log('[BlogEditorEnhanced] Profile role:', profile?.role);
+    console.log('[BlogEditorEnhanced] Auth hook error:', authHookError);
+    
+    if (authLoading) {
+      console.log('[BlogEditorEnhanced] Still loading auth, waiting...');
+      return;
+    }
+
+    if (!session || !user) {
+      console.log('[BlogEditorEnhanced] No session/user - cannot publish');
+      setCanPublish(false);
+      return;
+    }
+
+    // Check permissions
+    let hasPermission = false;
+    let permissionSource = '';
+
+    // First check profile role
+    if (profile) {
+      if (profile.role === 'admin' || profile.role === 'editor') {
+        hasPermission = true;
+        permissionSource = `profile role: ${profile.role}`;
+      } else if (profile.role === 'user') {
+        hasPermission = false;
+        permissionSource = 'user role (no publish access)';
       }
     }
-    
-    checkAuth();
 
-    const { data: sub } = supabase.auth.onAuthStateChange(async (event, sess) => {
-      console.log('[BlogEditorEnhanced] Auth state changed:', event);
-      const email = sess?.user?.email ?? null;
-      setSessionEmail(email);
-      
-      if (email) {
-        setIsCheckingAuth(true);
-        const editorStatus = await isCurrentUserEditor();
-        setIsEditor(editorStatus);
-        setIsCheckingAuth(false);
-      } else {
-        setIsEditor(false);
+    // If no profile or not admin/editor, check admin allowlist
+    if (!hasPermission && user.email) {
+      if (isAdminEmail(user.email)) {
+        hasPermission = true;
+        permissionSource = 'admin allowlist';
       }
-    });
+    }
 
-    return () => sub.subscription.unsubscribe();
-  }, []);
+    console.log('[BlogEditorEnhanced] === PERMISSION DECISION ===');
+    console.log('[BlogEditorEnhanced] Can publish:', hasPermission);
+    console.log('[BlogEditorEnhanced] Permission source:', permissionSource);
+    console.log('[BlogEditorEnhanced] === AUTH CHECK END ===');
+    
+    setCanPublish(hasPermission);
+  }, [authLoading, session, user, profile, authHookError]);
 
   // Load categories
   useEffect(() => {
@@ -324,7 +300,7 @@ export function BlogEditorPageEnhanced() {
         
         // Trust / E-E-A-T
         author_name: authorName.trim(),
-        author_email: sessionEmail!,
+        author_email: user?.email || '',
         author_role: authorRole.trim() || null,
         author_bio: authorBio.trim() || null,
         reviewed_by: reviewedBy.trim() || null,
@@ -402,8 +378,8 @@ export function BlogEditorPageEnhanced() {
     );
   };
 
-  // Logged OUT
-  if (!sessionEmail) {
+  // NOT LOGGED IN - Show login form
+  if (!session || !user) {
     return (
       <div className="min-h-screen pt-28 pb-20 bg-background">
         <div className="container mx-auto px-4">
@@ -464,8 +440,8 @@ export function BlogEditorPageEnhanced() {
     );
   }
 
-  // Checking authentication status
-  if (isCheckingAuth) {
+  // CHECKING AUTH - Show loading
+  if (authLoading) {
     return (
       <div className="min-h-screen pt-28 pb-20 bg-background">
         <div className="container mx-auto px-4">
@@ -478,32 +454,44 @@ export function BlogEditorPageEnhanced() {
     );
   }
 
-  // Logged IN but not an editor
-  if (!isEditor) {
+  // LOGGED IN but NO PUBLISH PERMISSION
+  if (!canPublish) {
+    const roleDisplay = profile?.role || 'none';
+    const isInAllowlist = user.email ? isAdminEmail(user.email) : false;
+    
     return (
       <div className="min-h-screen pt-28 pb-20 bg-background">
         <div className="container mx-auto px-4">
           <div className="max-w-xl mx-auto bg-destructive/10 border border-destructive/20 rounded-xl p-8">
             <h2 className="text-xl font-bold text-destructive mb-4">Access Denied</h2>
             <p className="text-destructive mb-2">
-              You don't have editor permissions.
+              You don't have permission to publish blog posts.
             </p>
             <p className="text-sm text-muted-foreground mb-6">
-              Logged in as: <strong>{sessionEmail}</strong>
+              Logged in as: <strong>{user.email}</strong>
             </p>
             
-            {authError && (
+            <div className="bg-background border border-border rounded-lg p-4 mb-6">
+              <p className="text-sm font-semibold mb-2">Permission Details:</p>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                <li>• Profile role: <strong>{roleDisplay}</strong></li>
+                <li>• In admin allowlist: <strong>{isInAllowlist ? 'Yes' : 'No'}</strong></li>
+                <li>• Required: <strong>admin</strong> or <strong>editor</strong> role</li>
+              </ul>
+            </div>
+            
+            {authHookError && (
               <div className="bg-background border border-border rounded-lg p-4 mb-6">
-                <p className="text-sm text-destructive font-mono">{authError}</p>
+                <p className="text-sm text-destructive font-mono">{authHookError}</p>
               </div>
             )}
             
             <div className="bg-background border border-border rounded-lg p-4 mb-6">
               <p className="text-sm font-semibold mb-2">Troubleshooting:</p>
               <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
-                <li>Make sure you've been granted editor access</li>
+                <li>Ensure your email is added to the admin allowlist in the database</li>
+                <li>Contact an administrator to grant you editor permissions</li>
                 <li>Try signing out and signing back in</li>
-                <li>Contact an administrator if the issue persists</li>
               </ul>
             </div>
             
@@ -517,7 +505,7 @@ export function BlogEditorPageEnhanced() {
     );
   }
 
-  // Logged IN and IS EDITOR
+  // LOGGED IN with PUBLISH PERMISSION - Show editor
   return (
     <div className="min-h-screen pt-28 pb-20 bg-background">
       <div className="container mx-auto px-4 max-w-5xl">
@@ -528,7 +516,8 @@ export function BlogEditorPageEnhanced() {
           </div>
           <div className="flex items-center gap-4">
             <span className="text-sm text-muted-foreground">
-              <strong>{sessionEmail}</strong>
+              <strong>{user?.email || 'Unknown'}</strong>
+              {profile && <span className="ml-2 text-xs">({profile.role})</span>}
             </span>
             <Button variant="outline" size="sm" onClick={signOut}>
               <LogOut size={16} className="mr-2" />

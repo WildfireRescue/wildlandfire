@@ -74,6 +74,25 @@ Fully functional Stripe integration with:
 - `/#stories` - Vision and mission stories
 - `/#grants` - Fire department and education grants
 - `/#contact` - Contact form and information
+- `/#blog` - Blog listing page
+- `/#admin/blog` - Blog editor (requires admin/editor role)
+
+## 🔐 Admin Access & Blog System
+
+The blog editor requires authentication and proper permissions. See:
+- **[Quick Start Guide](ADMIN_AUTH_QUICK_START.md)** - Fast deployment guide
+- **[Complete Documentation](ADMIN_AUTH_FIX_DOCUMENTATION.md)** - Technical details
+
+### Setting Up Admin Access
+
+1. Run the latest database migration: `005_fix_admin_auth_comprehensive.sql`
+2. Promote users to admin role via SQL:
+   ```sql
+   UPDATE profiles SET role = 'admin' WHERE email = 'your@email.com';
+   ```
+3. Sign in and navigate to `/#admin/blog`
+
+See `ADMIN_AUTH_QUICK_START.md` for step-by-step instructions.
 
 ## 🔍 SEO
 
