@@ -234,49 +234,13 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="blog-content prose prose-lg prose-stone prose-invert max-w-3xl mx-auto
-                  prose-headings:scroll-mt-24
-                  prose-headings:font-bold
-                  prose-headings:tracking-tight
-                  prose-h1:hidden
-                  prose-h2:text-3xl prose-h2:mt-16 prose-h2:mb-6 prose-h2:leading-tight prose-h2:text-heading
-                  prose-h3:text-2xl prose-h3:mt-12 prose-h3:mb-4 prose-h3:leading-snug prose-h3:text-heading
-                  prose-h4:text-xl prose-h4:mt-8 prose-h4:mb-3 prose-h4:text-heading
-                  prose-p:text-[1.0625rem] prose-p:leading-[1.75] prose-p:mb-6 prose-p:text-body-text prose-p:text-left
-                  prose-strong:text-heading prose-strong:font-bold
-                  prose-em:text-body-text prose-em:italic
-                  prose-ul:my-6 prose-ul:space-y-2 prose-ul:pl-6
-                  prose-ol:my-6 prose-ol:space-y-2 prose-ol:pl-6
-                  prose-li:text-[1.0625rem] prose-li:text-body-text prose-li:leading-[1.75] prose-li:text-left
-                  prose-li:my-1
-                  prose-a:text-primary prose-a:underline prose-a:decoration-2 hover:prose-a:decoration-primary/60 
-                  prose-a:font-medium prose-a:transition-all prose-a:underline-offset-[3px] hover:prose-a:text-primary/90
-                  prose-blockquote:border-l-[3px] prose-blockquote:border-primary/70
-                  prose-blockquote:bg-primary/5
-                  prose-blockquote:rounded-r-md
-                  prose-blockquote:pl-6
-                  prose-blockquote:pr-5
-                  prose-blockquote:py-4
-                  prose-blockquote:my-8
-                  prose-blockquote:italic
-                  prose-blockquote:text-[1.0625rem]
-                  prose-blockquote:leading-[1.7]
-                  prose-blockquote:text-body-text-muted
-                  prose-blockquote:not-italic
-                  prose-code:text-primary-foreground prose-code:bg-primary/90 prose-code:px-1.5 prose-code:py-0.5 
-                  prose-code:rounded prose-code:text-[0.9em] prose-code:font-semibold prose-code:font-mono
-                  prose-pre:bg-card/60 prose-pre:border prose-pre:border-border/50 prose-pre:shadow-lg 
-                  prose-pre:text-[0.875rem] prose-pre:my-8 prose-pre:rounded-lg prose-pre:font-mono prose-pre:overflow-x-auto
-                  prose-img:rounded-lg prose-img:border prose-img:border-border/40 prose-img:shadow-2xl prose-img:my-10 prose-img:w-full
-                  prose-hr:border-border/30 prose-hr:my-12
-                  prose-table:border-collapse prose-table:my-8 prose-table:w-full
-                  prose-th:bg-card prose-th:border prose-th:border-border/50 prose-th:px-4 prose-th:py-3 prose-th:text-left
-                  prose-td:border prose-td:border-border/50 prose-td:px-4 prose-td:py-3 prose-td:text-left
-                  first:prose-p:text-[1.1875rem] first:prose-p:leading-[1.65] first:prose-p:text-heading first:prose-p:font-medium first:prose-p:mb-8"
+            className="blog-content max-w-3xl mx-auto"
           >
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {safeMarkdownContent(post.content_markdown)}
-            </ReactMarkdown>
+            <div className="prose prose-invert prose-lg max-w-none prose-p:leading-relaxed prose-p:mb-6">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {safeMarkdownContent(post.content_markdown)}
+              </ReactMarkdown>
+            </div>
           </motion.article>
 
           {/* Post Footer: Sources, E-E-A-T, Share */}
