@@ -50,9 +50,19 @@ export default function App() {
   // Listen for Supabase auth state changes (magic link login)
   useEffect(() => {
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      // When user signs in via magic link, redirect to publish page
+      console.log('[App] Auth state changed:', event, { email: session?.user?.email });
+      
+      // ✅ When user signs in, redirect directly to admin/blog (skip publish redirect)
       if (event === 'SIGNED_IN' && session) {
-        window.location.hash = 'publish';
+        console.log('[App] User signed in, redirecting to admin/blog');
+        // Only redirect if not already on admin page
+        if (!window.location.hash.includes('admin')) {
+          window.location.hash = 'admin/blog';
+        }
+      }
+      
+      if (event === 'SIGNED_OUT') {
+        console.log('[App] User signed out');
       }
     });
 

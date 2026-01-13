@@ -9,7 +9,25 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
+// ✅ Singleton Supabase client with proper auth configuration
 export const supabase = createClient(
   supabaseUrl ?? '',
-  supabaseAnonKey ?? ''
+  supabaseAnonKey ?? '',
+  {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true,
+      flowType: 'pkce',
+      storage: window.localStorage,
+      storageKey: 'wildland-fire-auth',
+      debug: true, // Enable auth debugging
+    },
+  }
 );
+
+// Log auth initialization
+console.log('[Supabase] Client initialized', {
+  url: supabaseUrl,
+  hasAnonKey: !!supabaseAnonKey,
+});

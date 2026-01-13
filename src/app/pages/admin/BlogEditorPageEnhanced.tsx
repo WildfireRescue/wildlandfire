@@ -8,7 +8,7 @@ import { motion } from 'motion/react';
 import { supabase } from '../../../lib/supabase';
 import { Button } from '../../components/ui/button';
 import { Mail, LogOut, Save, Eye, ChevronDown, ChevronUp } from 'lucide-react';
-import { createPost, getCategories, isCurrentUserEditor } from '../../../lib/supabaseBlog';
+import { createPost, getCategories, isCurrentUserEditor, getCurrentUserProfile } from '../../../lib/supabaseBlog';
 import { generateSlug, calculateReadingTime } from '../../../lib/blogHelpers';
 import type { BlogCategory, Source } from '../../../lib/blogTypes';
 
@@ -47,6 +47,8 @@ function CollapsibleSection({ title, subtitle, defaultOpen = false, children }: 
 export function BlogEditorPageEnhanced() {
   const [sessionEmail, setSessionEmail] = useState<string | null>(null);
   const [isEditor, setIsEditor] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [authError, setAuthError] = useState<string | null>(null);
   const [categories, setCategories] = useState<BlogCategory[]>([]);
 
   // Login
@@ -113,23 +115,76 @@ export function BlogEditorPageEnhanced() {
 
   // Load session + check editor status
   useEffect(() => {
-    supabase.auth.getSession().then(async ({ data }) => {
-      const email = data.session?.user?.email ?? null;
-      setSessionEmail(email);
+    async function checkAuth() {
+      setIsCheckingAuth(true);
+      setAuthError(null);
       
-      if (email) {
-        const editorStatus = await isCurrentUserEditor();
-        setIsEditor(editorStatus);
+      try {
+        console.log('[BlogEditorEnhanced] Checking auth...');
+        const { data, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error('[BlogEditorEnhanced] Session error:', sessionError);
+          setAuthError(`Session error: ${sessionError.message}`);
+          setIsCheckingAuth(false);
+          return;
+        }
+        
+        const session = data.session;
+        const email = session?.user?.email ?? null;
+        
+        console.log('[BlogEditorEnhanced] Session check:', {
+          hasSession: !!session,
+          email,
+          userId: session?.user?.id,
+        });
+        
+        setSessionEmail(email);
+        
+        if (email) {
+          console.log('[BlogEditorEnhanced] User authenticated:', email);
+          
+          // Check if user is an editor
+          const editorStatus = await isCurrentUserEditor();
+          console.log('[BlogEditorEnhanced] Editor status:', editorStatus);
+          setIsEditor(editorStatus);
+          
+          if (!editorStatus) {
+            console.warn('[BlogEditorEnhanced] User does not have editor permissions');
+            // Check if profile exists
+            const { profile } = await getCurrentUserProfile();
+            console.log('[BlogEditorEnhanced] User profile:', profile);
+            if (!profile) {
+              setAuthError('No profile found. Please contact an administrator to set up your account.');
+            } else {
+              setAuthError(`Your role is: ${profile.role}. You need editor or admin role.`);
+            }
+          }
+        } else {
+          console.log('[BlogEditorEnhanced] No authenticated user');
+        }
+      } catch (e: any) {
+        console.error('[BlogEditorEnhanced] Auth check error:', e);
+        setAuthError(`Unexpected error: ${e?.message || 'Unknown error'}`);
+      } finally {
+        setIsCheckingAuth(false);
       }
-    });
+    }
+    
+    checkAuth();
 
-    const { data: sub } = supabase.auth.onAuthStateChange(async (_event, sess) => {
+    const { data: sub } = supabase.auth.onAuthStateChange(async (event, sess) => {
+      console.log('[BlogEditorEnhanced] Auth state changed:', event);
       const email = sess?.user?.email ?? null;
       setSessionEmail(email);
       
       if (email) {
+        setIsCheckingAuth(true);
         const editorStatus = await isCurrentUserEditor();
         setIsEditor(editorStatus);
+        setIsCheckingAuth(false);
+      } else {
+        setIsEditor(false);
       }
     });
 
@@ -149,7 +204,7 @@ export function BlogEditorPageEnhanced() {
   }, []);
 
   function getEmailRedirectTo() {
-    return `${window.location.origin}/`;
+    return `${window.location.origin}/#auth-callback`;
   }
 
   async function sendMagicLink() {
@@ -375,6 +430,11 @@ export function BlogEditorPageEnhanced() {
                   placeholder="your@email.com"
                   className="w-full px-4 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
                   disabled={loginBusy}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !loginBusy && !loginSent) {
+                      sendMagicLink();
+                    }
+                  }}
                 />
 
                 {loginError && (
@@ -404,15 +464,49 @@ export function BlogEditorPageEnhanced() {
     );
   }
 
+  // Checking authentication status
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen pt-28 pb-20 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="max-w-xl mx-auto bg-card border border-border rounded-xl p-8 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Checking permissions...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Logged IN but not an editor
   if (!isEditor) {
     return (
       <div className="min-h-screen pt-28 pb-20 bg-background">
         <div className="container mx-auto px-4">
-          <div className="max-w-xl mx-auto bg-destructive/10 border border-destructive/20 rounded-xl p-8 text-center">
-            <p className="text-destructive text-lg mb-6">
-              You don't have editor permissions. Contact an administrator.
+          <div className="max-w-xl mx-auto bg-destructive/10 border border-destructive/20 rounded-xl p-8">
+            <h2 className="text-xl font-bold text-destructive mb-4">Access Denied</h2>
+            <p className="text-destructive mb-2">
+              You don't have editor permissions.
             </p>
+            <p className="text-sm text-muted-foreground mb-6">
+              Logged in as: <strong>{sessionEmail}</strong>
+            </p>
+            
+            {authError && (
+              <div className="bg-background border border-border rounded-lg p-4 mb-6">
+                <p className="text-sm text-destructive font-mono">{authError}</p>
+              </div>
+            )}
+            
+            <div className="bg-background border border-border rounded-lg p-4 mb-6">
+              <p className="text-sm font-semibold mb-2">Troubleshooting:</p>
+              <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                <li>Make sure you've been granted editor access</li>
+                <li>Try signing out and signing back in</li>
+                <li>Contact an administrator if the issue persists</li>
+              </ul>
+            </div>
+            
             <Button onClick={signOut} variant="outline">
               <LogOut size={18} className="mr-2" />
               Sign Out
