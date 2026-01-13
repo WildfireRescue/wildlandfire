@@ -148,77 +148,93 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
       <BlogReadingProgress />
 
       <div className="min-h-screen bg-background pt-20 pb-24">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-screen-xl">
-          <div className="grid lg:grid-cols-[minmax(0,_1fr)_280px] gap-8 lg:gap-12">
-            {/* Main Content Column */}
-            <div className="w-full max-w-[75ch] mx-auto lg:mx-0">
-              {/* Back Button */}
-              <Button
-                variant="ghost"
-                onClick={() => (window.location.hash = 'blog')}
-                className="mb-8 -ml-4 text-muted-foreground hover:text-foreground transition-colors"
-                size="sm"
-              >
-                <ArrowLeft size={16} className="mr-2" />
-                Back to Blog
-              </Button>
+        {/* Centered Content Layout - No Sidebar */}
+        <div className="container mx-auto px-4 sm:px-6 lg:px-12 max-w-5xl">
+          {/* Back Button */}
+          <Button
+            variant="ghost"
+            onClick={() => (window.location.hash = 'blog')}
+            className="mb-8 -ml-4 text-muted-foreground hover:text-foreground transition-colors"
+            size="sm"
+          >
+            <ArrowLeft size={16} className="mr-2" />
+            Back to Blog
+          </Button>
 
-              {/* Breadcrumbs */}
-              <BlogBreadcrumbs category={post.category} title={post.title} />
+          {/* Breadcrumbs */}
+          <BlogBreadcrumbs category={post.category} title={post.title} />
 
-              {/* Article Header */}
-              <motion.header
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mb-12"
-              >
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-[1.1] tracking-tight text-heading">
-                  {coerceToString(post.title)}
-                </h1>
+          {/* Article Metadata & Author */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <BlogAuthorBlock
+              author={post.author_name}
+              publishedAt={post.published_at}
+              updatedAt={post.updated_at}
+              readingTime={post.reading_time_minutes}
+              category={post.category}
+            />
+          </motion.div>
 
-                {post.excerpt && (
-                  <p className="text-xl md:text-2xl leading-relaxed text-body-text-muted mb-8 font-light">
-                    {coerceToString(post.excerpt)}
-                  </p>
-                )}
+              {/* Article Title & Excerpt */}
+          <motion.header
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="mb-12 text-center max-w-4xl mx-auto"
+          >
+            <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-8 leading-[1.1] tracking-tight text-heading">
+              {coerceToString(post.title)}
+            </h1>
 
-                <BlogAuthorBlock
-                  author={post.author_name}
-                  publishedAt={post.published_at}
-                  updatedAt={post.updated_at}
-                  readingTime={post.reading_time_minutes}
-                  category={post.category}
-                />
-              </motion.header>
+            {post.excerpt && (
+              <p className="text-lg md:text-xl lg:text-2xl leading-relaxed text-body-text-muted font-light max-w-3xl mx-auto">
+                {coerceToString(post.excerpt)}
+              </p>
+            )}
+          </motion.header>
 
-              {/* Cover Image */}
-              {post.cover_image_url && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.2 }}
-                  className="mb-12"
-                >
-                  <img
-                    src={safeImageSrc(post.cover_image_url, PLACEHOLDER_IMAGE)}
-                    alt={coerceToString(post.title) || 'Blog post cover'}
-                    className="rounded-xl w-full border border-border/30 shadow-2xl"
-                    loading="eager"
-                    decoding="async"
-                    onError={(e) => {
-                      console.warn('[BlogPostPage] Cover image failed to load:', post.cover_image_url);
-                      e.currentTarget.src = PLACEHOLDER_IMAGE;
-                    }}
-                  />
-                </motion.div>
-              )}
+          {/* Cover Image */}
+          {post.cover_image_url && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+              className="mb-16 -mx-4 sm:mx-0"
+            >
+              <img
+                src={safeImageSrc(post.cover_image_url, PLACEHOLDER_IMAGE)}
+                alt={coerceToString(post.title) || 'Blog post cover'}
+                className="rounded-none sm:rounded-2xl w-full border-0 sm:border border-border/30 shadow-2xl"
+                loading="eager"
+                decoding="async"
+                onError={(e) => {
+                  console.warn('[BlogPostPage] Cover image failed to load:', post.cover_image_url);
+                  e.currentTarget.src = PLACEHOLDER_IMAGE;
+                }}
+              />
+            </motion.div>
+          )}
 
-              {/* Article Content */}
-              <motion.article
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="blog-content prose prose-lg prose-stone prose-invert max-w-none
+          {/* Inline Table of Contents - Collapsible */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="mb-12 max-w-3xl mx-auto"
+          >
+            <BlogTableOfContents content={safeMarkdownContent(post.content_markdown)} />
+          </motion.div>
+
+          {/* Article Content - Centered, Optimal Reading Width */}
+          <motion.article
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="blog-content prose prose-lg prose-stone prose-invert max-w-3xl mx-auto
                   prose-headings:scroll-mt-24
                   prose-headings:font-bold
                   prose-headings:tracking-tight
@@ -257,57 +273,46 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
                   prose-th:bg-card prose-th:border prose-th:border-border/50 prose-th:px-4 prose-th:py-3 prose-th:text-left
                   prose-td:border prose-td:border-border/50 prose-td:px-4 prose-td:py-3 prose-td:text-left
                   first:prose-p:text-[1.1875rem] first:prose-p:leading-[1.65] first:prose-p:text-heading first:prose-p:font-medium first:prose-p:mb-8"
-              >
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {safeMarkdownContent(post.content_markdown)}
-                </ReactMarkdown>
-              </motion.article>
+          >
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {safeMarkdownContent(post.content_markdown)}
+            </ReactMarkdown>
+          </motion.article>
 
-              {/* Sources & Citations */}
-              <BlogSources post={post} />
+          {/* Post Footer: Sources, E-E-A-T, Share */}
+          <div className="max-w-3xl mx-auto mt-16 space-y-12">
+            {/* Sources & Citations */}
+            <BlogSources post={post} />
 
-              {/* Share Section */}
+            {/* E-E-A-T Signals */}
+            <div className="border-t border-border/30 pt-12">
+              <BlogEEATSignals post={post} />
+            </div>
+
+            {/* Share Section */}
+            <div className="border-t border-border/30 pt-12">
               <BlogShareButtons 
                 title={coerceToString(post.title)} 
                 excerpt={post.excerpt ? coerceToString(post.excerpt) : null} 
               />
-
-              {/* E-E-A-T Signals (Mobile - show after content) */}
-              <div className="lg:hidden mt-12">
-                <BlogEEATSignals post={post} />
-              </div>
-
-              {/* Table of Contents (Mobile - show after E-E-A-T) */}
-              <div className="lg:hidden mt-12">
-                <BlogTableOfContents content={safeMarkdownContent(post.content_markdown)} />
-              </div>
-
-              {/* Related Posts */}
-              <BlogRelatedPosts category={post.category} currentSlug={post.slug} />
-
-              {/* Back Button (bottom) */}
-              <div className="mt-12">
-                <Button
-                  variant="outline"
-                  onClick={() => (window.location.hash = 'blog')}
-                  className="px-6 py-5 font-medium"
-                >
-                  <ArrowLeft size={18} className="mr-2" />
-                  Back to All Posts
-                </Button>
-              </div>
             </div>
+          </div>
 
-            {/* Sidebar: E-E-A-T + TOC (desktop only, sticky) */}
-            <aside className="hidden lg:block space-y-6">
-              <div className="sticky top-24 space-y-6">
-                {/* E-E-A-T Signals (show first on desktop) */}
-                <BlogEEATSignals post={post} />
-                
-                {/* Table of Contents */}
-                <BlogTableOfContents content={safeMarkdownContent(post.content_markdown)} />
-              </div>
-            </aside>
+          {/* Related Posts */}
+          <div className="mt-20">
+            <BlogRelatedPosts category={post.category} currentSlug={post.slug} />
+          </div>
+
+          {/* Back Button (bottom) */}
+          <div className="mt-16 text-center">
+            <Button
+              variant="outline"
+              onClick={() => (window.location.hash = 'blog')}
+              className="px-8 py-6 font-medium text-base"
+            >
+              <ArrowLeft size={18} className="mr-2" />
+              Back to All Posts
+            </Button>
           </div>
         </div>
       </div>
