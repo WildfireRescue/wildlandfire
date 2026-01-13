@@ -148,10 +148,10 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
       <BlogReadingProgress />
 
       <div className="min-h-screen bg-background pt-20 pb-24">
-        <div className="container mx-auto px-6 lg:px-8 max-w-screen-xl">
-          <div className="grid lg:grid-cols-[1fr_280px] gap-12">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-screen-xl">
+          <div className="grid lg:grid-cols-[minmax(0,_1fr)_280px] gap-8 lg:gap-12">
             {/* Main Content Column */}
-            <div className="max-w-[75ch]">
+            <div className="w-full max-w-[75ch] mx-auto lg:mx-0">
               {/* Back Button */}
               <Button
                 variant="ghost"
@@ -226,13 +226,13 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
                   prose-h2:text-3xl prose-h2:mt-16 prose-h2:mb-6 prose-h2:leading-tight prose-h2:text-heading
                   prose-h3:text-2xl prose-h3:mt-12 prose-h3:mb-4 prose-h3:leading-snug prose-h3:text-heading
                   prose-h4:text-xl prose-h4:mt-8 prose-h4:mb-3 prose-h4:text-heading
-                  prose-p:text-[1.0625rem] prose-p:leading-[1.75] prose-p:mb-6 prose-p:text-body-text
+                  prose-p:text-[1.0625rem] prose-p:leading-[1.75] prose-p:mb-6 prose-p:text-body-text prose-p:text-left
                   prose-strong:text-heading prose-strong:font-bold
                   prose-em:text-body-text prose-em:italic
-                  prose-ul:my-6 prose-ul:space-y-2
-                  prose-ol:my-6 prose-ol:space-y-2
-                  prose-li:text-[1.0625rem] prose-li:text-body-text prose-li:leading-[1.75]
-                  prose-li:pl-2 prose-li:my-1
+                  prose-ul:my-6 prose-ul:space-y-2 prose-ul:pl-6
+                  prose-ol:my-6 prose-ol:space-y-2 prose-ol:pl-6
+                  prose-li:text-[1.0625rem] prose-li:text-body-text prose-li:leading-[1.75] prose-li:text-left
+                  prose-li:my-1
                   prose-a:text-primary prose-a:underline prose-a:decoration-2 hover:prose-a:decoration-primary/60 
                   prose-a:font-medium prose-a:transition-all prose-a:underline-offset-[3px] hover:prose-a:text-primary/90
                   prose-blockquote:border-l-[3px] prose-blockquote:border-primary/70
@@ -246,15 +246,16 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
                   prose-blockquote:text-[1.0625rem]
                   prose-blockquote:leading-[1.7]
                   prose-blockquote:text-body-text-muted
+                  prose-blockquote:not-italic
                   prose-code:text-primary-foreground prose-code:bg-primary/90 prose-code:px-1.5 prose-code:py-0.5 
                   prose-code:rounded prose-code:text-[0.9em] prose-code:font-semibold prose-code:font-mono
                   prose-pre:bg-card/60 prose-pre:border prose-pre:border-border/50 prose-pre:shadow-lg 
-                  prose-pre:text-[0.875rem] prose-pre:my-8 prose-pre:rounded-lg prose-pre:font-mono
-                  prose-img:rounded-lg prose-img:border prose-img:border-border/40 prose-img:shadow-2xl prose-img:my-10
+                  prose-pre:text-[0.875rem] prose-pre:my-8 prose-pre:rounded-lg prose-pre:font-mono prose-pre:overflow-x-auto
+                  prose-img:rounded-lg prose-img:border prose-img:border-border/40 prose-img:shadow-2xl prose-img:my-10 prose-img:w-full
                   prose-hr:border-border/30 prose-hr:my-12
-                  prose-table:border-collapse prose-table:my-8
+                  prose-table:border-collapse prose-table:my-8 prose-table:w-full
                   prose-th:bg-card prose-th:border prose-th:border-border/50 prose-th:px-4 prose-th:py-3 prose-th:text-left
-                  prose-td:border prose-td:border-border/50 prose-td:px-4 prose-td:py-3
+                  prose-td:border prose-td:border-border/50 prose-td:px-4 prose-td:py-3 prose-td:text-left
                   first:prose-p:text-[1.1875rem] first:prose-p:leading-[1.65] first:prose-p:text-heading first:prose-p:font-medium first:prose-p:mb-8"
               >
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
