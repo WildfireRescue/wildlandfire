@@ -33,6 +33,7 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // HOOK 1: Load post data
   useEffect(() => {
     async function loadPost() {
       setLoading(true);
@@ -89,6 +90,26 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
     loadPost();
   }, [slug]);
 
+  // HOOK 2: Add IDs to headings for TOC navigation (runs after post is loaded)
+  useEffect(() => {
+    if (!post) return;
+
+    const articleElement = document.querySelector('article.blog-content');
+    if (!articleElement) return;
+
+    const headings = articleElement.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    headings.forEach((heading) => {
+      const text = heading.textContent || '';
+      const id = text
+        .toLowerCase()
+        .trim()
+        .replace(/['"]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+      heading.id = id;
+    });
+  }, [post]);
+
   // Loading State
   if (loading) {
     return (
@@ -117,26 +138,6 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
       </div>
     );
   }
-
-  // Add IDs to headings for TOC navigation
-  useEffect(() => {
-    if (!post) return;
-
-    const articleElement = document.querySelector('article.blog-content');
-    if (!articleElement) return;
-
-    const headings = articleElement.querySelectorAll('h1, h2, h3, h4, h5, h6');
-    headings.forEach((heading) => {
-      const text = heading.textContent || '';
-      const id = text
-        .toLowerCase()
-        .trim()
-        .replace(/['"]/g, '')
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, '');
-      heading.id = id;
-    });
-  }, [post]);
 
   return (
     <>

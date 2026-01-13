@@ -69,7 +69,7 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
                   alt="Wildland Fire Recovery Fund" 
                   className="h-14 w-14 relative z-10 drop-shadow-lg" 
                   loading="eager"
-                  fetchPriority="high"
+                  fetchpriority="high"
                   decoding="async"
                   width="56"
                   height="56"
@@ -154,7 +154,7 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
                   transition={{ delay: 0.1 }}
                   className="flex items-center justify-center gap-3 mb-12"
                 >
-                  <img src="/Images/logo-128.png" alt="Wildland Fire Recovery Fund" className="h-16 w-auto" loading="eager" fetchPriority="high" decoding="async" width="64" height="64" />
+                  <img src="/Images/logo-128.png" alt="Wildland Fire Recovery Fund" className="h-16 w-auto" loading="eager" fetchpriority="high" decoding="async" width="64" height="64" />
                   <div>
                     <div className="text-lg tracking-wider uppercase">THE WILDLAND FIRE</div>
                     <div className="text-lg tracking-wider uppercase">RECOVERY FUND</div>
