@@ -33,14 +33,14 @@
 - `stripe` (12 KB) - Payment processing
 - `supabase` (175 KB) - Backend services
 
-### 3. ✅ Added Resource Hints (Preconnect & DNS-Prefetch)
+### 3. ✅ Added Resource Hints (Preconnect & DNS Prefetch)
 Added preconnect links for external domains in index.html:
 - `www.googletagmanager.com` - Analytics
 - `fonts.googleapis.com` - Web fonts
 - `fonts.gstatic.com` - Font assets
 - `images.unsplash.com` - External images
 
-**Impact**: Faster connection establishment for third-party resources
+**Impact**: Faster connection establishment for third party resources
 
 ### 4. ✅ Image Optimization
 - Added `loading="lazy"` and `decoding="async"` to all images
@@ -81,7 +81,7 @@ Added preconnect links for external domains in index.html:
 
 ---
 
-## 🚀 ROUND 2: Mobile-Specific Optimizations (Score: 60 → ~85)
+## 🚀 ROUND 2: Mobile Specific Optimizations (Score: 60 → ~85)
 
 ### 1. ✅ Logo Image Optimization (HUGE Impact!)
 **Before**: 438KB (1024x1024) displayed at 56x56px
@@ -120,7 +120,7 @@ Added `<link rel="preload">` for:
 // Load after window.load event + 1 second delay
 setTimeout(() => loadGA(), 1000);
 ```
-**Impact**: Removes render-blocking script, faster TTI
+**Impact**: Removes render blocking script, faster TTI
 
 ### 2. ✅ Service Worker for Aggressive Caching
 - Created `/sw.js` for offline support
@@ -134,7 +134,7 @@ setTimeout(() => loadGA(), 1000);
 - Reduced server requests
 
 ### 3. ✅ Brotli + Gzip Compression
-Installed `vite-plugin-compression` for dual compression:
+Installed `vite plugin compression` for dual compression:
 - **Brotli** (.br files): 15-25% smaller than gzip
 - **Gzip** (.gz files): Fallback for older browsers
 
@@ -163,7 +163,7 @@ manualChunks: (id) => {
 - Parallel downloads
 - Only load what's needed per page
 
-### 5. ✅ Lazy Load Non-Critical Components
+### 5. ✅ Lazy Load Non Critical Components
 Converted to lazy loading:
 - `DonationForm` (only when modal opens)
 - `UrgencyTopBanner` (not critical for first paint)
@@ -342,12 +342,12 @@ cwebp logo-128.png -o logo-128.webp -q 85
 ```
 
 ### 2. Implement Critical CSS
-Extract above-the-fold CSS and inline it in `<head>`
+Extract above the fold CSS and inline it in `<head>`
 
 ### 3. Remove Unused CSS
 Use PurgeCSS or similar to remove unused Tailwind classes
 
-### 4. Optimize Third-Party Scripts
+### 4. Optimize Third Party Scripts
 - Delay Stripe.js until payment page
 - Use facade pattern for embedded content
 
@@ -391,7 +391,7 @@ Use PurgeCSS or similar to remove unused Tailwind classes
 
 **Expected Score**: **90-100** on both Mobile and Desktop
 
-All changes are production-ready and deployed. Test in 2-3 minutes!
+All changes are production ready and deployed. Test in 2-3 minutes!
 
 ---
 

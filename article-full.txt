@@ -1,0 +1,440 @@
+<div class="page-body breathe">
+        <div class="col col-main">
+            <div class="cb-nohero pez-bound" style="background-image: url('')" data-module="hero">
+        <div class="hero-align">
+        <header class="page-header  anim-cascade">
+                
+    <nav class="main-category -large">
+        <a href="https://www.civilbeat.org/category/maui/">
+                        Maui
+        </a>
+    </nav>
+            <h1 class="page-title">Maui Fire Survivors Face Tough Choices When Federal Housing Program Ends</h1>
+            <div class="anim-cascade">
+                <div class="page-lede">
+                    <div class="cb-richtext deck -flex" itemprop="description">
+  <div class="">
+<p class="lede-content">The state is seeking another extension to the FEMA housing program that thousands of Maui residents have relied on since losing their homes in the 2023 wildfires. It's currently set to end Feb. 28.</p>
+</div>
+
+</div>
+                </div>
+            </div>
+        </header>
+        <div class="page-byline  anim-cascade">
+            <div class="authors-and-share">
+                <div class="byline-and-time">
+                    <div class="cb-byline -flex inherit-wp-color" style="">
+            <cite>
+            <span class="prefix">By</span>
+            <span class="authors">
+                                    <span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+                                                <span itemprop="name">
+                                                            <a href="https://www.civilbeat.org/author/erin-nolan/" itemprop="url" rel="author">Erin Nolan</a>
+                                                    </span>
+                    </span>
+                            </span>
+                    </cite>
+                            <span class="delim">
+                /
+            </span>
+                  <time datetime="2026-01-15 00:01:00" title="2026-01-15T00:01:00-10:00" itemprop="datePublished" class="">January 15, 2026</time>
+    </div>
+                                    </div>
+                                        <div class="cb-fire-block share align bs-5 pez-bound" data-module="block-share" data-href="" data-title="Maui Fire Survivors Face Tough Choices When Federal Housing Program Ends">
+        <div class="d-flex align-items-center justify-content-end">
+            <div class="btn-group mx-2" role="group">
+                <button type="button" class="btn btn-secondary toggle-share-modal">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <g clip-path="url(#clip0_1902_1721)">
+                            <path d="M16 5L14.58 6.42L12.99 4.83V16H11.01V4.83L9.42 6.42L8 5L12 1L16 5ZM20 10V21C20 22.1 19.1 23 18 23H6C4.89 23 4 22.1 4 21V10C4 8.89 4.89 8 6 8H9V10H6V21H18V10H15V8H18C19.1 8 20 8.89 20 10Z" fill="black"></path>
+                        </g>
+                        <defs>
+                            <clipPath id="clip0_1902_1721">
+                                <rect width="24" height="24" fill="white"></rect>
+                            </clipPath>
+                        </defs>
+                    </svg>
+
+                    <span>Share Article</span>
+                </button>
+            </div>
+                            <div class="btn-group mx-2" role="group">
+                    <a type="button" class="btn btn-secondary" href="#comments">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <g clip-path="url(#clip0_1902_1728)">
+                                <path d="M20 17.17L18.83 16H4V4H20V17.17ZM20 2H4C2.9 2 2 2.9 2 4V16C2 17.1 2.9 18 4 18H18L22 22V4C22 2.9 21.1 2 20 2Z" fill="black"></path>
+                            </g>
+                            <defs>
+                                <clipPath id="clip0_1902_1728">
+                                    <rect width="24" height="24" fill="white"></rect>
+                                </clipPath>
+                            </defs>
+                        </svg>
+
+                        <span class="coral-count" data-coral-url="https://www.civilbeat.org/2026/01/maui-fire-survivors-face-tough-choices-when-federal-housing-program-ends/" data-coral-notext="true" data-coral-ref="aHR0cHM6Ly93d3cuY2l2aWxiZWF0Lm9yZy8yMDI2LzAxL21hdWktZmlyZS1zdXJ2aXZvcnMtZmFjZS10b3VnaC1jaG9pY2VzLXdoZW4tZmVkZXJhbC1ob3VzaW5nLXByb2dyYW0tZW5kcy8=" data-coral-count="9" data-coral-new-count="9" data-coral-previous-count="0"><span class="coral-count-number">9</span></span>
+                    </a>
+                </div>
+                                </div>
+
+        <div class="share-modal card">
+            <div class="card-body w-100 p-0">
+                <div class="card-title">
+                    <span>Share Story</span>
+                    <span class="share-modal-close">
+                        <i class="fa-regular fa-xmark-large"></i>
+                    </span>
+                </div>
+                <ul class="w-100">
+                    <li class="w-100">
+                        <a href="#" class="w-100 share-link" data-source="facebook">
+                            <i class="fa-brands fa-facebook color-facebook"></i>
+                            <span>Facebook</span>
+                        </a>
+                    </li>
+                    <li class="w-100">
+                        <a href="#" class="w-100 share-link" data-source="twitter">
+                            <i class="fa-brands fa-x-twitter color-twitter"></i>
+                            <span>X</span>
+                        </a>
+                    </li>
+                    <li class="w-100">
+                        <a href="#" class="w-100 share-link" data-source="bluesky">
+                            <i class="fa-brands fa-bluesky color-bluesky"></i>
+                            <span>Bluesky</span>
+                        </a>
+                    </li>
+                    <li class="w-100">
+                        <a href="#" class="w-100 share-link" data-source="reddit">
+                            <i class="fa-brands fa-reddit color-reddit"></i>
+                            <span>
+                                Reddit
+                            </span>
+                        </a>
+                    </li>
+                    <li class="w-100">
+                        <a href="#" class="w-100 share-link" data-source="email">
+                            <i class="fa-light fa-envelope color-envelope"></i>
+                            <span>Email</span>
+                        </a>
+                    </li>
+                    <li class="w-100">
+                        <a href="#" class="w-100 share-link" data-source="copy-link">
+                            <i class="fa-sharp fa-solid fa-link-simple color-link"></i>
+                            <span>Copy Link</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+                            </div>
+        </div>
+    </div>
+</div>
+            <div class="body-section">
+                <div class="cb-share-content" data-url="">
+    <div class="cb-richtext extensive-styling main">
+        
+                    
+<div class="wp-block-cgb-lede"><p class="lede-content hide">The state is seeking another extension to the FEMA housing program that thousands of Maui residents have relied on since losing their homes in the 2023 wildfires. It's currently set to end Feb. 28.</p></div>
+
+
+
+<p>Hundreds of wildfire survivors on Maui are preparing to soon be uprooted and forced to once again find new living arrangements if the federally funded housing program that they have relied on since losing their homes in the August 2023 blaze ends next month as scheduled.&nbsp;</p>
+
+
+
+<p>The Federal Emergency Management Agency is still reviewing the state's request to extend the Individuals and Households Program through Feb. 10, 2027. The program has provided rental assistance and temporary housing for thousands of fire survivors since late 2023.&nbsp;</p>
+
+
+
+<p>Steven Hew said his life was turned upside down when his family's generational home was destroyed in the Lahaina fire. He finally gained some sense of stability about a year ago, he said, when he applied for FEMA-funded housing and was placed in a studio apartment in Kahana, between Kāʻanapali and Nāpili in West Maui.&nbsp;</p>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" width="1024" height="683" src="https://d1l18ops95qbzp.cloudfront.net/wp-content/2025/01/30090735/250129-dc-maui-Lahaina-1046-1024x683.jpg" alt="Below the Lahaina Bypass, not far from the memorial to the 102 Lahainanas lost on the fire of August 8th, 2023, developments are beginning to be rebuilt. Some owners have placed large Recreation vehicle on their lots, while others have progressed to various levels and are framing new homes and applying new roofs.  Building is a slow process but one that shows Lahaina neighborhoods are recovering.(David Croxford/Civil Beat/2025)" class="wp-image-1694239" srcset="https://d1l18ops95qbzp.cloudfront.net/wp-content/2025/01/30090735/250129-dc-maui-Lahaina-1046-1024x683.jpg 1024w, https://d1l18ops95qbzp.cloudfront.net/wp-content/2025/01/30090735/250129-dc-maui-Lahaina-1046-300x200.jpg 300w, https://d1l18ops95qbzp.cloudfront.net/wp-content/2025/01/30090735/250129-dc-maui-Lahaina-1046-768x512.jpg 768w, https://d1l18ops95qbzp.cloudfront.net/wp-content/2025/01/30090735/250129-dc-maui-Lahaina-1046-1536x1024.jpg 1536w, https://d1l18ops95qbzp.cloudfront.net/wp-content/2025/01/30090735/250129-dc-maui-Lahaina-1046-2048x1365.jpg 2048w, https://d1l18ops95qbzp.cloudfront.net/wp-content/2025/01/30090735/250129-dc-maui-Lahaina-1046-1188x792.jpg 1188w, https://d1l18ops95qbzp.cloudfront.net/wp-content/2025/01/30090735/250129-dc-maui-Lahaina-1046-960x640.jpg 960w, https://d1l18ops95qbzp.cloudfront.net/wp-content/2025/01/30090735/250129-dc-maui-Lahaina-1046-640x427.jpg 640w" sizes="(max-width: 1024px) 100vw, 1024px"><figcaption class="wp-element-caption">Below the Lahaina Bypass — not far from the memorial to the 102 people who died in the Aug. 8, 2023, fire — housing is beginning to be rebuilt. Some owners have placed large recreation vehicle on their lots, while others have progressed to various levels and are framing new homes and applying new roofs. Building is a slow process but one that shows Lahaina neighborhoods are recovering.(David Croxford/Civil Beat/2025)</figcaption></figure>
+
+
+
+<p>"I had a roof over my head, and I was able to get two jobs and save some money," Hew said about how he benefited from his new living arrangement.&nbsp;</p>
+
+
+
+<p>If the programs aren't extended, Hew said he would likely need to quit his restaurant jobs in Lahaina so that he could stay with friends on other parts of the island or relocate to join family in Washington state or Las Vegas.</p>
+
+
+
+<p>"Maui is home, definitely. A lot of my friends are here, and it means a lot to me," he said. "But it's never going to be the same after the fire. A lot of people will probably have to make that decision to leave."</p>
+
+
+
+<p>The Individuals and Households Program, which includes the continued temporary housing assistance and the direct housing programs, has played a critical role in Maui's recovery efforts since wildfires killed at least 102 people, destroyed thousands of structures and displaced more than 12,000 residents in Lahaina and Kula. Almost 1,300 households have been placed in units leased directly from landlords or in temporary units, including one of 167 modular homes at the Kilohana Temporary Group Housing Project in Lahaina, and others have been provided with rental assistance.</p>
+
+
+
+<p>Many people who were enrolled in federally funded housing programs have since moved into rebuilt homes, relocated off island or found alternative housing. But as of Tuesday, 656 households were still  in temporary housing — <a href="https://www.civilbeat.org/2025/10/fema-scales-back-direct-lease-housing-for-maui-fire-survivors/">down from 798 in October</a> — and 295 households were relying on rental assistance provided by FEMA, according to a statement emailed to Civil Beat on Tuesday by the agency .</p>
+
+
+
+<p>Federal officials are still reviewing the state's request to extend and the agency is working with nonprofit leaders, local and state officials and other federal agencies "to navigate the unique recovery challenges on the island," the statement said. However, it added that federally funded housing is only "intended to provide disaster survivors a short-term housing solution while they develop their permanent housing plan."</p>
+
+
+
+<p>Maui County Council member Tamara Paltin, who represents West Maui, said she understood that FEMA's ultimate goal is to help survivors get back on their feet. Unfortunately, <a href="https://www.mauirecovers.org/recoverydashboard#section-housing">homes have only been rebuilt on 112 </a>&nbsp;of the 1,399 residential properties <a href="https://www.civilbeat.org/2024/08/the-view-from-above-how-far-weve-come-since-the-maui-fires/" target="_blank" rel="noreferrer noopener">cleared by the U.S. Army Corps of Engineers</a>, and Paltin said the factors that contributed to the island's longstanding housing shortage have only been amplified since the fires.&nbsp;</p>
+
+
+
+<p>"I feel like we are making steady progress with the resources that we have at our disposal," she said about Maui's post-wildfire recovery. "But it's very difficult to find any housing, especially within their price point, and especially within the areas where they live, work and go to school."</p>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" width="1024" height="683" src="https://d1l18ops95qbzp.cloudfront.net/wp-content/2024/11/23115937/FEMA-Housing-6-1024x683.jpg" alt="The green unit in the middle is the home occupied by the Folaumoela family, the first residents of FEMA Kilohana Temporary Group Housing. (Léo Azambuja/Civil Beat/2024)" class="wp-image-1683495" srcset="https://d1l18ops95qbzp.cloudfront.net/wp-content/2024/11/23115937/FEMA-Housing-6-1024x683.jpg 1024w, https://d1l18ops95qbzp.cloudfront.net/wp-content/2024/11/23115937/FEMA-Housing-6-300x200.jpg 300w, https://d1l18ops95qbzp.cloudfront.net/wp-content/2024/11/23115937/FEMA-Housing-6-768x512.jpg 768w, https://d1l18ops95qbzp.cloudfront.net/wp-content/2024/11/23115937/FEMA-Housing-6-1536x1024.jpg 1536w, https://d1l18ops95qbzp.cloudfront.net/wp-content/2024/11/23115937/FEMA-Housing-6-2048x1365.jpg 2048w, https://d1l18ops95qbzp.cloudfront.net/wp-content/2024/11/23115937/FEMA-Housing-6-1188x792.jpg 1188w, https://d1l18ops95qbzp.cloudfront.net/wp-content/2024/11/23115937/FEMA-Housing-6-960x640.jpg 960w, https://d1l18ops95qbzp.cloudfront.net/wp-content/2024/11/23115937/FEMA-Housing-6-640x427.jpg 640w" sizes="(max-width: 1024px) 100vw, 1024px"><figcaption class="wp-element-caption">Residents of FEMA's Kilohana Temporary Group Housing project in West Maui would be among those affected. (Léo Azambuja/Civil Beat/2024)</figcaption></figure>
+
+
+
+<p>More than 90% of households that were <a href="https://www.civilbeat.org/2025/05/maui-wildfire-survivors-shuffle-to-short-term-rentals-as-fema-charges-rent/" target="_blank" rel="noreferrer noopener">enrolled in FEMA's direct housing program</a> in May of last year were renters before the 2023 fires. But rent prices on the island have increased significantly over the last two and a half years, with the <a href="https://analytics.uhero.hawaii.edu/maui-recovery-dashboard/housing-and-jobs/housing/rents" target="_blank" rel="noreferrer noopener">median monthly cost of studio and one-bedroom units</a> jumping from around $1,200 in July 2023 to around $1,700 in August 2025, according to data collected by the University of Hawaiʻi Economic Research Organization. The difference was even more pronounced for larger units, with the median rent doubling from about $1,400 to about $2,800 per month for units with three or more bedrooms, according to UHERO.</p>
+
+
+
+<p>Not only is the Maui rental market ill prepared to handle a sudden influx of hundreds of survivors seeking new housing, but it would be cruel to force another move onto survivors who may be only just beginning the process of rebuilding their lives, said Nara Boone, a cofounder of the nonprofit Maui Housing Hui.&nbsp;</p>
+
+
+
+<p>"Some people feel paralyzed because they have been through this so many times," Boone said. "It's just torturous for a lot of people to know that they're maybe having to endure this again."</p>
+
+
+
+<p>"They've already lost all their belongings," she added. "They are trying to prepare, but it's hard to prepare when you have no place else to go."</p>
+
+
+
+<h2 class="wp-block-heading" id="h-this-is-an-untenable-situation">'This Is An Untenable Situation'</h2>
+
+
+
+<p>The federal government has contributed approximately $3 billion to Maui's recovery, including more than $80 million in individual assistance for Maui residents; $448 million in federal disaster loans approved by the U.S. Small Business Administration; $1.3 billion in mission assignments to fast-track debris removal, school construction and infrastructure repair; and a $1.6 billion grant intended in part to fund long-term, permanent housing solutions, according to the FEMA spokesperson.</p>
+
+
+
+<p>Due to the severity of the devastation caused by the Maui wildfires, FEMA approved a previous request from the state to extend federal housing programs to Feb. 10 of this year from February 2025. Earlier this month, the agency announced that the deadline would be moved back an additional two and a half weeks.</p>
+
+
+<div class="wp-block-image">
+<figure class="alignleft size-cb-640 is-resized"><img decoding="async" width="640" height="437" src="https://d1l18ops95qbzp.cloudfront.net/wp-content/2024/10/31090909/Tamara-Paltin-Lahaina-Recovery-Meeting-640x437.jpg" alt="Maui council member Tamara Paltin. (Léo Azambuja/Civil Beat/2024)" class="wp-image-1679290" style="width:460px;height:auto" srcset="https://d1l18ops95qbzp.cloudfront.net/wp-content/2024/10/31090909/Tamara-Paltin-Lahaina-Recovery-Meeting-640x437.jpg 640w, https://d1l18ops95qbzp.cloudfront.net/wp-content/2024/10/31090909/Tamara-Paltin-Lahaina-Recovery-Meeting-300x205.jpg 300w, https://d1l18ops95qbzp.cloudfront.net/wp-content/2024/10/31090909/Tamara-Paltin-Lahaina-Recovery-Meeting-1024x699.jpg 1024w, https://d1l18ops95qbzp.cloudfront.net/wp-content/2024/10/31090909/Tamara-Paltin-Lahaina-Recovery-Meeting-768x524.jpg 768w, https://d1l18ops95qbzp.cloudfront.net/wp-content/2024/10/31090909/Tamara-Paltin-Lahaina-Recovery-Meeting-1536x1049.jpg 1536w, https://d1l18ops95qbzp.cloudfront.net/wp-content/2024/10/31090909/Tamara-Paltin-Lahaina-Recovery-Meeting-2048x1398.jpg 2048w, https://d1l18ops95qbzp.cloudfront.net/wp-content/2024/10/31090909/Tamara-Paltin-Lahaina-Recovery-Meeting-1188x811.jpg 1188w, https://d1l18ops95qbzp.cloudfront.net/wp-content/2024/10/31090909/Tamara-Paltin-Lahaina-Recovery-Meeting-960x655.jpg 960w" sizes="(max-width: 640px) 100vw, 640px"><figcaption class="wp-element-caption">Maui council member Tamara Paltin described the island's housing situation as "untenable." (Léo Azambuja/Civil Beat/2024)</figcaption></figure></div>
+
+
+<p>FEMA has been scaling back its housing programs for months. Citing no more unmet needs, the agency in August <a href="https://www.civilbeat.org/2025/10/fema-scales-back-direct-lease-housing-for-maui-fire-survivors/">canceled over $2 million worth of contracts with a private company</a> that had been managing residential units rented to fire survivors.</p>
+
+
+
+<p>Paltin told Civil Beat that hundreds of factory-built temporary housing units have been installed on the Westside, apartment buildings <a href="https://www.civilbeat.org/2024/04/a-low-income-housing-complex-is-ready-to-rebuild-after-lahaina-fire-it-just-needs-36m/" target="_blank" rel="noreferrer noopener">that were destroyed</a> during the fires have been rebuilt and more than a hundred homes have been completed in Lahaina and Kula. Still, not nearly enough temporary or permanent housing has been built to support the hundreds of households relying on federal housing programs, and there are not enough resources to help survivors who may not be able to find housing.</p>
+
+
+
+<p>"This is an untenable situation," Paltin said during a council meeting on Jan. 7.</p>
+
+
+
+<p>Council members voted unanimously to <a href="https://mauicounty.legistar.com/LegislationDetail.aspx?ID=7798865&amp;GUID=D762DC52-7D91-452D-955E-2DF62BC9D7DB&amp;Options=&amp;Search=" target="_blank" rel="noreferrer noopener">advance legislation</a> that would increase the Department of Housing's fiscal year 2026 funding by incorporating $2 million in insurance proceeds collected after the Komohana Hale apartments were damaged in the Lahaina fire. The new funding would be used to rebuild the apartment complex.</p>
+
+
+
+<p>"We can't wait any longer," Paltin said during the meeting, urging her colleagues to prioritize taking action that moves new affordable housing projects forward quickly. "Dragging our feet is just not acceptable."</p>
+
+
+
+<p>The council took steps to increase the island's housing stock in December, when <a href="https://www.civilbeat.org/2025/12/maui-vacation-rental-bill-that-divided-community-is-signed-into-law/">members voted 5-3 to pass Bill 9,</a> which would phase out thousands of the island's short-term vacation rentals in hopes of freeing up more units for long-term housing. When Mayor Richard Bissen initially proposed it in May 2024, <a href="https://www.civilbeat.org/2024/05/maui-mayor-takes-bold-step-to-eliminate-7000-short-term-rentals-by-2026/">the legislation was to have taken effect</a> on July 1, 2025 in West Maui and Jan. 1 of this year in the rest of the county. But the implementation dates were pushed back until Jan. 1, 2029 and Jan. 1, 2031, respectively, after lengthy review and approval processes by the county planning commissions and council.</p>
+
+
+
+<h2 class="wp-block-heading" id="h-fire-survivors-feel-forgotten">Fire Survivors Feel Forgotten</h2>
+
+
+
+<p>State and county officials said they were hopeful FEMA will approve the continuation of federal housing programs, but they were also preparing to help survivors transition out of those programs "when that time comes," said Trista Speer, state Department of Human Services deputy director.</p>
+
+
+
+<p>"We want to emphasize that the State and County is committed to working together to ensure all Maui wildfire survivors, whether they are involved in a federal or non-federal funded program, continue to receive necessary support for their recovery," Speer said in a statement Monday. "We recognize that the most pressing need has almost always been housing support — and we are proud that we have always been able to find solutions to meet that important need."</p>
+
+
+
+<p>Hew was trying to hold onto local and state government officials' repeated assurances. "I think that's what a lot of people are riding on," he said.</p>
+
+
+
+<p>He felt frustrated though by the lack of resources or real plan for those survivors who lose their FEMA-provided housing.</p>
+
+
+
+<p>"It seems like a lot of the fire survivors are really forgotten," Hew said. "The last couple of years, I've really had to live my life one day at a time. Like everyone else, I'm just waiting to see what's going to happen."</p>
+
+
+
+<p>C<em>ivil Beat's coverage of Maui County is supported in part by a grant from the Nuestro Futuro Foundation.</em></p>
+
+        
+        
+        
+                    <div class="cb-subscribe-insert pez-bound" data-module="subscribe-insert" data-show="none">
+  <div class="cb-modal-subscribe -insert pez-bound" data-ajax-url="https://www.civilbeat.org/wp-admin/admin-ajax.php" data-module="subscribe-modal" data-quick="true" data-source="inline" style="opacity: 1;">
+    <div class="modal-align">
+      <div class="modal-box">
+        <h2 class="modal-title">
+          <img class="aside-logo" src="https://www.civilbeat.org/wp-content/themes/becivil/dist/images/logo10.png" alt="Civil Beat">
+          <!-- <img src="https://www.civilbeat.org/wp-content/themes/becivil/dist/images/cb-badge@2x.png" /> -->
+          <!-- <span>Sign up for our FREE morning newsletter and face each day more informed.</span> -->
+          <span>
+            Sign up for our FREE morning newsletter and face each day more informed.
+          </span>
+        </h2>
+        <form>
+          <div class="modal-form">
+            <div class="form-body">
+              <div class="form-field oneline">
+                <input name="email" id="subscribe-email" type="text" placeholder="Enter email">
+                <button>
+                  <i class="fa fa-gear fa-spin"></i>
+                  Sign Up
+                </button>
+              </div>
+              <div class="form-error">
+                Sorry. That's an invalid e-mail.
+              </div>
+              <div class="form-confirmation">
+                Thanks! We'll send you a confirmation e-mail shortly.
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+        
+            </div>
+</div>
+            </div>
+            <div class="body-section">
+                
+<div class="page-donate-footnote ">
+  
+<div class="cb-footnote-donate">
+    <h3 class="footnote-title">Will you fund our next investigation?  </h3>
+    <div class="message">
+        <div class="cb-richtext">
+            <p><span style="font-weight: 400;">As a Civil Beat reader, you know how important it is for journalists to have the freedom, resources and ability to pursue stories that shine a light on corruption, institutional failures and other wrongdoing.&nbsp;</span></p>
+<p><span style="font-weight: 400;">Your donation to our nonprofit newsroom ensures that we can remain independent and accountable only to you.</span></p>
+<p><span style="font-weight: 400;"><a href="https://civilbeat.fundjournalism.org/?amount=180&amp;frequency=once&amp;campaign=701360000016Ddv">Give now</a> and help power the strongest team of investigative journalists in the state. </span></p>
+
+        </div>
+    </div>
+        <div class="cta">
+    <a href="https://civilbeat.fundjournalism.org/?amount=180&amp;frequency=once&amp;campaign=701360000016Ddv" target="_blank" class="cb-button">
+        Donate
+    </a>
+    </div>
+    </div>
+</div>
+
+
+
+            </div>
+            <div class="body-section ">
+                    <div class="cb-about-authors">
+        <h3 class="cb-section-title">
+            About the Author
+        </h3>
+        <ul class="authors">
+                                                <li class="author">
+
+                                                                            <a class="thumbnail" href="https://www.civilbeat.org/author/erin-nolan/">
+                                <img loading="lazy" src="https://d1l18ops95qbzp.cloudfront.net/wp-content/2024/12/11142838/241211-kl-Erin-Nolan-Headshot-cropped-300x300.jpg" alt="Erin Nolan">
+                            </a>
+                        
+                        <div class="author-align w-thumb">
+                            <div class="author-name">
+                                
+                                <a href="https://www.civilbeat.org/author/erin-nolan/">Erin Nolan</a>
+                                                                    <div class="social-icons">
+                                                                                    <a class="social-icon" href="mailto:enolan@civilbeat.org" target="">
+                                                <i class="fa fa-envelope-o"></i>
+                                            </a>
+                                                                            </div>
+                                                            </div>
+                            <div class="author-bio cb-richtext">
+                                Erin Nolan is a staff reporter based on Maui. Before joining Honolulu Civil Beat in 2024, she wrote for The New York Times as a freelance journalist and as a fellow on the Metro desk.
+                            </div>
+                                                            <div class="rss-link">
+                                    <a href="https://www.civilbeat.org/author/erin-nolan/feed/">
+                                        Use the RSS feed to subscribe to
+                                        Erin Nolan's posts today
+                                    </a>
+                                </div>
+                                                    </div>
+                    </li>
+                                    </ul>
+    </div>
+            </div>
+                        <div class="page-section -last">
+                    <div id="comments">
+    <div id="coral_talk_stream"></div>
+    <div id="coral_thread"></div>
+    <script type="text/javascript">
+      ;(function () {
+        var d = document,
+          s = d.createElement('script')
+        s.src = 'https://civilbeat.coral.coralproject.net/assets/js/embed.js'
+        s.async = false
+        s.defer = true
+        s.onload = function () {
+          Coral.createStreamEmbed({
+            id: 'coral_thread',
+            autoRender: true,
+            rootURL: 'https://civilbeat.coral.coralproject.net',
+            // Uncomment these lines and replace with the ID of the
+            // story's ID and URL from your CMS to provide the
+            // tightest integration. Refer to our documentation at
+            // https://docs.coralproject.net for all the configuration
+            // options.
+            // storyID: '1755132',
+            storyURL: 'https://www.civilbeat.org/2026/01/maui-fire-survivors-face-tough-choices-when-federal-housing-program-ends/',
+          })
+        }
+        ;(d.head || d.body).appendChild(s)
+      })()
+    </script>
+  </div>
+                </div>
+                    <div class="print-footer print-only">
+                    <div>Article URL: https://www.civilbeat.org/2026/01/maui-fire-survivors-face-tough-choices-when-federal-housing-program-ends/</div>
+                    <div>Printed from civilbeat.org on 1/19/2026</div>
+                </div></div>
+        <div class="col col-asides">
+        <div class="cb-aside widget-content p-4">
+  <iframe src="/wp-content/themes/becivil/widgets/slp-widgets/donate.html" onload="javascript:(function(o){o.style.height=o.contentWindow.document.body.scrollHeight+&quot;px&quot;;}(this));" style="height: 409px; width: 100%; border: none; overflow: hidden;" frameborder="0"></iframe>
+</div>
+        <div class="cb-aside widget-content p-4">
+  <iframe src="/wp-content/themes/becivil/widgets/slp-widgets/calendar-events.php" onload="javascript:(function(o){o.style.height=o.contentWindow.document.body.scrollHeight+&quot;px&quot;;}(this));" style="height: 366px; width: 100%; border: none; overflow: hidden;" frameborder="0"></iframe>
+</div>
+    <div class="cb-aside widget-content p-4">
+  <iframe id="slp-news-tip-widget" src="/wp-content/themes/becivil/widgets/slp-widgets/news-tip.php" onload="javascript:(function(o){o.style.height=o.contentWindow.document.body.scrollHeight+&quot;px&quot;;}(this));" style="height: 365px; width: 100%; border: none; overflow: hidden;" frameborder="0"></iframe>
+  <script>
+    let newsTipFrame = document.getElementById('slp-news-tip-widget');
+    window.document.addEventListener('slpNewsTipResizeEvent', function(e) {
+      if (e.detail.state === 'open') {
+        newsTipFrame.style.height = parseInt(newsTipFrame.contentWindow.document.body.scrollHeight) + 900 + "px";
+      } else {
+        newsTipFrame.style.height = parseInt(newsTipFrame.contentWindow.document.body.scrollHeight) - 900 + "px";
+      }
+    }, false);
+  </script>
+</div>
+    </div>
+    </div>
+</div>
+    </div>
+
+        <div data-module="popularity" data-id="1755132" data-url="https://www.civilbeat.org/wp-admin/admin-ajax.php" data-action="poptally" class="pez-bound"></div>
+        </section>

@@ -24,7 +24,7 @@ Yet once the emergency phase ends, **most funding and attention disappears**.
 
 Emergency aid is critical—but it's only the first step.
 
-**Short-term relief typically covers:**
+**Short term relief typically covers:**
 
 - Evacuations
 - Temporary shelter
@@ -38,11 +38,11 @@ Emergency aid is critical—but it's only the first step.
 - Financial gaps while families rebuild
 - Ongoing support for firefighters and first responders
 
-This gap between emergency response and long-term recovery is where many families fall through the cracks.
+This gap between emergency response and long term recovery is where many families fall through the cracks.
 
 ---
 
-## What Long-Term Wildfire Recovery Really Looks Like
+## What Long Term Wildfire Recovery Really Looks Like
 
 True recovery means standing with communities long after the smoke clears.
 
@@ -72,7 +72,7 @@ Our mission is simple but urgent: **to ensure recovery doesn't end when headline
 
 ---
 
-## The Growing Need for Long-Term Wildfire Support
+## The Growing Need for Long Term Wildfire Support
 
 Wildfires are increasing in frequency, size, and intensity. Communities are being asked to recover again and again—with fewer resources each time.
 
@@ -83,7 +83,7 @@ Wildfires are increasing in frequency, size, and intensity. Communities are bein
 - First responders burn out and leave the profession
 - Communities struggle to fully rebuild
 
-Long-term recovery is not optional—it's essential.
+Long term recovery is not optional—it's essential.
 
 ---
 

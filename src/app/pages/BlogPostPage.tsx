@@ -14,14 +14,14 @@ import { BlogShareButtons } from '../components/blog/BlogShareButtons';
 import { BlogRelatedPosts } from '../components/blog/BlogRelatedPosts';
 import { BlogEEATSignals } from '../components/blog/BlogEEATSignals';
 import { BlogSources } from '../components/blog/BlogSources';
-import { getPostBySlug } from '../../lib/supabaseBlog';
-import { getArticleBySlug } from '../../lib/articles';
+import { getPostBySlug } from '../../lib/supabaseBlog.ts';
+import { getArticleBySlug } from '../../lib/articles.ts';
 import HostedArticleTemplate from '../components/HostedArticleTemplate';
 import ExternalArticleTemplate from '../components/ExternalArticleTemplate';
-import { generateMetaTags, updateDocumentMeta, generateArticleStructuredData } from '../../lib/seoHelpers';
-import { safeImageSrc, safeMarkdownContent, coerceToString, PLACEHOLDER_IMAGE } from '../../lib/blogImages';
-import { debugLog, debugError, debugTiming } from '../../lib/debug';
-import { categorizeError, getUserErrorMessage, isRetryableError } from '../../lib/errorHandling';
+import { generateMetaTags, updateDocumentMeta, generateArticleStructuredData } from '../../lib/seoHelpers.ts';
+import { safeImageSrc, safeMarkdownContent, coerceToString, PLACEHOLDER_IMAGE } from '../../lib/blogImages.ts';
+import { debugLog, debugError, debugTiming } from '../../lib/debug.ts';
+import { categorizeError, getUserErrorMessage, isRetryableError } from '../../lib/errorHandling.ts';
 import type { BlogPost } from '../../lib/blogTypes';
 
 export function BlogPostPage() {

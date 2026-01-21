@@ -26,7 +26,7 @@
 ✓ Secondary Keywords: "disaster relief, fire aid, community support"
 ```
 
-### Step 3: Author & Trust (E-E-A-T)
+### Step 3: Author & Trust (E E A T)
 ```
 ✓ Author Name: "The Wildland Fire Recovery Fund"
 ✓ Author Role: "Nonprofit Disaster Relief Organization"
@@ -91,7 +91,7 @@ Add Source:
 1. Set Status: "Scheduled"
 2. Set "Scheduled For" date/time
 3. Click "Save Post"
-4. Post auto-publishes at scheduled time
+4. Post auto publishes at scheduled time
 
 ### Saving as Draft
 1. Set Status: "Draft"
@@ -116,7 +116,7 @@ Add Source:
 
 ## Fallback System
 
-Don't worry if you skip optional SEO fields! The system auto-generates:
+Don't worry if you skip optional SEO fields! The system auto generates:
 
 - **Missing Meta Title?** → Uses post title
 - **Missing Meta Description?** → Uses excerpt or content preview
@@ -124,7 +124,7 @@ Don't worry if you skip optional SEO fields! The system auto-generates:
 - **Missing OG Image?** → Uses featured image
 - **Missing Robots?** → Generates from checkboxes
 
-## Tips for E-E-A-T
+## Tips for E E A T
 
 ### Show Expertise
 - Fill in Author Role with credentials
@@ -202,7 +202,7 @@ Horizontal rule
 5. Read aloud for flow
 
 ### After Publishing
-1. View on site: `/#blog/your-slug`
+1. View on site: `/#blog/your slug`
 2. Test social sharing
 3. Check mobile display
 4. Verify meta tags (View Source)
@@ -278,4 +278,4 @@ Include:
 
 ---
 
-**Pro Tip**: Save drafts frequently! The browser won't auto-save your work.
+**Pro Tip**: Save drafts frequently! The browser won't auto save your work.

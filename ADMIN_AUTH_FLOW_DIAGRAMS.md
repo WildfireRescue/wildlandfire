@@ -395,7 +395,7 @@ The security definer functions bypass RLS, so:
 - **Layer 3**: Role check (RLS policies)
 - **Layer 4**: Frontend validation (UI)
 
-### 3. Fail-Safe Defaults
+### 3. Fail Safe Defaults
 - No profile? → Denied
 - Error fetching profile? → Denied
 - Unknown role? → Denied

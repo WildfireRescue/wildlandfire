@@ -10,7 +10,7 @@ This guide walks you through the 5 most critical SEO tasks in order. Follow each
 
 ### Instructions:
 
-1. **Go to:** https://search.google.com/search-console
+1. **Go to:** https://search.google.com/search console
 
 2. **Click:** "Start now" (sign in with Google account)
 
@@ -267,7 +267,7 @@ Emergency housing | Mental health support | Firefighter resources
 
 1. **Go to:** https://www.linkedin.com/company/setup/new/
 2. **Company name:** "The Wildland Fire Recovery Fund"
-3. **LinkedIn public URL:** `wildland-fire-recovery-fund`
+3. **LinkedIn public URL:** `wildland fire recovery fund`
 4. **Website:** `https://wildlandfirerecoveryfund.org`
 5. **Industry:** "Philanthropic Fundraising Services"
 6. **Company size:** Select appropriate

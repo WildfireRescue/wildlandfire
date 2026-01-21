@@ -219,7 +219,7 @@ Auth Callback       Page Refresh         Before Expiry    Clear Storage
 |--------|--------|-------|
 | **Redirect Loop** | ❌ Infinite | ✅ Clean, direct |
 | **Session Persistence** | ❌ Lost on refresh | ✅ Persists |
-| **redirectTo URL** | ❌ Wrong (/) | ✅ Correct (/#auth-callback) |
+| **redirectTo URL** | ❌ Wrong (/) | ✅ Correct (/#auth callback) |
 | **Logging** | ❌ None | ✅ Comprehensive |
 | **Auth Config** | ❌ Default | ✅ Optimized |
 | **Loading States** | ❌ Missing | ✅ Proper guards |

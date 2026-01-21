@@ -6,7 +6,7 @@
 ✅ Vite for fast builds and hot module replacement
 ✅ React for efficient component rendering
 ✅ Tailwind CSS for minimal CSS bundle size
-✅ Tree-shaking enabled (unused code removed)
+✅ Tree shaking enabled (unused code removed)
 ✅ Code splitting via dynamic imports (if needed)
 
 ### **Images**
@@ -16,13 +16,13 @@
 
 ### **JavaScript**
 ✅ Motion/React for optimized animations
-✅ Efficient re-renders with React hooks
+✅ Efficient re renders with React hooks
 ✅ Event delegation where appropriate
-✅ Minimal third-party dependencies
+✅ Minimal third party dependencies
 
 ---
 
-## 🚀 **Post-Deployment Optimizations**
+## 🚀 **Post Deployment Optimizations**
 
 ### **1. Image Optimization**
 
@@ -165,9 +165,9 @@ const DonationForm = lazy(() => import('./components/DonationForm'));
 }
 ```
 
-### **10. Minimize Third-Party Scripts**
+### **10. Minimize Third Party Scripts**
 
-**Current third-party scripts:**
+**Current third party scripts:**
 - Stripe.js (required for donations) ✅
 - Supabase (required for backend) ✅
 
@@ -246,7 +246,7 @@ Test with: https://pagespeed.web.dev/
 loading="lazy"
 ```
 
-6. **Defer non-critical JavaScript**
+6. **Defer non critical JavaScript**
 ```html
 <script src="analytics.js" defer></script>
 ```
@@ -291,8 +291,8 @@ const loadStripe = async () => {
 
 ### **Already Optimized**
 ✅ Responsive design (Tailwind CSS)
-✅ Touch-friendly buttons
-✅ Mobile-first approach
+✅ Touch friendly buttons
+✅ Mobile first approach
 
 ### **Additional Optimizations**
 - [ ] Test on real devices (iPhone, Android)
@@ -309,7 +309,7 @@ const loadStripe = async () => {
 
 | Metric | Budget | Current | Status |
 |--------|--------|---------|--------|
-| Total Page Size | < 3 MB | Check post-deploy | - |
+| Total Page Size | < 3 MB | Check post deploy | - |
 | JavaScript | < 500 KB | ~200 KB | ✅ |
 | CSS | < 100 KB | ~50 KB | ✅ |
 | Images | < 2 MB | Varies | ⚠️ |
@@ -402,7 +402,7 @@ lighthouse https://wildlandfirerecoveryfund.org --view
 ❌ LCP > 4 seconds
 ❌ Total page size > 5 MB
 ❌ JavaScript bundle > 1 MB
-❌ Render-blocking resources
+❌ Render blocking resources
 ❌ Too many HTTP requests (> 100)
 ❌ Unoptimized images (> 500 KB each)
 ❌ Missing compression
@@ -421,4 +421,4 @@ lighthouse https://wildlandfirerecoveryfund.org --view
 
 ---
 
-**Your site is already well-optimized! Focus on hosting configuration and image optimization for maximum impact. 🚀**
+**Your site is already well optimized! Focus on hosting configuration and image optimization for maximum impact. 🚀**

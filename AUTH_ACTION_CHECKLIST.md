@@ -86,7 +86,7 @@ sessionStorage.clear();
 - [ ] Try to access `/#admin/blog`
 - [ ] **Expected:** Shows login form (blocked from editor)
 
-### Test 4: Non-Admin Access ✓
+### Test 4: Non Admin Access ✓
 - [ ] Create test user WITHOUT admin role
 - [ ] Login as that user
 - [ ] **Expected:** "Access Denied" message with role info
@@ -95,7 +95,7 @@ sessionStorage.clear();
 
 ## 📋 Deployment Checklist
 
-### Pre-Deployment
+### Pre Deployment
 - [ ] All 4 tests pass locally
 - [ ] No TypeScript errors (`npm run build`)
 - [ ] Console logs show expected flow
@@ -114,7 +114,7 @@ sessionStorage.clear();
   supabase db push --linked
   ```
 
-### Post-Deployment
+### Post Deployment
 - [ ] Promote production admin users
   ```sql
   UPDATE profiles SET role = 'admin' 
@@ -163,7 +163,7 @@ ON CONFLICT (id) DO UPDATE SET role = 'admin';
 ### ❌ Session not persisting
 **Fix:**
 1. Check localStorage in DevTools
-2. Look for key: `wildland-fire-auth`
+2. Look for key: `wildland fire auth`
 3. If missing, check for cookie blocking
 4. Try different browser
 
@@ -223,7 +223,7 @@ If you see the editor, you're done! 🎉
 
 1. **Check console logs** - They tell you exactly what's happening
 2. **Review documentation** - Detailed troubleshooting in AUTH_LOOP_FIX.md
-3. **Verify configuration** - Double-check redirect URLs and database
+3. **Verify configuration** - Double check redirect URLs and database
 4. **Test in clean browser** - Eliminate cached state issues
 
 ---

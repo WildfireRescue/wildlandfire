@@ -2,7 +2,7 @@
 
 ## ✅ COMPLETED - Technical SEO Foundation
 
-Your website now has enterprise-level SEO implemented:
+Your website now has enterprise level SEO implemented:
 
 ### Meta Tags & Headers
 - ✅ Dynamic page titles (unique for each page)
@@ -40,7 +40,7 @@ Your website now has enterprise-level SEO implemented:
 ### 1. Google Search Console Setup
 **Priority: CRITICAL**
 
-1. Go to https://search.google.com/search-console
+1. Go to https://search.google.com/search console
 2. Click "Add Property"
 3. Enter your domain: `https://wildlandfirerecoveryfund.org`
 4. Verify ownership (DNS verification or HTML file upload)
@@ -489,14 +489,14 @@ gtag('event', 'purchase', {
 9. **firefighter support** (170 searches/month)
 10. **wildfire recovery assistance** (140 searches/month)
 
-### Long-Tail Keywords (Lower Competition)
+### Long Tail Keywords (Lower Competition)
 11. "how to help wildfire victims" (High intent)
 12. "tax deductible donation wildfire" (High intent)
 13. "wildfire relief organizations" (High intent)
 14. "emergency housing for wildfire survivors"
 15. "mental health support disaster survivors"
 
-### Location-Based Keywords (If Applicable)
+### Location Based Keywords (If Applicable)
 16. "[State] wildfire relief"
 17. "[City] fire disaster relief"
 18. "California wildfire charity"
@@ -754,7 +754,7 @@ Before you start, ensure:
 
 ## 🎉 YOU'RE READY TO LAUNCH!
 
-Your website has best-in-class SEO foundations. Now focus on:
+Your website has best in class SEO foundations. Now focus on:
 
 1. **Content creation** (blog posts, stories, updates)
 2. **Link building** (partnerships, directories, media)

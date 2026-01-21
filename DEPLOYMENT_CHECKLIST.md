@@ -1,6 +1,6 @@
-# Deployment Checklist - SEO & E-E-A-T Enhancement
+# Deployment Checklist - SEO & E E A T Enhancement
 
-## Pre-Deployment
+## Pre Deployment
 
 ### 1. Code Review
 - [x] All TypeScript errors resolved
@@ -89,7 +89,7 @@ npm run build
 1. Navigate to: `https://yoursite.com/#blog`
 2. Find your test post
 3. Click to open
-4. Right-click → "View Page Source"
+4. Right click → "View Page Source"
 5. Search for:
    - `<meta name="description"`
    - `<meta property="og:title"`
@@ -103,12 +103,12 @@ npm run build
 Run through validators:
 
 **Google Rich Results Test:**
-1. Go to: https://search.google.com/test/rich-results
+1. Go to: https://search.google.com/test/rich results
 2. Enter your post URL
 3. Click "Test URL"
 
 **✅ Pass:** Article schema recognized, no errors  
-**❌ Fail:** Check JSON-LD structure
+**❌ Fail:** Check JSON LD structure
 
 **Facebook Sharing Debugger:**
 1. Go to: https://developers.facebook.com/tools/debug/
@@ -119,22 +119,22 @@ Run through validators:
 **❌ Fail:** Verify og:image URL is accessible
 
 **Twitter Card Validator:**
-1. Go to: https://cards-dev.twitter.com/validator
+1. Go to: https://cards dev.twitter.com/validator
 2. Enter your post URL
 3. Click "Preview card"
 
 **✅ Pass:** Card preview shows correctly  
 **❌ Fail:** Check twitter:card meta tags
 
-#### Test 5: Verify E-E-A-T Display
+#### Test 5: Verify E E A T Display
 1. Open test post
-2. Check sidebar for E-E-A-T box
+2. Check sidebar for E E A T box
 3. Should show:
    - Author name
    - Fact-checked badge (if checked)
    - Last updated date
 
-**✅ Pass:** E-E-A-T signals display  
+**✅ Pass:** E E A T signals display  
 **❌ Fail:** Check BlogEEATSignals.tsx
 
 #### Test 6: Verify Sources Display
@@ -200,7 +200,7 @@ Run through validators:
 **✅ Pass:** Mobile experience smooth  
 **❌ Fail:** Review responsive CSS
 
-## Post-Deployment
+## Post Deployment
 
 ### Immediate Actions (First 24 Hours)
 
@@ -362,10 +362,10 @@ Before marking deployment complete:
 
 ## 🎉 Deployment Complete!
 
-Once all items are checked, your enhanced SEO and E-E-A-T blog system is live!
+Once all items are checked, your enhanced SEO and E E A T blog system is live!
 
 **Next Steps:**
-1. Create high-quality content using new features
+1. Create high quality content using new features
 2. Monitor SEO performance weekly
 3. Gather user feedback
 4. Iterate and improve

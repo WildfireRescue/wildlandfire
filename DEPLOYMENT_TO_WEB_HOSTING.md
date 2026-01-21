@@ -32,8 +32,8 @@ Your site is built with React and Vite. You need to create production files firs
    dist/
    ├── index.html
    ├── assets/
-   │   ├── index-ABC123.js
-   │   ├── index-DEF456.css
+   │   ├── index ABC123.js
+   │   ├── index DEF456.css
    │   └── [other optimized files]
    ├── public/
    │   ├── robots.txt
@@ -121,7 +121,7 @@ public_html/
 
 ## ⚙️ STEP 3: Configure for Single Page Application (CRITICAL!)
 
-Your site uses React Router with hash-based routing (`#home`, `#about`, etc.). This should work automatically, but you need to ensure proper configuration.
+Your site uses React Router with hash based routing (`#home`, `#about`, etc.). This should work automatically, but you need to ensure proper configuration.
 
 ### Create/Update `.htaccess` file (for Apache servers)
 
@@ -401,7 +401,7 @@ Common hosting support contacts:
 - **GoDaddy:** 1-480-505-8877
 - **HostGator:** 1-866-964-2867
 
-Ask them: "How do I deploy a React single-page application to my hosting?"
+Ask them: "How do I deploy a React single page application to my hosting?"
 
 ---
 

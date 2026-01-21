@@ -90,7 +90,7 @@ OR
 ```
 
 **If missing:**
-1. Check email spelling in allowlist (case-sensitive)
+1. Check email spelling in allowlist (case sensitive)
 2. Verify both files have same allowlist:
    - `src/hooks/useAuth.ts`
    - `src/lib/supabaseBlog.ts`

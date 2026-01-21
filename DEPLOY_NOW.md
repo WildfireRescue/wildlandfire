@@ -33,7 +33,7 @@ I've fixed all the issues with your site:
 **Then:**
 
 1. Go to: **https://github.com/new**
-2. Repository name: `wildland-fire-recovery-fund`
+2. Repository name: `wildland fire recovery fund`
 3. Make it **Private** (keep your Stripe keys safe)
 4. Click **"Create repository"**
 5. Follow the instructions on screen to upload your code
@@ -41,7 +41,7 @@ I've fixed all the issues with your site:
 **OR use GitHub Desktop (easier):**
 1. Download GitHub Desktop: https://desktop.github.com/
 2. Click "Create New Repository"
-3. Name: `wildland-fire-recovery-fund`
+3. Name: `wildland fire recovery fund`
 4. Local Path: Select your project folder
 5. Click "Publish repository" → Make it Private
 6. Click "Publish"
@@ -50,7 +50,7 @@ I've fixed all the issues with your site:
 
 1. Go back to **https://vercel.com**
 2. Click **"Add New..."** → **"Project"**
-3. Click **"Import"** next to your `wildland-fire-recovery-fund` repository
+3. Click **"Import"** next to your `wildland fire recovery fund` repository
 4. **Framework Preset:** Vite
 5. **Build Command:** Leave as default (`npm run build`)
 6. **Output Directory:** `dist`
@@ -86,7 +86,7 @@ Value: [Already configured in your Supabase environment]
 
 ## 🎉 YOU'RE LIVE!
 
-Your site is now live at: `https://your-project-name.vercel.app`
+Your site is now live at: `https://your project name.vercel.app`
 
 ### Next Steps:
 

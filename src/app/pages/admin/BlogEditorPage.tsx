@@ -6,18 +6,17 @@
 
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { motion } from 'motion/react';
-import { supabase } from '../../../lib/supabase';
+import { supabase } from '../../../lib/supabase.ts';
 import { Button } from '../../components/ui/button';
-import { Mail, LogOut, Save, Eye } from 'lucide-react';
-import { createPost, getCategories, isCurrentUserEditor, getCurrentUserProfile } from '../../../lib/supabaseBlog';
-import { generateSlug, calculateReadingTime } from '../../../lib/blogHelpers';
-import { withTimeout, TimeoutError } from '../../../lib/promiseUtils';
+import { Mail, LogOut, Save, Eye, AlertCircle, Info } from 'lucide-react';
+import { createPost, getCategories } from '../../../lib/supabaseBlog.ts';
+import { generateSlug, calculateReadingTime } from '../../../lib/blogHelpers.ts';
+import { withTimeout, TimeoutError } from '../../../lib/promiseUtils.ts';
+import { checkEditorPermissions, getPermissionInstructions, type PermissionCheckResult } from '../../../lib/permissions.ts';
 import type { BlogCategory } from '../../../lib/blogTypes';
 
-export function BlogEditorPage() {
-  const [sessionEmail, setSessionEmail] = useState<string | null>(null);
-  const [isEditor, setIsEditor] = useState(false);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+export fupermissionResult, setPermissionResult] = useState<PermissionCheckResult | null>(null);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true
   const [authError, setAuthError] = useState<string | null>(null);
   const [categories, setCategories] = useState<BlogCategory[]>([]);
 
@@ -52,7 +51,7 @@ export function BlogEditorPage() {
   }, [autoSlug]);
 
   // Load session + check editor status
-  // DO NOT register auth listener here - it's handled in App.tsx
+  // DO NOT register auth listener here - it's handled in AuthProvider
   useEffect(() => {
     let mounted = true;
     
@@ -60,63 +59,32 @@ export function BlogEditorPage() {
       setIsCheckingAuth(true);
       setAuthError(null);
       
+      
       try {
-        console.log('[BlogEditor] Checking auth...');
-        const { data, error: sessionError } = await supabase.auth.getSession();
+        console.log('[BlogEditor] Checking permissions...');
+        const result = await checkEditorPermissions();
         
-        if (!mounted) return; // Component unmounted, stop processing
+        if (!mounted) return;
         
-        if (sessionError) {
-          console.error('[BlogEditor] Session error:', sessionError);
-          setAuthError(`Session error: ${sessionError.message}`);
-          setIsCheckingAuth(false);
-          return;
-        }
-        
-        const session = data.session;
-        const email = session?.user?.email ?? null;
-        
-        console.log('[BlogEditor] Session check:', {
-          hasSession: !!session,
-          email,
-          userId: session?.user?.id,
+        console.log('[BlogEditor] Permission check result:', {
+          status: result.status,
+          hasAccess: result.hasAccess,
+          email: result.user?.email
         });
         
-        setSessionEmail(email);
-        
-        if (email) {
-          console.log('[BlogEditor] Checking editor status for:', email);
-          
-          // This call is now non-blocking - profile 500 errors won't break it
-          const editorStatus = await isCurrentUserEditor();
-          
-          if (!mounted) return; // Component unmounted, stop processing
-          
-          console.log('[BlogEditor] Editor status:', editorStatus);
-          setIsEditor(editorStatus);
-          
-          if (!editorStatus) {
-            // This call is also non-blocking now
-            const { profile } = await getCurrentUserProfile();
-            
-            if (!mounted) return; // Component unmounted, stop processing
-            
-            console.log('[BlogEditor] User profile:', profile);
-            if (!profile) {
-              setAuthError('No profile found and email not in admin allowlist. Please contact an administrator.');
-            } else {
-              setAuthError(`Your role is: ${profile.role}. You need editor or admin role.`);
-            }
-          }
-        } else {
-          console.log('[BlogEditor] No authenticated user');
-        }
+        setPermissionResult(result);
       } catch (e: any) {
-        if (!mounted) return; // Component unmounted, stop processing
-        console.error('[BlogEditor] Auth check error:', e);
-        setAuthError(`Unexpected error: ${e?.message || 'Unknown error'}`);
-      } finally {
-        if (mounted) {
+        if (!mounted) return;
+        
+        console.error('[BlogEditor] Permission check error:', e);
+        setPermissionResult({
+          status: 'error',
+          hasAccess: false,
+          user: null,
+          profile: null,
+          message: 'Failed to check permissions',
+          technicalDetails: e
+        }
           setIsCheckingAuth(false);
         }
       }
@@ -125,7 +93,7 @@ export function BlogEditorPage() {
     checkAuth();
 
     // ❌ DO NOT subscribe to auth state changes here
-    // The listener is already registered in App.tsx
+    // The listener is already registered in AuthProvider (App.tsx)
     // Multiple listeners cause AbortError, memory leaks, and stuck states
 
     // Cleanup function
@@ -191,6 +159,9 @@ export function BlogEditorPage() {
     setSaving(true);
     setSaveMsg(null);
     setSaveErr(null);
+    
+    // Track if timeout warning was shown
+    let timeoutWarningShown = false;
 
     try {
       // Validate required fields
@@ -208,6 +179,9 @@ export function BlogEditorPage() {
 
       const readingTime = calculateReadingTime(content);
 
+      const authorEmail = permissionResult?.user?.email || 'unknown';
+      const authorName = authorEmail.split('@')[0];
+
       const postData = {
         title: title.trim(),
         slug: finalSlug,
@@ -220,19 +194,30 @@ export function BlogEditorPage() {
         published_at: status === 'published' ? new Date().toISOString() : null,
         reading_time_minutes: readingTime,
         featured,
-        author_email: sessionEmail!,
-        author_name: sessionEmail?.split('@')[0],
+        author_email: authorEmail,
+        author_name: authorName,
       };
 
       console.log('[BlogEditor] Attempting to save post:', postData);
       
-      // Wrap the createPost call with a 15-second timeout
+      // Set up a timeout warning after 10 seconds
+      const timeoutWarning = setTimeout(() => {
+        if (!timeoutWarningShown) {
+          timeoutWarningShown = true;
+          setSaveMsg('⏳ Save taking longer than expected... Please wait or check your connection.');
+        }
+      }, 10000);
+      
+      // Wrap the createPost call with a 15-second timeout using withTimeout
       const savePromise = createPost(postData);
       const { post, error } = await withTimeout(
         savePromise,
         15000,
-        'Save operation timed out. Please check your connection and try again.'
+        'Save operation timed out after 15 seconds. Please check your connection and try again.'
       );
+      
+      // Clear the warning timeout
+      clearTimeout(timeoutWarning);
       
       console.log('[BlogEditor] Save result:', { post, error });
       
@@ -294,13 +279,41 @@ export function BlogEditorPage() {
       // Clear error message after 10 seconds
       setTimeout(() => setSaveErr(null), 10000);
     } finally {
-      // ALWAYS clear saving state
+      // ALWAYS clear saving state, no matter what happens
       setSaving(false);
     }
   }
 
-  // Logged OUT
-  if (!sessionEmail) {
+  // Checking authentication status
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen pt-28 pb-20 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="max-w-xl mx-auto bg-card border border-border rounded-xl p-8 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Checking permissions...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // No permission result yet
+  if (!permissionResult) {
+    return (
+      <div className="min-h-screen pt-28 pb-20 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="max-w-xl mx-auto bg-destructive/10 border border-destructive/20 rounded-xl p-8 text-center">
+            <AlertCircle className="w-12 h-12 mx-auto mb-4 text-destructive" />
+            <p className="text-destructive">Failed to check permissions</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Logged OUT (no session)
+  if (permissionResult.status === 'no_session') {
     return (
       <div className="min-h-screen pt-28 pb-20 bg-background">
         <div className="container mx-auto px-4">
@@ -361,60 +374,78 @@ export function BlogEditorPage() {
     );
   }
 
-  // Checking authentication status
-  if (isCheckingAuth) {
+  // Logged IN but no access (no profile, insufficient role, or error)
+  if (!permissionResult.hasAccess) {
+    const instructions = getPermissionInstructions(permissionResult.status);
+    const userEmail = permissionResult.user?.email || 'Unknown';
+    
     return (
       <div className="min-h-screen pt-28 pb-20 bg-background">
         <div className="container mx-auto px-4">
-          <div className="max-w-xl mx-auto bg-card border border-border rounded-xl p-8 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Checking permissions...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Logged IN but not an editor
-  if (!isEditor) {
-    return (
-      <div className="min-h-screen pt-28 pb-20 bg-background">
-        <div className="container mx-auto px-4">
-          <div className="max-w-xl mx-auto bg-destructive/10 border border-destructive/20 rounded-xl p-8">
-            <h2 className="text-xl font-bold text-destructive mb-4">Access Denied</h2>
-            <p className="text-destructive mb-2">
-              You don't have editor permissions.
-            </p>
-            <p className="text-sm text-muted-foreground mb-6">
-              Logged in as: <strong>{sessionEmail}</strong>
-            </p>
-            
-            {authError && (
-              <div className="bg-background border border-border rounded-lg p-4 mb-6">
-                <p className="text-sm text-destructive font-mono">{authError}</p>
+          <div className="max-w-2xl mx-auto bg-destructive/10 border border-destructive/20 rounded-xl p-8">
+            <div className="flex items-start gap-4 mb-6">
+              <AlertCircle className="w-8 h-8 text-destructive flex-shrink-0 mt-1" />
+              <div className="flex-1">
+                <h2 className="text-xl font-bold text-destructive mb-2">Access Denied</h2>
+                <p className="text-destructive mb-2">
+                  {permissionResult.message}
+                </p>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Logged in as: <strong>{userEmail}</strong>
+                </p>
               </div>
-            )}
-            
-            <div className="bg-background border border-border rounded-lg p-4 mb-6">
-              <p className="text-sm font-semibold mb-2">Troubleshooting:</p>
-              <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
-                <li>Make sure you've been granted editor access</li>
-                <li>Try signing out and signing back in</li>
-                <li>Contact an administrator if the issue persists</li>
-              </ul>
             </div>
             
-            <Button onClick={signOut} variant="outline">
-              <LogOut size={18} className="mr-2" />
-              Sign Out
-            </Button>
+            {instructions && (
+              <details className="bg-background border border-border rounded-lg p-4 mb-6">
+                <summary className="cursor-pointer text-primary font-medium flex items-center gap-2">
+                  <Info className="w-4 h-4" />
+                  Technical Details & Fix Instructions
+                </summary>
+                <div className="mt-4 space-y-3">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Status: <code className="text-primary">{permissionResult.status}</code>
+                    </p>
+                    {permissionResult.profile && (
+                      <p className="text-sm text-muted-foreground">
+                        Current Role: <code className="text-foreground">{permissionResult.profile.role}</code>
+                      </p>
+                    )}
+                  </div>
+                  <pre className="bg-muted/50 p-3 rounded text-xs text-foreground overflow-x-auto">
+{instructions}</pre>
+                </div>
+              </details>
+            )}
+            
+            <div className="flex gap-3">
+              <Button
+                onClick={() => window.location.href = '/'}
+                variant="outline"
+              >
+                Return Home
+              </Button>
+              <Button
+                onClick={signOut}
+                variant="outline"
+                className="ml-auto"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
+              </Button>
+            </div>
           </div>
         </div>
       </div>
     );
   }
 
-  // Logged IN and IS EDITOR
+  // Successfully authenticated with editor access
+  const userEmail = permissionResult.user?.email || 'Unknown';
+  const userRole = permissionResult.profile?.role || 'allowlist';
+
+  // Logged IN and IS EDITOR - Main Editor UI
   return (
     <div className="min-h-screen pt-28 pb-20 bg-background">
       <div className="container mx-auto px-4 max-w-4xl">
@@ -422,7 +453,7 @@ export function BlogEditorPage() {
           <h1 className="text-3xl font-bold">Blog Editor</h1>
           <div className="flex items-center gap-4">
             <span className="text-sm text-muted-foreground">
-              Signed in as <strong>{sessionEmail}</strong>
+              Signed in as <strong>{userEmail}</strong> ({userRole})
             </span>
             <Button variant="outline" size="sm" onClick={signOut}>
               <LogOut size={16} className="mr-2" />

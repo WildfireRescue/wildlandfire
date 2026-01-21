@@ -101,7 +101,7 @@ After deployment, verify these scenarios:
 2. Go to `/admin/blog`
 3. Should see blog editor (not "Access Denied")
 
-### ✅ Non-Admin Cannot Access Editor
+### ✅ Non Admin Cannot Access Editor
 1. Sign in as regular user
 2. Go to `/admin/blog`
 3. Should see "Access Denied" with helpful error message
@@ -157,7 +157,7 @@ The migration uses `DROP TABLE IF EXISTS` so this shouldn't happen. If it does:
    ```sql
    DROP TABLE IF EXISTS profiles CASCADE;
    ```
-3. Re-run the migration
+3. Re run the migration
 
 ## What Changed?
 

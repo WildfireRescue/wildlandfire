@@ -93,13 +93,13 @@ Test the built version locally
 | **FIXES_COMPLETE.md** | What was fixed + testing | Want details |
 | **DEPLOYMENT_TO_WEB_HOSTING.md** | Traditional hosting | Using INMotion/cPanel |
 | **QUICK_START_SEO_GUIDE.md** | SEO setup | After deployment |
-| **SEO_ACTION_CHECKLIST.md** | Advanced SEO tactics | Long-term strategy |
+| **SEO_ACTION_CHECKLIST.md** | Advanced SEO tactics | Long term strategy |
 | **STRIPE_SETUP_INSTRUCTIONS.md** | Stripe configuration | Already done ✅ |
 | **README.md** | Project overview | For GitHub/developers |
 
 ---
 
-## ✅ Pre-Deployment Checklist
+## ✅ Pre Deployment Checklist
 
 **Before you deploy, have these ready:**
 

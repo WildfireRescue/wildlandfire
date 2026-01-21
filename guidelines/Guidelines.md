@@ -26,7 +26,7 @@ Additionally, if you select a design system to use in the prompt box, you can re
 your design system's components, tokens, variables and components.
 For example:
 
-* Use a base font-size of 14px
+* Use a base font size of 14px
 * Date formats should always be in the format “Jun 10”
 * The bottom toolbar should only ever have a maximum of 4 items
 * Never use the floating action button with the bottom toolbar
@@ -43,7 +43,7 @@ users through the application. It provides visual feedback and clear affordances
 
 ### Usage
 Buttons should be used for important actions that users need to take, such as form submissions, confirming choices,
-or initiating processes. They communicate interactivity and should have clear, action-oriented labels.
+or initiating processes. They communicate interactivity and should have clear, action oriented labels.
 
 ### Variants
 * Primary Button
@@ -56,6 +56,6 @@ or initiating processes. They communicate interactivity and should have clear, a
   * Usage : Can appear alongside a primary button for less important actions
 * Tertiary Button
   * Purpose : Used for the least important actions
-  * Visual Style : Text-only with no border, using primary color
+  * Visual Style : Text only with no border, using primary color
   * Usage : For actions that should be available but not emphasized
 -->

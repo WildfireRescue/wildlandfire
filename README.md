@@ -1,6 +1,6 @@
 # The Wildland Fire Recovery Fund
 
-A comprehensive donation-focused website serving wildfire survivors.
+A comprehensive donation focused website serving wildfire survivors.
 
 ## 🔥 About
 
@@ -92,11 +92,11 @@ The blog editor requires authentication and proper permissions. See:
    ```
 3. Sign in and navigate to `/#admin/blog`
 
-See `ADMIN_AUTH_QUICK_START.md` for step-by-step instructions.
+See `ADMIN_AUTH_QUICK_START.md` for step by step instructions.
 
 ## 🔍 SEO
 
-Enterprise-level SEO implementation:
+Enterprise level SEO implementation:
 - ✅ Meta tags optimization
 - ✅ Structured data (Schema.org)
 - ✅ Open Graph tags

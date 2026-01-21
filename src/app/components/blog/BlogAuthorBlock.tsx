@@ -4,7 +4,7 @@
 // =====================================================
 
 import { Calendar, Clock } from 'lucide-react';
-import { formatDate, getReadTimeText } from '../../../lib/blogHelpers';
+import { formatDate, getReadTimeText } from '../../../lib/blogHelpers.ts';
 import { BlogCategoryBadge } from './BlogCategoryBadge';
 
 interface BlogAuthorBlockProps {

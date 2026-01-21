@@ -3,6 +3,11 @@ import { supabase } from '../lib/supabase';
 import type { Session, User } from '@supabase/supabase-js';
 import type { UserProfile } from '../lib/blogTypes';
 
+// =====================================================
+// DEPRECATED: Use useAuthContext from ../contexts/AuthContext instead
+// This hook is kept for backward compatibility but will be removed
+// =====================================================
+
 export interface AuthState {
   session: Session | null;
   user: User | null;
@@ -25,17 +30,19 @@ export function isAdminEmail(email: string | undefined): boolean {
 }
 
 /**
+ * @deprecated Use useAuthContext from ../contexts/AuthContext instead
+ * 
  * Hook to manage Supabase authentication state
  * 
  * Features:
  * - Loads session on mount using getSession()
  * - Loads user profile from public.profiles (optional - may fail with 500)
- * - DOES NOT listen for auth state changes (handled by App.tsx)
+ * - DOES NOT listen for auth state changes (handled by AuthProvider)
  * - Provides loading state to prevent premature redirects
  * - Comprehensive logging for debugging
  * 
  * IMPORTANT: This hook does NOT register an auth listener.
- * The listener is registered ONCE in App.tsx to avoid multiple subscriptions.
+ * The listener is registered ONCE in AuthProvider to avoid multiple subscriptions.
  */
 export function useAuth(): AuthState {
   const [session, setSession] = useState<Session | null>(null);
@@ -152,8 +159,9 @@ export function useAuth(): AuthState {
 
     initAuth();
 
-    // ❌ DO NOT register auth listener here - it's handled in App.tsx
+    // ❌ DO NOT register auth listener here - it's handled in AuthProvider
     // Multiple listeners cause AbortError and stuck states
+    // Use useAuthContext from ../contexts/AuthContext for reactive auth state
     
     return () => {
       mounted = false;

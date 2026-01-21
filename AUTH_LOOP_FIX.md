@@ -124,7 +124,7 @@ const { error } = await supabase.auth.signInWithOtp({
 
 ### ✅ 5. Added Comprehensive Logging
 
-All auth-related files now include detailed console logging:
+All auth related files now include detailed console logging:
 
 ```typescript
 console.log('[BlogEditor] Session check:', {
@@ -198,8 +198,8 @@ Make sure these are configured in your Supabase project:
 
 1. **Redirect URLs** (Settings → Authentication → URL Configuration):
    ```
-   https://your-domain.com/#auth-callback
-   http://localhost:5173/#auth-callback (for development)
+   https://your domain.com/#auth callback
+   http://localhost:5173/#auth callback (for development)
    ```
 
 2. **Email Templates** (Settings → Authentication → Email Templates):
@@ -207,7 +207,7 @@ Make sure these are configured in your Supabase project:
 
 3. **Site URL** (Settings → Authentication → URL Configuration):
    ```
-   https://your-domain.com
+   https://your domain.com
    ```
 
 ## Database Setup
@@ -252,7 +252,7 @@ VITE_SUPABASE_ANON_KEY=your-anon-key
 
 3. **Verify user has profile:**
    ```sql
-   SELECT * FROM profiles WHERE email = 'your-email@example.com';
+   SELECT * FROM profiles WHERE email = 'your email@example.com';
    ```
 
 4. **Check browser console for errors:**
@@ -263,12 +263,12 @@ VITE_SUPABASE_ANON_KEY=your-anon-key
 
 1. **Check user role:**
    ```sql
-   SELECT email, role FROM profiles WHERE email = 'your-email@example.com';
+   SELECT email, role FROM profiles WHERE email = 'your email@example.com';
    ```
 
 2. **Promote to admin:**
    ```sql
-   UPDATE profiles SET role = 'admin' WHERE email = 'your-email@example.com';
+   UPDATE profiles SET role = 'admin' WHERE email = 'your email@example.com';
    ```
 
 3. **Verify RLS policies allow admin access:**
@@ -279,7 +279,7 @@ VITE_SUPABASE_ANON_KEY=your-anon-key
 
 1. **Check localStorage:**
    ```javascript
-   console.log(localStorage.getItem('wildland-fire-auth'));
+   console.log(localStorage.getItem('wildland fire auth'));
    ```
 
 2. **Verify auth config has:**
@@ -288,7 +288,7 @@ VITE_SUPABASE_ANON_KEY=your-anon-key
    storage: window.localStorage,
    ```
 
-3. **Check for third-party cookie blocking**
+3. **Check for third party cookie blocking**
 
 ## Files Changed
 

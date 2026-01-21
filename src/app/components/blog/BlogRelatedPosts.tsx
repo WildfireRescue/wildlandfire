@@ -6,7 +6,7 @@
 import { useEffect, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { BlogPostCard } from './BlogPostCard';
-import { getRelatedPosts } from '../../../lib/supabaseBlog';
+import { getRelatedPosts } from '../../../lib/supabaseBlog.ts';
 import type { BlogPost } from '../../../lib/blogTypes';
 
 interface BlogRelatedPostsProps {

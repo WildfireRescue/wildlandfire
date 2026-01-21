@@ -10,7 +10,7 @@ Users could successfully authenticate but were unable to access the `/admin/blog
 1. **Missing Profile Records**: The `profiles` table was not automatically populated when users signed up via Supabase Auth
 2. **Structural Issues**: The profiles table used `user_id` as a foreign key instead of `id` as the primary key referencing auth.users
 3. **RLS Recursion**: Post policies checking profiles table caused infinite recursion due to restrictive RLS policies
-4. **No Auto-Creation**: No trigger existed to create profile records on user signup
+4. **No Auto Creation**: No trigger existed to create profile records on user signup
 5. **Frontend Race Conditions**: Permission checks ran before loading states were properly handled
 
 ## Solution Implemented
@@ -131,14 +131,14 @@ Created three comprehensive documentation files:
 ## Testing Coverage
 
 ### Scenarios Covered
-1. ✅ New user signup → profile auto-created
+1. ✅ New user signup → profile auto created
 2. ✅ Admin user → can access editor
 3. ✅ Regular user → sees helpful "Access Denied" message
 4. ✅ Loading states → prevent false negatives
 5. ✅ Error states → display helpful information
 6. ✅ Console logging → aids debugging
 7. ✅ Sign out → works correctly
-8. ✅ Re-authentication → preserves permissions
+8. ✅ Re authentication → preserves permissions
 
 ## Deployment Steps
 

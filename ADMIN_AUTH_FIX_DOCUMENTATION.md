@@ -9,7 +9,7 @@ Users could successfully sign in to the application, but when accessing `/admin/
 1. **Missing Profile Records**: When users signed up via Supabase Auth, no corresponding row was created in the `profiles` table
 2. **Restrictive RLS Policies**: The Row Level Security policies on the `profiles` table prevented queries needed for permission checks
 3. **RLS Recursion Issues**: The original setup had post policies that checked the profiles table, which itself had RLS enabled, causing infinite recursion
-4. **No Auto-Creation Trigger**: There was no mechanism to automatically create profiles when new users signed up
+4. **No Auto Creation Trigger**: There was no mechanism to automatically create profiles when new users signed up
 5. **Frontend Loading States**: The frontend didn't properly handle loading states, potentially showing "no permissions" before the check completed
 
 ## Solution Overview
@@ -41,7 +41,7 @@ CREATE TABLE profiles (
 - Role values are `'user'`, `'editor'`, or `'admin'` (changed from `'viewer'`, `'editor'`, `'admin'`)
 - Default role is `'user'` for new sign-ups
 
-#### B. RLS Policies (Non-Recursive)
+#### B. RLS Policies (Non Recursive)
 
 The migration creates 5 carefully designed RLS policies:
 
@@ -78,7 +78,7 @@ The migration creates 5 carefully designed RLS policies:
    - Critical for the auto-creation trigger to work
    - Allows background processes to create profiles
 
-#### C. Auto-Creation Trigger
+#### C. Auto Creation Trigger
 
 ```sql
 CREATE OR REPLACE FUNCTION public.handle_new_user()
@@ -258,7 +258,7 @@ export async function isCurrentUserEditor(): Promise<boolean> {
 
 #### D. New Function: isCurrentUserAdmin()
 
-Added a new function to check for admin-only access:
+Added a new function to check for admin only access:
 ```typescript
 export async function isCurrentUserAdmin(): Promise<boolean> {
   const { profile, error } = await getCurrentUserProfile();
@@ -407,7 +407,7 @@ SELECT promote_user_to_admin('your-admin-email@example.com');
 ```
 
 **Option C: Edit Migration File**
-Uncomment and customize the auto-promotion section in Step 8 of the migration file.
+Uncomment and customize the auto promotion section in Step 8 of the migration file.
 
 ### Step 3: Verify
 
@@ -513,7 +513,7 @@ The helper functions use `SECURITY DEFINER` to:
 
 1. **Principle of Least Privilege**: Users get minimum required permissions
 2. **Defense in Depth**: Multiple layers of security (RLS + application checks)
-3. **Fail-Safe Defaults**: Permission checks return false on error
+3. **Fail Safe Defaults**: Permission checks return false on error
 4. **Audit Trail**: Created/updated timestamps on all records
 5. **Error Logging**: Comprehensive logging without exposing sensitive data
 

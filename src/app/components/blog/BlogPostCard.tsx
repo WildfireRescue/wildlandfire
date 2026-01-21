@@ -7,8 +7,8 @@ import { motion } from 'motion/react';
 import { Calendar, Clock } from 'lucide-react';
 import { Button } from '../ui/button';
 import { BlogCategoryBadge } from './BlogCategoryBadge';
-import { formatDate, getReadTimeText } from '../../../lib/blogHelpers';
-import { safeImageSrc, safeSlug, PLACEHOLDER_IMAGE } from '../../../lib/blogImages';
+import { formatDate, getReadTimeText } from '../../../lib/blogHelpers.ts';
+import { safeImageSrc, safeSlug, PLACEHOLDER_IMAGE } from '../../../lib/blogImages.ts';
 import type { BlogPost } from '../../../lib/blogTypes';
 
 interface BlogPostCardProps {

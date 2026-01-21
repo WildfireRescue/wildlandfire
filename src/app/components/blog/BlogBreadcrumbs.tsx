@@ -4,7 +4,7 @@
 // =====================================================
 
 import { Home, ChevronRight } from 'lucide-react';
-import { formatTag } from '../../../lib/blogHelpers';
+import { formatTag } from '../../../lib/blogHelpers.ts';
 
 interface BlogBreadcrumbsProps {
   category?: string | null;

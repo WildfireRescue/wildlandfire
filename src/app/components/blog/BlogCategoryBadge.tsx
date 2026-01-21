@@ -3,7 +3,7 @@
 // Displays category with color-coded badge
 // =====================================================
 
-import { getCategoryColor, formatTag } from '../../../lib/blogHelpers';
+import { getCategoryColor, formatTag } from '../../../lib/blogHelpers.ts';
 
 interface BlogCategoryBadgeProps {
   category: string | null;

@@ -12,7 +12,7 @@
 
 ## 🔍 **Keyword Research Results**
 
-### **High-Priority Keywords (Start Here)**
+### **High Priority Keywords (Start Here)**
 
 | Keyword | Monthly Searches | Difficulty | Intent | Priority |
 |---------|------------------|------------|--------|----------|
@@ -25,9 +25,9 @@
 | fire victim support | 600 | Low | Informational | ⭐⭐⭐ |
 | wildfire charity | 400 | Low | Donating | ⭐⭐⭐ |
 | firefighter grants | 500 | Low | Grants | ⭐⭐⭐⭐ |
-| wildfire emergency assistance | 350 | Low | Help-seeking | ⭐⭐⭐⭐⭐ |
+| wildfire emergency assistance | 350 | Low | Help seeking | ⭐⭐⭐⭐⭐ |
 
-### **Long-Tail Keywords (Easy Wins)**
+### **Long Tail Keywords (Easy Wins)**
 
 - "how to help wildfire survivors" (500 searches)
 - "donate to wildfire victims" (400 searches)
@@ -111,7 +111,7 @@
 ### **Month 3: Expansion & Optimization**
 
 **Week 1-2: Local SEO**
-9. **Location Pages:** (Create for major wildfire-prone areas)
+9. **Location Pages:** (Create for major wildfire prone areas)
    - "Wildfire Relief in Northern California"
    - "Southern California Fire Recovery Support"
    - "Oregon Wildfire Assistance"
@@ -132,7 +132,7 @@
     - Press release opportunity
     - CTA: Support our rapid response team
 
-12. **Year-End Report:** "Our First Year: Building a Movement (2026 Vision)"
+12. **Year End Report:** "Our First Year: Building a Movement (2026 Vision)"
     - Target: "wildfire charity", branded searches
     - Transparency report
     - Goals vs. progress
@@ -143,7 +143,7 @@
 
 ## 🎨 **Content Types & Formats**
 
-### **Blog Posts** (SEO-optimized long-form)
+### **Blog Posts** (SEO optimized long form)
 - 1,500-3,000 words
 - Keyword-optimized titles
 - Internal linking
@@ -151,7 +151,7 @@
 - Related content
 - Clear CTAs
 
-### **Landing Pages** (Conversion-focused)
+### **Landing Pages** (Conversion focused)
 - Problem → Solution → CTA
 - Social proof
 - Trust indicators
@@ -211,7 +211,7 @@
 
 ### **Owned Channels**
 1. **Website Blog** - Primary content hub
-2. **Email Newsletter** - Weekly/bi-weekly updates
+2. **Email Newsletter** - Weekly/bi weekly updates
 3. **Social Media** - Daily sharing, engagement
 
 ### **Earned Media**
@@ -222,12 +222,12 @@
 ### **Paid Amplification**
 1. **Google Ads** (via Google Ad Grants - $10K/month free)
 2. **Social Media Ads** - Facebook/Instagram for donor acquisition
-3. **Content Promotion** - Boost high-performing posts
+3. **Content Promotion** - Boost high performing posts
 
 ### **Partnership Channels**
 1. **Local Fire Departments** - Share resources
-2. **State Fire Agencies** - Cross-promotion
-3. **Community Organizations** - Co-created content
+2. **State Fire Agencies** - Cross promotion
+3. **Community Organizations** - Co created content
 4. **Influencers** - Disaster relief advocates
 
 ---

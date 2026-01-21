@@ -104,7 +104,7 @@ box-shadow:
 
 ---
 
-### 9. **Scroll-Triggered Animations**
+### 9. **Scroll Triggered Animations**
 **Difficulty:** Medium | **Impact:** High
 
 Add more entrance animations:
@@ -120,7 +120,7 @@ Add more entrance animations:
 
 ---
 
-### 10. **Micro-interactions on Buttons**
+### 10. **Micro interactions on Buttons**
 **Difficulty:** Easy | **Impact:** High
 
 Premium button states:
@@ -144,7 +144,7 @@ whileTap={{ scale: 0.98 }}
 ### 11. **Premium Image Loading**
 **Difficulty:** Medium | **Impact:** Medium
 
-Add skeleton screens and blur-up loading:
+Add skeleton screens and blur up loading:
 - Blur placeholder while image loads
 - Skeleton screens for content
 - Smooth fade-in transitions
@@ -155,7 +155,7 @@ Add skeleton screens and blur-up loading:
 ### 12. **Enhanced Mobile Experience**
 **Difficulty:** Medium | **Impact:** Critical
 
-Mobile-specific improvements:
+Mobile specific improvements:
 - Sticky "Donate" bottom bar on mobile
 - Swipeable donation amounts
 - Bottom sheet modals instead of center
@@ -219,7 +219,7 @@ Optimize donation UX:
 ### 17. **Testimonial Carousel**
 **Difficulty:** Medium | **Impact:** High
 
-Add auto-playing testimonials:
+Add auto playing testimonials:
 - Real survivor quotes (when available)
 - Donor testimonials
 - Firefighter endorsements
@@ -334,7 +334,7 @@ Track what works:
 11. Testimonial section
 12. Footer polish
 
-### **Phase 3: Long-term Polish (Next Week)** ⭐
+### **Phase 3: Long term Polish (Next Week)** ⭐
 13. Premium image loading
 14. Navigation mega menu
 15. Form validation improvements
@@ -463,7 +463,7 @@ Your site already has:
 ✅ Trust signals (badges)
 ✅ Social proof (live notifications)
 ✅ Urgency (progress indicator)
-✅ Emotional connection (micro-copy)
+✅ Emotional connection (micro copy)
 ✅ Premium animations
 
 **Next level:**

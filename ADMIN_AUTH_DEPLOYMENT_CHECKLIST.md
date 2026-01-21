@@ -2,7 +2,7 @@
 
 Use this checklist to ensure proper deployment of the admin authentication fix.
 
-## Pre-Deployment
+## Pre Deployment
 
 ### 1. Code Review
 - [ ] Review migration SQL: `supabase/migrations/005_fix_admin_auth_comprehensive.sql`
@@ -61,7 +61,7 @@ Use this checklist to ensure proper deployment of the admin authentication fix.
   ```sql
   UPDATE profiles SET role = 'admin' 
   WHERE email IN (
-    'your-email@example.com'
+    'your email@example.com'
   );
   ```
 
@@ -89,7 +89,7 @@ Use this checklist to ensure proper deployment of the admin authentication fix.
   netlify deploy --prod  # or vercel --prod
   ```
 
-## Post-Deployment Testing
+## Post Deployment Testing
 
 ### Test Case 1: New User Signup
 - [ ] Sign up with a new test email
@@ -114,7 +114,7 @@ Use this checklist to ensure proper deployment of the admin authentication fix.
 - [ ] Verify user email displayed in header
 - [ ] Verify "Sign Out" button present
 
-### Test Case 3: Non-Admin User
+### Test Case 3: Non Admin User
 - [ ] Sign out
 - [ ] Sign up/sign in with non-admin email
 - [ ] Navigate to `/#admin/blog`
@@ -270,7 +270,7 @@ If issues arise:
 4. Run verification queries above
 5. Check this deployment checklist for missed steps
 
-## Final Sign-Off
+## Final Sign Off
 
 - [ ] All pre-deployment checks completed
 - [ ] Migration applied successfully

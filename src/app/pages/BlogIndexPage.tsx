@@ -8,8 +8,8 @@ import { motion } from 'motion/react';
 import { Helmet } from 'react-helmet-async';
 import { BlogPostCard } from '../components/blog/BlogPostCard';
 import { BlogPagination } from '../components/blog/BlogPagination';
-import { getPublishedPosts, getFeaturedPosts, getCategories } from '../../lib/supabaseBlog';
-import { withTimeout, TimeoutError } from '../../lib/promiseUtils';
+import { getPublishedPosts, getFeaturedPosts, getCategories } from '../../lib/supabaseBlog.ts';
+import { withTimeout, TimeoutError } from '../../lib/promiseUtils.ts';
 import type { BlogPost, BlogCategory } from '../../lib/blogTypes';
 
 export function BlogIndexPage() {

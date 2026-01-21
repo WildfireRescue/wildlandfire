@@ -112,7 +112,7 @@ Visit: https://supabase.com/dashboard/project/qckavajzhqlzicnjphvp
 
 ## Deployment
 
-### Pre-Deployment
+### Pre Deployment
 - [ ] All tests above passing
 - [ ] .env.local has Supabase credentials
 - [ ] Run `npm run build` locally - succeeds
@@ -150,7 +150,7 @@ For each editor (jason@, drew@, kendra@):
 - [ ] They refresh `/#admin/blog`
 - [ ] They see editor form (not "Not authorized")
 
-## Post-Launch
+## Post Launch
 
 ### Content Creation
 - [ ] Create first real blog post with:

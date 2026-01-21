@@ -150,7 +150,7 @@ Default categories:
 - updated_at (timestamptz)
 ```
 
-### Row-Level Security (RLS)
+### Row Level Security (RLS)
 
 **Posts:**
 - Public: Read published, non-noindex posts
@@ -195,7 +195,7 @@ WHERE email = 'new-editor@example.com';
 
 ## 🚀 SEO Features
 
-### Per-Post SEO
+### Per Post SEO
 - Custom meta title & description
 - Open Graph tags (og:title, og:description, og:image)
 - Twitter Card support
@@ -211,7 +211,7 @@ WHERE email = 'new-editor@example.com';
 - **Reading Time**: Calculated automatically at 200 WPM
 - **Slug Generation**: Auto-generated from title (URL-safe)
 
-### Build-Time Generation
+### Build Time Generation
 
 Package.json prebuild script:
 ```bash
@@ -258,7 +258,7 @@ tsx src/lib/generateSitemap.ts && tsx src/lib/generateRSS.ts
 
 ## 🛣️ Routing
 
-### Hash-Based Routes
+### Hash Based Routes
 
 ```
 #blog                          → Blog index (all posts)
@@ -269,12 +269,12 @@ tsx src/lib/generateSitemap.ts && tsx src/lib/generateRSS.ts
 
 ### Redirects
 
-**Client-Side (in App.tsx):**
+**Client Side (in App.tsx):**
 - `#articles` → `#blog`
 - `#articles/slug` → `#blog/slug`
 - `#publish` → `#admin/blog`
 
-**Server-Side (in netlify.toml):**
+**Server Side (in netlify.toml):**
 - `/articles` → `/#blog` (301)
 - `/articles/*` → `/#blog/:splat` (301)
 - `/publish` → `/#admin/blog` (301)
@@ -318,7 +318,7 @@ tsx src/lib/generateSitemap.ts && tsx src/lib/generateRSS.ts
 1. **Environment Variables**: Ensure Netlify has:
    ```
    VITE_SUPABASE_URL=https://qckavajzhqlzicnjphvp.supabase.co
-   VITE_SUPABASE_ANON_KEY=[your-anon-key]
+   VITE_SUPABASE_ANON_KEY=[your anon key]
    ```
 
 2. **Commit & Push**:
@@ -392,7 +392,7 @@ Beyond emergency aid, we offer...
 
 ## 📈 Analytics & Monitoring
 
-### Built-In Metrics
+### Built In Metrics
 - `view_count` column in posts table (incremented on page view)
 - `published_at` for chronological sorting
 - `updated_at` for content freshness

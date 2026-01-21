@@ -54,7 +54,7 @@
 ### 2. **Removed "Small" and "Starting" Language - Confidence Upgrade** 💪
 
 **Problem:** Language like "we're small" and "just getting started" undermined credibility, especially with institutional donors  
-**Solution:** Replaced with confident, vision-focused, future-proof language
+**Solution:** Replaced with confident, vision focused, future proof language
 
 **Files Updated:**
 - ✅ `/src/app/components/StoriesHero.tsx` - Removed "We're just getting started" → Now: "Our vision is clear"
@@ -352,7 +352,7 @@ Your site now has:
 - ✅ **Updated SEO and documentation**
 - ✅ **Everything tested and working**
 
-**Ready to deploy these changes?** Just commit and push to GitHub, and Vercel/Netlify will auto-deploy!
+**Ready to deploy these changes?** Just commit and push to GitHub, and Vercel/Netlify will auto deploy!
 
 ---
 

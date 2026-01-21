@@ -6,8 +6,8 @@
    - Go to: Supabase Dashboard → Authentication → URL Configuration
    - Add to "Redirect URLs":
      ```
-     http://localhost:5173/#auth-callback
-     https://your-production-domain.com/#auth-callback
+     http://localhost:5173/#auth callback
+     https://your production domain.com/#auth callback
      ```
 
 2. **Ensure you have an admin user:**
@@ -15,7 +15,7 @@
    -- Run this in Supabase SQL Editor
    UPDATE profiles 
    SET role = 'admin' 
-   WHERE email = 'your-email@example.com';
+   WHERE email = 'your email@example.com';
    ```
 
 3. **Clear browser storage:**
@@ -73,7 +73,7 @@
 [BlogEditorEnhanced] No authenticated user
 ```
 
-### Test 4: Non-Admin User
+### Test 4: Non Admin User
 1. ✅ Create a test user without admin role
 2. ✅ Login with that user
 3. ✅ Should see "Access Denied" message
@@ -82,7 +82,7 @@
 
 ## Troubleshooting
 
-### ❌ "Sign-in failed: Invalid redirect URL"
+### ❌ "Sign in failed: Invalid redirect URL"
 **Fix:** Add the redirect URL to Supabase dashboard (see "Before Testing" step 1)
 
 ### ❌ Still seeing login loop
@@ -117,7 +117,7 @@ WHERE email = 'your-email@example.com';
 ✅ No infinite redirects
 ✅ Session persists after refresh
 ✅ Console shows expected log sequence
-✅ Non-admin users see proper error message
+✅ Non admin users see proper error message
 
 ## Production Deployment Checklist
 
@@ -125,7 +125,7 @@ Before deploying to production:
 
 1. ✅ Update production redirect URLs in Supabase
    ```
-   https://your-production-domain.com/#auth-callback
+   https://your production domain.com/#auth callback
    ```
 
 2. ✅ Verify production environment variables

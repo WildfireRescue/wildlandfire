@@ -5,13 +5,16 @@
 
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { motion } from 'motion/react';
-import { supabase } from '../../../lib/supabase';
+import { supabase } from '../../../lib/supabase.ts';
+import ArticleEditor from '../../components/ArticleEditor';
+import { createOrUpdateArticle, saveArticleBlocks } from '../../../lib/articles.ts';
+import { uploadArticleImage } from '../../../lib/articleImage.ts';
 import { Button } from '../../components/ui/button';
-import { Mail, LogOut, Save, Eye, ChevronDown, ChevronUp } from 'lucide-react';
-import { createPost, getCategories, isAdminEmail } from '../../../lib/supabaseBlog';
-import { generateSlug, calculateReadingTime } from '../../../lib/blogHelpers';
+import { Mail, LogOut, Save, Eye, ChevronDown, ChevronUp, AlertCircle, Info } from 'lucide-react';
+import { createPost, getCategories } from '../../../lib/supabaseBlog.ts';
+import { generateSlug, calculateReadingTime } from '../../../lib/blogHelpers.ts';
 import type { BlogCategory, Source } from '../../../lib/blogTypes';
-import { useAuth } from '../../../hooks/useAuth';
+import { checkEditorPermissions, getPermissionInstructions, type PermissionCheckResult } from '../../../lib/permissions.ts';
 
 interface CollapsibleSectionProps {
   title: string;
@@ -46,10 +49,9 @@ function CollapsibleSection({ title, subtitle, defaultOpen = false, children }: 
 }
 
 export function BlogEditorPageEnhanced() {
-  // Use centralized auth hook
-  const { session, user, profile, loading: authLoading, error: authHookError } = useAuth();
-  
-  const [canPublish, setCanPublish] = useState(false);
+  // Permission checking
+  const [permissionResult, setPermissionResult] = useState<PermissionCheckResult | null>(null);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [categories, setCategories] = useState<BlogCategory[]>([]);
 
   // Login
@@ -102,6 +104,16 @@ export function BlogEditorPageEnhanced() {
   const [sources, setSources] = useState<Source[]>([]);
   const [outboundLinksVerified, setOutboundLinksVerified] = useState(false);
 
+  // New Articles system state
+  const [articleType, setArticleType] = useState<'hosted' | 'external'>('hosted');
+  const [articleBlocks, setArticleBlocks] = useState<any[]>([]);
+  const [articleFeaturedImage, setArticleFeaturedImage] = useState('');
+  const [articleExternalUrl, setArticleExternalUrl] = useState('');
+  const [articleSourceName, setArticleSourceName] = useState('');
+  const [articleOgTitle, setArticleOgTitle] = useState('');
+  const [articleOgDescription, setArticleOgDescription] = useState('');
+  const [articleSaving, setArticleSaving] = useState(false);
+
   // UI states
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
@@ -114,58 +126,52 @@ export function BlogEditorPageEnhanced() {
     if (!slugTouched.current) setSlug(autoSlug);
   }, [autoSlug]);
 
-  // Determine permissions based on auth state
+  // Check permissions on mount
   useEffect(() => {
-    console.log('[BlogEditorEnhanced] === AUTH CHECK START ===');
-    console.log('[BlogEditorEnhanced] Auth loading:', authLoading);
-    console.log('[BlogEditorEnhanced] Session exists:', !!session);
-    console.log('[BlogEditorEnhanced] User ID:', user?.id);
-    console.log('[BlogEditorEnhanced] User email:', user?.email);
-    console.log('[BlogEditorEnhanced] Profile exists:', !!profile);
-    console.log('[BlogEditorEnhanced] Profile role:', profile?.role);
-    console.log('[BlogEditorEnhanced] Auth hook error:', authHookError);
+    let mounted = true;
     
-    if (authLoading) {
-      console.log('[BlogEditorEnhanced] Still loading auth, waiting...');
-      return;
-    }
-
-    if (!session || !user) {
-      console.log('[BlogEditorEnhanced] No session/user - cannot publish');
-      setCanPublish(false);
-      return;
-    }
-
-    // Check permissions
-    let hasPermission = false;
-    let permissionSource = '';
-
-    // First check profile role
-    if (profile) {
-      if (profile.role === 'admin' || profile.role === 'editor') {
-        hasPermission = true;
-        permissionSource = `profile role: ${profile.role}`;
-      } else if (profile.role === 'user') {
-        hasPermission = false;
-        permissionSource = 'user role (no publish access)';
+    async function checkAuth() {
+      setIsCheckingAuth(true);
+      
+      try {
+        console.log('[BlogEditorEnhanced] Checking permissions...');
+        const result = await checkEditorPermissions();
+        
+        if (!mounted) return;
+        
+        console.log('[BlogEditorEnhanced] Permission check result:', {
+          status: result.status,
+          hasAccess: result.hasAccess,
+          email: result.user?.email
+        });
+        
+        setPermissionResult(result);
+      } catch (e: any) {
+        if (!mounted) return;
+        
+        console.error('[BlogEditorEnhanced] Permission check error:', e);
+        setPermissionResult({
+          status: 'error',
+          hasAccess: false,
+          user: null,
+          profile: null,
+          message: 'Failed to check permissions',
+          technicalDetails: e
+        });
+      } finally {
+        if (mounted) {
+          setIsCheckingAuth(false);
+        }
       }
     }
-
-    // If no profile or not admin/editor, check admin allowlist
-    if (!hasPermission && user.email) {
-      if (isAdminEmail(user.email)) {
-        hasPermission = true;
-        permissionSource = 'admin allowlist';
-      }
-    }
-
-    console.log('[BlogEditorEnhanced] === PERMISSION DECISION ===');
-    console.log('[BlogEditorEnhanced] Can publish:', hasPermission);
-    console.log('[BlogEditorEnhanced] Permission source:', permissionSource);
-    console.log('[BlogEditorEnhanced] === AUTH CHECK END ===');
     
-    setCanPublish(hasPermission);
-  }, [authLoading, session, user, profile, authHookError]);
+    checkAuth();
+
+    return () => {
+      mounted = false;
+      console.log('[BlogEditorEnhanced] Component unmounted');
+    };
+  }, []);
 
   // Load categories
   useEffect(() => {
@@ -233,9 +239,13 @@ export function BlogEditorPageEnhanced() {
   }
 
   async function savePost() {
+    // Clear previous messages and set saving state
     setSaving(true);
     setSaveMsg(null);
     setSaveErr(null);
+    
+    // Track if timeout warning was shown
+    let timeoutWarningShown = false;
 
     try {
       // Validation
@@ -300,7 +310,7 @@ export function BlogEditorPageEnhanced() {
         
         // Trust / E-E-A-T
         author_name: authorName.trim(),
-        author_email: user?.email || '',
+        author_email: permissionResult?.user?.email || 'unknown',
         author_role: authorRole.trim() || null,
         author_bio: authorBio.trim() || null,
         reviewed_by: reviewedBy.trim() || null,
@@ -314,27 +324,82 @@ export function BlogEditorPageEnhanced() {
         outbound_links_verified: outboundLinksVerified,
       };
 
-      console.log('Attempting to save post:', postData);
+      console.log('[BlogEditorEnhanced] Attempting to save post:', postData);
       
-      const { post, error } = await createPost(postData);
+      // Set up a timeout warning after 10 seconds
+      const timeoutWarning = setTimeout(() => {
+        if (!timeoutWarningShown) {
+          timeoutWarningShown = true;
+          setSaveMsg('⏳ Save taking longer than expected... Please wait or check your connection.');
+        }
+      }, 10000);
       
-      console.log('Save result:', { post, error });
+      // Create the save promise with a 15-second hard timeout
+      const saveResult = await Promise.race([
+        createPost(postData),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('Save operation timed out after 15 seconds. Please try again.')), 15000)
+        )
+      ]);
+      
+      // Clear the warning timeout
+      clearTimeout(timeoutWarning);
+      
+      const { post, error } = saveResult;
+      
+      console.log('[BlogEditorEnhanced] Save result:', { post, error });
       
       if (error) {
-        console.error('Supabase error:', error);
-        throw new Error(error.message || 'Failed to save post');
+        console.error('[BlogEditorEnhanced] Supabase error:', error);
+        
+        // Provide detailed error messages
+        let errorMessage = 'Failed to save post';
+        
+        if (error.message) {
+          errorMessage = error.message;
+        }
+        
+        if (error.code === 'PGRST301') {
+          errorMessage = 'Permission denied. You may not have the required permissions to create posts.';
+        } else if (error.code === '23505') {
+          errorMessage = 'A post with this slug already exists. Please use a different slug.';
+        } else if (error.code === '42501') {
+          errorMessage = 'Database permission denied. Please ensure RLS policies are configured correctly.';
+        }
+        
+        throw new Error(errorMessage);
+      }
+      
+      if (!post) {
+        throw new Error('Post was not created. No data returned from database.');
       }
 
-      setSaveMsg('✅ Post saved successfully!');
+      console.log('[BlogEditorEnhanced] Post saved successfully:', post.id);
+      setSaveMsg(`✅ Post saved successfully! ${status === 'published' ? 'Post is now live.' : 'Saved as draft.'}`);
       
-      // Reset form
+      // Reset form after successful save
       setTimeout(() => {
         resetForm();
       }, 1500);
+      
+      // Clear success message after 5 seconds
+      setTimeout(() => setSaveMsg(null), 5000);
+      
     } catch (e: any) {
-      console.error('Save error:', e);
-      setSaveErr(e?.message || 'Failed to save post');
+      console.error('[BlogEditorEnhanced] Save error:', e);
+      
+      let errorMessage = 'Failed to save post';
+      
+      if (e?.message) {
+        errorMessage = e.message;
+      }
+      
+      setSaveErr(errorMessage);
+      
+      // Clear error message after 10 seconds
+      setTimeout(() => setSaveErr(null), 10000);
     } finally {
+      // ALWAYS clear saving state, no matter what
       setSaving(false);
     }
   }
@@ -378,8 +443,36 @@ export function BlogEditorPageEnhanced() {
     );
   };
 
-  // NOT LOGGED IN - Show login form
-  if (!session || !user) {
+  // Checking authentication status
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen pt-28 pb-20 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="max-w-xl mx-auto bg-card border border-border rounded-xl p-8 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Checking permissions...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // No permission result yet
+  if (!permissionResult) {
+    return (
+      <div className="min-h-screen pt-28 pb-20 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="max-w-xl mx-auto bg-destructive/10 border border-destructive/20 rounded-xl p-8 text-center">
+            <AlertCircle className="w-12 h-12 mx-auto mb-4 text-destructive" />
+            <p className="text-destructive">Failed to check permissions</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Logged OUT (no session)
+  if (permissionResult.status === 'no_session') {
     return (
       <div className="min-h-screen pt-28 pb-20 bg-background">
         <div className="container mx-auto px-4">
@@ -440,72 +533,78 @@ export function BlogEditorPageEnhanced() {
     );
   }
 
-  // CHECKING AUTH - Show loading
-  if (authLoading) {
-    return (
-      <div className="min-h-screen pt-28 pb-20 bg-background">
-        <div className="container mx-auto px-4">
-          <div className="max-w-xl mx-auto bg-card border border-border rounded-xl p-8 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Checking permissions...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // LOGGED IN but NO PUBLISH PERMISSION
-  if (!canPublish) {
-    const roleDisplay = profile?.role || 'none';
-    const isInAllowlist = user.email ? isAdminEmail(user.email) : false;
+  // Logged IN but no access (no profile, insufficient role, or error)
+  if (!permissionResult.hasAccess) {
+    const instructions = getPermissionInstructions(permissionResult.status);
+    const userEmail = permissionResult.user?.email || 'Unknown';
     
     return (
       <div className="min-h-screen pt-28 pb-20 bg-background">
         <div className="container mx-auto px-4">
-          <div className="max-w-xl mx-auto bg-destructive/10 border border-destructive/20 rounded-xl p-8">
-            <h2 className="text-xl font-bold text-destructive mb-4">Access Denied</h2>
-            <p className="text-destructive mb-2">
-              You don't have permission to publish blog posts.
-            </p>
-            <p className="text-sm text-muted-foreground mb-6">
-              Logged in as: <strong>{user.email}</strong>
-            </p>
-            
-            <div className="bg-background border border-border rounded-lg p-4 mb-6">
-              <p className="text-sm font-semibold mb-2">Permission Details:</p>
-              <ul className="text-sm text-muted-foreground space-y-1">
-                <li>• Profile role: <strong>{roleDisplay}</strong></li>
-                <li>• In admin allowlist: <strong>{isInAllowlist ? 'Yes' : 'No'}</strong></li>
-                <li>• Required: <strong>admin</strong> or <strong>editor</strong> role</li>
-              </ul>
+          <div className="max-w-2xl mx-auto bg-destructive/10 border border-destructive/20 rounded-xl p-8">
+            <div className="flex items-start gap-4 mb-6">
+              <AlertCircle className="w-8 h-8 text-destructive flex-shrink-0 mt-1" />
+              <div className="flex-1">
+                <h2 className="text-xl font-bold text-destructive mb-2">Access Denied</h2>
+                <p className="text-destructive mb-2">
+                  {permissionResult.message}
+                </p>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Logged in as: <strong>{userEmail}</strong>
+                </p>
+              </div>
             </div>
             
-            {authHookError && (
-              <div className="bg-background border border-border rounded-lg p-4 mb-6">
-                <p className="text-sm text-destructive font-mono">{authHookError}</p>
-              </div>
+            {instructions && (
+              <details className="bg-background border border-border rounded-lg p-4 mb-6">
+                <summary className="cursor-pointer text-primary font-medium flex items-center gap-2">
+                  <Info className="w-4 h-4" />
+                  Technical Details & Fix Instructions
+                </summary>
+                <div className="mt-4 space-y-3">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Status: <code className="text-primary">{permissionResult.status}</code>
+                    </p>
+                    {permissionResult.profile && (
+                      <p className="text-sm text-muted-foreground">
+                        Current Role: <code className="text-foreground">{permissionResult.profile.role}</code>
+                      </p>
+                    )}
+                  </div>
+                  <pre className="bg-muted/50 p-3 rounded text-xs text-foreground overflow-x-auto">
+{instructions}</pre>
+                </div>
+              </details>
             )}
             
-            <div className="bg-background border border-border rounded-lg p-4 mb-6">
-              <p className="text-sm font-semibold mb-2">Troubleshooting:</p>
-              <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
-                <li>Ensure your email is added to the admin allowlist in the database</li>
-                <li>Contact an administrator to grant you editor permissions</li>
-                <li>Try signing out and signing back in</li>
-              </ul>
+            <div className="flex gap-3">
+              <Button
+                onClick={() => window.location.href = '/'}
+                variant="outline"
+              >
+                Return Home
+              </Button>
+              <Button
+                onClick={signOut}
+                variant="outline"
+                className="ml-auto"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
+              </Button>
             </div>
-            
-            <Button onClick={signOut} variant="outline">
-              <LogOut size={18} className="mr-2" />
-              Sign Out
-            </Button>
           </div>
         </div>
       </div>
     );
   }
 
-  // LOGGED IN with PUBLISH PERMISSION - Show editor
+  // Successfully authenticated with editor access
+  const userEmail = permissionResult.user?.email || 'Unknown';
+  const userRole = permissionResult.profile?.role || 'allowlist';
+
+  // LOGGED IN with EDITOR ACCESS - Show editor UI
   return (
     <div className="min-h-screen pt-28 pb-20 bg-background">
       <div className="container mx-auto px-4 max-w-5xl">
@@ -516,8 +615,8 @@ export function BlogEditorPageEnhanced() {
           </div>
           <div className="flex items-center gap-4">
             <span className="text-sm text-muted-foreground">
-              <strong>{user?.email || 'Unknown'}</strong>
-              {profile && <span className="ml-2 text-xs">({profile.role})</span>}
+              <strong>{userEmail}</strong>
+              <span className="ml-2 text-xs">({userRole})</span>
             </span>
             <Button variant="outline" size="sm" onClick={signOut}>
               <LogOut size={16} className="mr-2" />
@@ -583,6 +682,110 @@ export function BlogEditorPageEnhanced() {
               <p className="text-xs text-muted-foreground mt-1">
                 Reading time: ~{calculateReadingTime(content)} min
               </p>
+            </div>
+          </CollapsibleSection>
+
+          {/* ==================== ARTICLES (NEW SYSTEM) ==================== */}
+          <CollapsibleSection title="📰 Articles (New system)" subtitle="Create or edit articles using the new block model">
+            <div className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Article Type</label>
+                  <select value={articleType} onChange={(e) => setArticleType(e.target.value as any)} className="w-full px-4 py-3 bg-input-background border border-border rounded-lg">
+                    <option value="hosted">Hosted (full content)</option>
+                    <option value="external">External (link post)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Featured Image URL</label>
+                  <div className="flex gap-2">
+                    <input type="url" value={articleFeaturedImage} onChange={(e) => setArticleFeaturedImage(e.target.value)} placeholder="https://..." className="w-full px-3 py-2 bg-input-background border border-border rounded-lg" />
+                    <label className="btn">
+                      Upload
+                      <input type="file" accept="image/*" onChange={async (e) => {
+                        const f = e.target.files?.[0];
+                        if (!f) return;
+                        const r = await uploadArticleImage(f);
+                        if ('publicUrl' in r) setArticleFeaturedImage(r.publicUrl);
+                        else alert('Upload failed: ' + (r as any).error);
+                      }} className="hidden" />
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {articleType === 'external' && (
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium mb-2">External URL</label>
+                  <div className="flex gap-2">
+                    <input type="url" value={articleExternalUrl} onChange={(e) => setArticleExternalUrl(e.target.value)} placeholder="https://example.com/article" className="w-full px-3 py-2 bg-input-background border border-border rounded-lg" />
+                    <Button onClick={async () => {
+                      if (!articleExternalUrl) return alert('Enter URL first');
+                      try {
+                        const res = await fetch('/.netlify/functions/fetch-og', { method: 'POST', body: JSON.stringify({ url: articleExternalUrl }) });
+                        const json = await res.json();
+                        setArticleOgTitle(json.og_title || '');
+                        setArticleOgDescription(json.og_description || '');
+                        setArticleSourceName(json.og_site || '');
+                        if (json.og_image) setArticleFeaturedImage(json.og_image);
+                        if (json.favicon) {
+                          // store favicon in source field if needed
+                        }
+                      } catch (err) {
+                        console.error(err);
+                        alert('Failed to fetch OpenGraph metadata');
+                      }
+                    }}>Fetch OG</Button>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <input type="text" value={articleSourceName} onChange={(e) => setArticleSourceName(e.target.value)} placeholder="Source name (e.g., Apple News)" className="px-3 py-2 bg-input-background border border-border rounded-lg" />
+                    <input type="text" value={articleOgTitle} onChange={(e) => setArticleOgTitle(e.target.value)} placeholder="OG Title (optional)" className="px-3 py-2 bg-input-background border border-border rounded-lg" />
+                  </div>
+                  <textarea value={articleOgDescription} onChange={(e) => setArticleOgDescription(e.target.value)} placeholder="OG Description / Excerpt" rows={2} className="w-full px-3 py-2 bg-input-background border border-border rounded-lg" />
+                </div>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Article Blocks</label>
+                <ArticleEditor value={articleBlocks} onChange={(b) => setArticleBlocks(b)} />
+              </div>
+
+              <div className="flex gap-3">
+                <Button onClick={async () => {
+                  setArticleSaving(true);
+                  try {
+                    const slugToUse = slug || autoSlug || generateSlug(articleOgTitle || title || 'article');
+                    const articlePayload: any = {
+                      slug: slugToUse,
+                      title: title || articleOgTitle || 'Untitled',
+                      subtitle: excerpt || null,
+                      type: articleType,
+                      external_url: articleType === 'external' ? articleExternalUrl : null,
+                      source_name: articleSourceName || null,
+                      og_title: articleOgTitle || null,
+                      og_description: articleOgDescription || null,
+                      og_image: articleFeaturedImage || null,
+                      featured_image: articleFeaturedImage || null,
+                      author: authorName || null,
+                    };
+
+                    const saved = await createOrUpdateArticle(articlePayload as any);
+                    if (articleBlocks && articleBlocks.length > 0) {
+                      await saveArticleBlocks(saved.id, articleType === 'external' ? 'notes' : 'body', articleBlocks);
+                    }
+
+                    alert('Article saved');
+                  } catch (err) {
+                    console.error(err);
+                    alert('Failed to save article');
+                  } finally {
+                    setArticleSaving(false);
+                  }
+                }} disabled={articleSaving}>
+                  {articleSaving ? 'Saving...' : 'Save Article'}
+                </Button>
+              </div>
             </div>
           </CollapsibleSection>
 

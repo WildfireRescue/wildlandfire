@@ -46,7 +46,7 @@ npm install
 npm run build
 ```
 
-This creates a `dist` folder with your production-ready files.
+This creates a `dist` folder with your production ready files.
 
 ---
 
@@ -67,7 +67,7 @@ Upload **ONLY** the contents of the `dist` folder to your web host.
 
 ### Using FTP (alternative):
 1. Get your FTP credentials from INC Web Authority
-2. Download an FTP client like FileZilla (https://filezilla-project.org)
+2. Download an FTP client like FileZilla (https://filezilla project.org)
 3. Connect to your hosting:
    - Host: Your domain or FTP address
    - Username: Your FTP username
@@ -114,7 +114,7 @@ This deploys your payment processing backend to Supabase's servers.
 2. Select your project: **kgwtctsj43v2cjoz3lp3djh2frsbt2lqsqvawc3rdjvdec2yqhxq**
 3. Click **"Edge Functions"** in the left sidebar
 4. Click **"Deploy new function"**
-5. Name it: `make-server-39bb2c80`
+5. Name it: `make server-39bb2c80`
 6. Copy the contents of `/supabase/functions/server/index.tsx`
 7. Paste into the editor
 8. Click **"Deploy"**
@@ -185,7 +185,7 @@ This ensures React Router works correctly.
 
 **Check:**
 1. All files from `dist` folder were uploaded
-2. File paths are correct (case-sensitive on Linux servers)
+2. File paths are correct (case sensitive on Linux servers)
 3. Image files exist in the `assets` folder
 
 ---
@@ -197,9 +197,9 @@ Make sure these are set in your Supabase project:
 | Variable | Location | Status |
 |----------|----------|--------|
 | `STRIPE_SECRET_KEY` | Supabase Dashboard → Settings → Edge Functions | ✅ Set |
-| `SUPABASE_URL` | Auto-provided by Supabase | ✅ Set |
-| `SUPABASE_ANON_KEY` | Auto-provided by Supabase | ✅ Set |
-| `SUPABASE_SERVICE_ROLE_KEY` | Auto-provided by Supabase | ✅ Set |
+| `SUPABASE_URL` | Auto provided by Supabase | ✅ Set |
+| `SUPABASE_ANON_KEY` | Auto provided by Supabase | ✅ Set |
+| `SUPABASE_SERVICE_ROLE_KEY` | Auto provided by Supabase | ✅ Set |
 
 ---
 
@@ -238,4 +238,4 @@ Make sure these are set in your Supabase project:
 
 Once deployed, your donation system will be live and accepting real payments to help wildfire survivors rise from the ashes!
 
-**Pro Tip:** After deployment, make a small test donation to ensure everything works end-to-end before promoting the site.
+**Pro Tip:** After deployment, make a small test donation to ensure everything works end to end before promoting the site.

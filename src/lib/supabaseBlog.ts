@@ -20,22 +20,96 @@ export async function getPublishedPosts(options: PaginationOptions = { page: 1, 
     const to = from + perPage - 1;
 
     console.log('[getPublishedPosts] Fetching posts:', { page, perPage, from, to });
+    // Fetch legacy posts (hosted) and new articles (hosted + external) and merge them
+    const [postsRes, articlesRes] = await Promise.all([
+      supabase
+        .from('posts')
+        .select('*')
+        .eq('status', 'published')
+        .eq('noindex', false)
+        .order('published_at', { ascending: false }),
+      supabase
+        .from('articles')
+        .select('*')
+        .eq('status', 'published')
+        .order('published_at', { ascending: false })
+    ]);
 
-    const { data, error, count } = await supabase
-      .from('posts')
-      .select('*', { count: 'exact' })
-      .eq('status', 'published')
-      .eq('noindex', false)
-      .order('published_at', { ascending: false })
-      .range(from, to);
+    const postsData = postsRes.data as BlogPost[] | null;
+    const postsError = postsRes.error || null;
+    const articlesData = articlesRes.data as any[] | null;
+    const articlesError = articlesRes.error || null;
 
-    if (error) {
-      console.error('[getPublishedPosts] Error:', error);
-      return { posts: null, error, total: 0 };
+    if (postsError) {
+      console.error('[getPublishedPosts] Error fetching legacy posts:', postsError);
+      return { posts: null, error: postsError, total: 0 };
+    }
+    if (articlesError) {
+      console.error('[getPublishedPosts] Error fetching articles:', articlesError);
+      // don't block entirely for articles errors; continue with posts only
     }
 
-    console.log('[getPublishedPosts] Success:', { count: data?.length || 0, total: count });
-    return { posts: data as BlogPost[] | null, error: null, total: count || 0 };
+    // Map articles to the BlogPost shape (lightweight) so they can be listed alongside legacy posts
+    const articlePosts: BlogPost[] = (articlesData || []).map((a: any) => ({
+      id: a.id,
+      slug: a.slug,
+      title: a.title,
+      excerpt: a.subtitle || null,
+      content_markdown: '',
+      content_html: null,
+      meta_title: a.og_title || null,
+      meta_description: a.og_description || null,
+      canonical_url: a.external_url || null,
+      focus_keyword: null,
+      secondary_keywords: null,
+      cover_image_url: a.featured_image || a.og_image || null,
+      featured_image_url: a.featured_image || a.og_image || null,
+      featured_image_alt_text: null,
+      og_image_url: a.og_image || null,
+      og_title: a.og_title || null,
+      og_description: a.og_description || null,
+      twitter_card: 'summary_large_image',
+      category: 'News',
+      tags: [],
+      status: 'published',
+      published_at: a.published_at || null,
+      scheduled_for: null,
+      featured: false,
+      allow_indexing: true,
+      allow_follow: true,
+      robots_directives: 'index, follow',
+      sitemap_priority: 0.5,
+      author_id: null,
+      author_name: a.author || a.source_name || null,
+      author_email: '',
+      author_role: null,
+      author_bio: null,
+      reviewed_by: null,
+      fact_checked: false,
+      created_at: a.created_at,
+      updated_at: a.updated_at,
+      last_updated_at: a.updated_at || null,
+      reading_time_minutes: a.reading_time || 5,
+      faq_json: null,
+      view_count: 0,
+      noindex: false,
+      sources: null,
+      outbound_links_verified: false
+    }));
+
+    // Combine and sort by published_at desc
+    const combined = [...(postsData || []), ...articlePosts];
+    combined.sort((x, y) => {
+      const dx = x.published_at ? new Date(x.published_at).getTime() : 0;
+      const dy = y.published_at ? new Date(y.published_at).getTime() : 0;
+      return dy - dx;
+    });
+
+    const total = combined.length;
+    const pageSlice = combined.slice(from, to + 1);
+
+    console.log('[getPublishedPosts] Success:', { count: pageSlice.length, total });
+    return { posts: pageSlice as BlogPost[] | null, error: null, total };
   } catch (e: any) {
     console.error('[getPublishedPosts] Unexpected error:', e);
     return { posts: null, error: e, total: 0 };
@@ -76,24 +150,45 @@ export async function getAllPosts(filters?: BlogListFilters, options: Pagination
 
 /**
  * Fetch single post by slug
+ * Returns null for not found, throws for real errors
  */
 export async function getPostBySlug(slug: string, includeUnpublished: boolean = false) {
-  if (!includeUnpublished) {
-    const { data, error } = await supabase
-      .from('posts')
-      .select('*')
-      .eq('slug', slug)
-      .eq('status', 'published')
-      .eq('noindex', false)
-      .single();
-    return { post: data as BlogPost | null, error };
-  } else {
-    const { data, error } = await supabase
-      .from('posts')
-      .select('*')
-      .eq('slug', slug)
-      .single();
-    return { post: data as BlogPost | null, error };
+  try {
+    if (!includeUnpublished) {
+      const { data, error } = await supabase
+        .from('posts')
+        .select('*')
+        .eq('slug', slug)
+        .eq('status', 'published')
+        .eq('noindex', false)
+        .single();
+      
+      // PGRST116 means not found - return null gracefully
+      if (error && error.code === 'PGRST116') {
+        return { post: null, error: null };
+      }
+      
+      // Other errors are returned for handling
+      return { post: data as BlogPost | null, error };
+    } else {
+      const { data, error } = await supabase
+        .from('posts')
+        .select('*')
+        .eq('slug', slug)
+        .single();
+      
+      // PGRST116 means not found - return null gracefully
+      if (error && error.code === 'PGRST116') {
+        return { post: null, error: null };
+      }
+      
+      // Other errors are returned for handling
+      return { post: data as BlogPost | null, error };
+    }
+  } catch (err) {
+    // Catch any unexpected errors (network, etc.)
+    console.error('[getPostBySlug] Unexpected error:', err);
+    return { post: null, error: err as any };
   }
 }
 
@@ -132,27 +227,102 @@ export async function getFeaturedPosts(limit: number = 3) {
 export async function getPostsByCategory(category: string, options: PaginationOptions = { page: 1, perPage: 12 }) {
   try {
     const { page, perPage } = options;
-    const from = (page - 1) * perPage;
-    const to = from + perPage - 1;
 
     console.log('[getPostsByCategory] Fetching posts:', { category, page, perPage });
 
-    const { data, error, count } = await supabase
-      .from('posts')
-      .select('*', { count: 'exact' })
-      .eq('status', 'published')
-      .eq('noindex', false)
-      .eq('category', category)
-      .order('published_at', { ascending: false })
-      .range(from, to);
+    // Fetch both legacy posts and articles
+    const [postsRes, articlesRes] = await Promise.all([
+      supabase
+        .from('posts')
+        .select('*')
+        .eq('status', 'published')
+        .eq('noindex', false)
+        .eq('category', category)
+        .order('published_at', { ascending: false }),
+      supabase
+        .from('articles')
+        .select('*')
+        .eq('status', 'published')
+        .order('published_at', { ascending: false })
+    ]);
 
-    if (error) {
-      console.error('[getPostsByCategory] Error:', error);
-      return { posts: null, error, total: 0 };
+    const postsData = postsRes.data as BlogPost[] | null;
+    const postsError = postsRes.error;
+    const articlesData = articlesRes.data as any[] | null;
+
+    if (postsError) {
+      console.error('[getPostsByCategory] Error:', postsError);
+      return { posts: null, error: postsError, total: 0 };
     }
 
-    console.log('[getPostsByCategory] Success:', { count: data?.length || 0, total: count });
-    return { posts: data as BlogPost[] | null, error: null, total: count || 0 };
+    // Map articles to BlogPost shape and filter by category (since articles table doesn't have category column)
+    const articlePosts: BlogPost[] = (articlesData || [])
+      .filter((a: any) => {
+        // Articles are always "News" category for now
+        return category.toLowerCase() === 'news';
+      })
+      .map((a: any) => ({
+        id: a.id,
+        slug: a.slug,
+        title: a.title,
+        excerpt: a.subtitle || null,
+        content_markdown: '',
+        content_html: null,
+        meta_title: a.og_title || null,
+        meta_description: a.og_description || null,
+        canonical_url: a.external_url || null,
+        focus_keyword: null,
+        secondary_keywords: null,
+        cover_image_url: a.featured_image || a.og_image || null,
+        featured_image_url: a.featured_image || a.og_image || null,
+        featured_image_alt_text: null,
+        og_image_url: a.og_image || null,
+        og_title: a.og_title || null,
+        og_description: a.og_description || null,
+        twitter_card: 'summary_large_image',
+        category: 'News',
+        tags: [],
+        status: 'published',
+        published_at: a.published_at || null,
+        scheduled_for: null,
+        featured: false,
+        allow_indexing: true,
+        allow_follow: true,
+        robots_directives: 'index, follow',
+        sitemap_priority: 0.5,
+        author_id: null,
+        author_name: a.author || a.source_name || null,
+        author_email: '',
+        author_role: null,
+        author_bio: null,
+        reviewed_by: null,
+        fact_checked: false,
+        created_at: a.created_at,
+        updated_at: a.updated_at,
+        last_updated_at: a.updated_at || null,
+        reading_time_minutes: a.reading_time || 5,
+        faq_json: null,
+        view_count: 0,
+        noindex: false,
+        sources: null,
+        outbound_links_verified: false
+      }));
+
+    // Combine and sort by published_at
+    const allPosts = [...(postsData || []), ...articlePosts]
+      .sort((a, b) => {
+        const dateA = new Date(a.published_at || 0).getTime();
+        const dateB = new Date(b.published_at || 0).getTime();
+        return dateB - dateA;
+      });
+
+    // Apply pagination after combining
+    const from = (page - 1) * perPage;
+    const to = from + perPage;
+    const paginatedPosts = allPosts.slice(from, to);
+
+    console.log('[getPostsByCategory] Success:', { count: paginatedPosts.length, total: allPosts.length });
+    return { posts: paginatedPosts, error: null, total: allPosts.length };
   } catch (e: any) {
     console.error('[getPostsByCategory] Unexpected error:', e);
     return { posts: null, error: e, total: 0 };

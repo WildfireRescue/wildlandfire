@@ -127,7 +127,8 @@ export function getCategoryColor(category: string | null): string {
     updates: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
   };
   
-  return colors[category || ''] || 'bg-muted-foreground/10 text-muted-foreground border-muted-foreground/20';
+  const categoryKey = (category || '').toLowerCase();
+  return colors[categoryKey] || 'bg-muted-foreground/10 text-muted-foreground border-muted-foreground/20';
 }
 
 /**

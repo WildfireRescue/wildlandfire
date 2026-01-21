@@ -61,7 +61,7 @@ git commit -m "Complete blog system migration"
 git push
 ```
 
-Netlify auto-deploys. Check in 2-3 minutes:
+Netlify auto deploys. Check in 2-3 minutes:
 - https://thewildlandfirerecoveryfund.org/#blog
 
 ---
@@ -78,7 +78,7 @@ Netlify auto-deploys. Check in 2-3 minutes:
 
 ---
 
-## Storage Policies (Copy-Paste)
+## Storage Policies (Copy Paste)
 
 Go to: Storage → blog bucket → Policies → New Policy
 

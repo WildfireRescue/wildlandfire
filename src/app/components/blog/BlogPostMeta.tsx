@@ -4,7 +4,7 @@
 // =====================================================
 
 import { Helmet } from 'react-helmet-async';
-import { getBlogPostUrl } from '../../../lib/blogHelpers';
+import { getBlogPostUrl } from '../../../lib/blogHelpers.ts';
 import type { BlogPost } from '../../../lib/blogTypes';
 
 interface BlogPostMetaProps {

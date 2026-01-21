@@ -180,13 +180,13 @@ Before deploying, verify:
 
 1. **Redirect URLs** (Authentication → URL Configuration):
    ```
-   http://localhost:5173/#auth-callback
-   https://your-domain.com/#auth-callback
+   http://localhost:5173/#auth callback
+   https://your domain.com/#auth callback
    ```
 
 2. **Site URL**:
    ```
-   https://your-domain.com
+   https://your domain.com
    ```
 
 ### Database

@@ -5,7 +5,7 @@
 
 import { useEffect, useState } from 'react';
 import { List, ChevronDown } from 'lucide-react';
-import { extractHeadings } from '../../../lib/blogHelpers';
+import { extractHeadings } from '../../../lib/blogHelpers.ts';
 import type { Heading } from '../../../lib/blogTypes';
 
 interface BlogTableOfContentsProps {

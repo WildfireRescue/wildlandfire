@@ -46,7 +46,7 @@ Your website had several missing critical files that were preventing it from run
 - Browser tab icon
 - Placeholder until you add custom logo
 
-#### 9. **`/DEPLOY_NOW.md`** - Step-by-Step Deployment Guide
+#### 9. **`/DEPLOY_NOW.md`** - Step by Step Deployment Guide
 - Complete Vercel deployment instructions
 - Alternative Netlify instructions
 - Environment variable setup
@@ -143,7 +143,7 @@ Priority tasks:
 
 ---
 
-## 📋 Pre-Deployment Checklist
+## 📋 Pre Deployment Checklist
 
 Before deploying, make sure you have:
 

@@ -12,9 +12,9 @@ import { Button } from '../components/ui/button';
 import { BlogPostCard } from '../components/blog/BlogPostCard';
 import { BlogPagination } from '../components/blog/BlogPagination';
 import { BlogBreadcrumbs } from '../components/blog/BlogBreadcrumbs';
-import { getPostsByCategory, getCategoryBySlug } from '../../lib/supabaseBlog';
-import { withTimeout, TimeoutError } from '../../lib/promiseUtils';
-import { formatTag } from '../../lib/blogHelpers';
+import { getPostsByCategory, getCategoryBySlug } from '../../lib/supabaseBlog.ts';
+import { withTimeout, TimeoutError } from '../../lib/promiseUtils.ts';
+import { formatTag } from '../../lib/blogHelpers.ts';
 import type { BlogPost, BlogCategory } from '../../lib/blogTypes';
 
 export function BlogCategoryPage() {

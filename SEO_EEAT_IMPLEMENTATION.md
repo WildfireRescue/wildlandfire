@@ -1,8 +1,8 @@
-# Enhanced Blog System with SEO & E-E-A-T Implementation
+# Enhanced Blog System with SEO & E E A T Implementation
 
 ## Overview
 
-This document describes the comprehensive SEO and E-E-A-T (Expertise, Experience, Authority, Trust) enhancement to the Wildland Fire Recovery Fund blog/article publishing system.
+This document describes the comprehensive SEO and E E A T (Expertise, Experience, Authority, Trust) enhancement to the Wildland Fire Recovery Fund blog/article publishing system.
 
 ## What Was Implemented
 
@@ -27,7 +27,7 @@ Added 25+ new fields to the `posts` table organized into categories:
 - `og_description` - Social sharing description
 - `twitter_card` - Twitter card type (default: summary_large_image)
 
-#### Trust / E-E-A-T
+#### Trust / E E A T
 - `author_role` - Author's title/credentials
 - `author_bio` - Author biography
 - `reviewed_by` - Fact-checker/reviewer name
@@ -71,7 +71,7 @@ Sections:
 1. **Core Content** - Title, slug, excerpt, markdown content
 2. **SEO Optimization** - Meta tags, keywords, canonical URL
 3. **Images & Social Sharing** - Featured images, OG tags
-4. **Author & E-E-A-T** - Author credentials, fact-checking
+4. **Author & E E A T** - Author credentials, fact checking
 5. **Publishing & Discovery** - Status, visibility, robots
 6. **Sources & Citations** - Reference management
 
@@ -132,7 +132,7 @@ The editor will prompt for authentication via magic link.
    - Focus keyword
    - Secondary keywords
 
-3. **Author Credentials** (E-E-A-T)
+3. **Author Credentials** (E E A T)
    - Author name (default: organization)
    - Author role (credentials)
    - Author bio
@@ -195,7 +195,7 @@ Robots: robots_directives → computed from allow_indexing + allow_follow
 - Dates (published, modified)
 - Image references
 
-## E-E-A-T Implementation
+## E E A T Implementation
 
 ### Expertise
 - Author role/title field
@@ -259,9 +259,9 @@ Security implemented via Row Level Security:
 
 1. **Image Upload** - Direct upload to Supabase storage
 2. **Markdown Preview** - Live preview alongside editor
-3. **SEO Score** - Real-time SEO optimization score
+3. **SEO Score** - Real time SEO optimization score
 4. **Keyword Density** - Analysis tool for keywords
-5. **Schema Enhancements** - FAQ schema, How-To schema
+5. **Schema Enhancements** - FAQ schema, How To schema
 6. **Multilingual** - i18n support for content
 7. **Version History** - Track content revisions
 8. **Bulk Operations** - Edit multiple posts at once
@@ -298,4 +298,4 @@ For issues or questions:
 
 ## Conclusion
 
-This implementation provides a production-ready, SEO-optimized, E-E-A-T-compliant blog publishing system that maximizes trust signals, accessibility, and search engine discoverability for nonprofit credibility and reach.
+This implementation provides a production ready, SEO optimized, E E A T compliant blog publishing system that maximizes trust signals, accessibility, and search engine discoverability for nonprofit credibility and reach.

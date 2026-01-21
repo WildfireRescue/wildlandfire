@@ -121,7 +121,7 @@ const { session, user, profile, loading: authLoading, error: authHookError } = u
 4. ✅ Header should show email with "(editor)" role
 
 ### Test 3: Regular User (No Permission)
-1. Sign in with non-admin email (profile role='user')
+1. Sign in with non admin email (profile role='user')
 2. Check console for:
    - `[useAuth] Profile loaded: { role: 'user' }`
    - `[BlogEditorEnhanced] Can publish: false`
@@ -158,7 +158,7 @@ const { session, user, profile, loading: authLoading, error: authHookError } = u
 
 ## 📝 Next Steps (Optional)
 
-1. **Auto-create profiles**: Add trigger to create `profiles` row when allowlisted user signs up:
+1. **Auto create profiles**: Add trigger to create `profiles` row when allowlisted user signs up:
    ```sql
    CREATE OR REPLACE FUNCTION handle_admin_signup()
    RETURNS TRIGGER AS $$
