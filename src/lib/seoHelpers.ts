@@ -49,7 +49,7 @@ export function generateMetaTags(
   siteName: string = 'Wildland Fire Recovery Fund',
   twitterHandle?: string
 ): MetaTags {
-  // Build canonical URL
+  // Build canonical URL (no hash fragments for browser history routing)
   const postUrl = `${siteUrl}/blog/${post.slug}`;
   const canonicalUrl = post.canonical_url || postUrl;
   
@@ -201,25 +201,26 @@ export function renderMetaTags(tags: MetaTags): string {
 }
 
 /**
- * Generate JSON-LD structured data for article
+ * Generate JSON-LD structured data for blog post (BlogPosting schema)
+ * Optimized for Google rich results eligibility
  */
 export function generateArticleStructuredData(
   post: BlogPost,
   siteUrl: string = window.location.origin,
-  organizationName: string = 'Wildland Fire Recovery Fund',
-  organizationLogo?: string
+  organizationName: string = 'The Wildland Fire Recovery Fund',
+  organizationLogo: string = `${window.location.origin}/Images/logo-512.png`
 ) {
   const postUrl = `${siteUrl}/blog/${post.slug}`;
   const imageUrl = post.og_image_url || post.featured_image_url || post.cover_image_url;
   
   const structuredData = {
     '@context': 'https://schema.org',
-    '@type': 'Article',
+    '@type': 'BlogPosting',
     headline: post.title,
-    description: post.excerpt || post.meta_description,
+    description: post.excerpt || post.meta_description || post.content_markdown?.slice(0, 160),
     image: imageUrl ? [imageUrl] : undefined,
-    datePublished: post.published_at,
-    dateModified: post.last_updated_at || post.updated_at,
+    datePublished: post.published_at || new Date().toISOString(),
+    dateModified: post.last_updated_at || post.updated_at || post.published_at || new Date().toISOString(),
     author: {
       '@type': post.author_role ? 'Person' : 'Organization',
       name: post.author_name || organizationName,
@@ -229,12 +230,10 @@ export function generateArticleStructuredData(
     publisher: {
       '@type': 'Organization',
       name: organizationName,
-      ...(organizationLogo && {
-        logo: {
-          '@type': 'ImageObject',
-          url: organizationLogo,
-        },
-      }),
+      logo: {
+        '@type': 'ImageObject',
+        url: organizationLogo,
+      },
     },
     mainEntityOfPage: {
       '@type': 'WebPage',
@@ -275,9 +274,9 @@ function escapeHtml(text: string): string {
 /**
  * Update document head with meta tags (client-side)
  */
-export function updateDocumentMeta(tags: MetaTags): void {
-  // Update title
-  document.title = tags.title;
+export function updateDocumentMeta(tags: MetaTags, siteName: string = 'The Wildland Fire Recovery Fund'): void {
+  // Update title with site name appended
+  document.title = `${tags.title} | ${siteName}`;
   
   // Helper to set or update meta tag
   const setMeta = (selector: string, content: string) => {

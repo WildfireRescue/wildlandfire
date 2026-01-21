@@ -1,0 +1,15 @@
+# Netlify redirects for React SPA with browser history routing
+# All routes should serve index.html for client-side routing
+
+# Redirect old hash-based URLs to clean URLs
+/#!/*  /:splat  301!
+/#/*   /:splat  301!
+
+# API routes (if any) - pass through
+/api/*  /api/:splat  200
+
+# Netlify Functions
+/.netlify/functions/*  /.netlify/functions/:splat  200
+
+# All other routes serve index.html for SPA
+/*  /index.html  200

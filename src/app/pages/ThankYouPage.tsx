@@ -1,13 +1,10 @@
 import { motion } from 'motion/react';
 import { Heart, Home, Share2, Mail, TrendingUp } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 
-interface ThankYouPageProps {
-  onNavigate: (page: string) => void;
-}
-
-export function ThankYouPage({ onNavigate }: ThankYouPageProps) {
+export function ThankYouPage() {
   return (
     <div className="min-h-screen pt-28 pb-20 bg-background relative overflow-hidden">
       {/* Background Image */}
@@ -111,24 +108,26 @@ export function ThankYouPage({ onNavigate }: ThankYouPageProps) {
             transition={{ delay: 1.1, duration: 0.6 }}
             className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12"
           >
-            <Button
-              size="lg"
-              onClick={() => onNavigate('home')}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground px-8"
-            >
-              <Home size={20} className="mr-2" />
-              Return Home
-            </Button>
+            <Link to="/">
+              <Button
+                size="lg"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground px-8"
+              >
+                <Home size={20} className="mr-2" />
+                Return Home
+              </Button>
+            </Link>
 
-            <Button
-              size="lg"
-              variant="outline"
-              onClick={() => onNavigate('impact')}
-              className="border-2 border-border hover:bg-secondary px-8"
-            >
-              <TrendingUp size={20} className="mr-2" />
-              See Our Impact
-            </Button>
+            <Link to="/stories">
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-2 border-border hover:bg-secondary px-8"
+              >
+                <TrendingUp size={20} className="mr-2" />
+                See Our Impact
+              </Button>
+            </Link>
           </motion.div>
 
           {/* Share Section */}

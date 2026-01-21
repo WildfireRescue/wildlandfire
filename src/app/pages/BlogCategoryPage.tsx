@@ -4,6 +4,7 @@
 // =====================================================
 
 import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { ArrowLeft } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
@@ -16,11 +17,8 @@ import { withTimeout, TimeoutError } from '../../lib/promiseUtils';
 import { formatTag } from '../../lib/blogHelpers';
 import type { BlogPost, BlogCategory } from '../../lib/blogTypes';
 
-interface BlogCategoryPageProps {
-  categorySlug: string;
-}
-
-export function BlogCategoryPage({ categorySlug }: BlogCategoryPageProps) {
+export function BlogCategoryPage() {
+  const { categorySlug } = useParams<{ categorySlug: string }>();
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [category, setCategory] = useState<BlogCategory | null>(null);
   const [loading, setLoading] = useState(true);
@@ -32,6 +30,8 @@ export function BlogCategoryPage({ categorySlug }: BlogCategoryPageProps) {
 
   // Fetch category info
   useEffect(() => {
+    if (!categorySlug) return;
+    
     let mounted = true;
     
     async function loadCategory() {
