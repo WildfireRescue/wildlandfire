@@ -4,6 +4,7 @@
 // =====================================================
 
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { BlogPostCard } from './BlogPostCard';
 import { getRelatedPosts } from '../../../lib/supabaseBlog.ts';
@@ -53,12 +54,12 @@ export function BlogRelatedPosts({ category, currentSlug, limit = 3 }: BlogRelat
         <h2 className="text-2xl md:text-3xl font-bold text-heading">
           Related Articles
         </h2>
-        <a
-          href="#blog"
+        <Link
+          to="/blog"
           className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors text-sm font-medium"
         >
           View All <ArrowRight size={16} />
-        </a>
+        </Link>
       </div>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">

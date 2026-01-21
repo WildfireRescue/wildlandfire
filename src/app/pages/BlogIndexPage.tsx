@@ -4,6 +4,7 @@
 // =====================================================
 
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Helmet } from 'react-helmet-async';
 import { BlogPostCard } from '../components/blog/BlogPostCard';
@@ -13,6 +14,7 @@ import { withTimeout, TimeoutError } from '../../lib/promiseUtils.ts';
 import type { BlogPost, BlogCategory } from '../../lib/blogTypes';
 
 export function BlogIndexPage() {
+  const navigate = useNavigate();
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [featuredPosts, setFeaturedPosts] = useState<BlogPost[]>([]);
   const [categories, setCategories] = useState<BlogCategory[]>([]);
@@ -195,7 +197,7 @@ export function BlogIndexPage() {
     setCurrentPage(1);
     // Navigate to category page
     if (category) {
-      window.location.hash = `blog/category/${category}`;
+      navigate(`/blog/category/${category}`);
     }
   };
 

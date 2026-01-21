@@ -4,7 +4,7 @@
 // =====================================================
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { ArrowLeft } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
@@ -141,15 +141,16 @@ export function BlogCategoryPage() {
       <div className="min-h-screen bg-background pt-32 pb-24">
         <div className="container mx-auto px-6 md:px-8 max-w-7xl">
           {/* Back Button */}
-          <Button
-            variant="ghost"
-            onClick={() => (window.location.hash = 'blog')}
-            className="mb-8 text-muted-foreground hover:text-foreground transition-colors"
-            size="sm"
-          >
-            <ArrowLeft size={16} className="mr-2" />
-            Back to All Posts
-          </Button>
+          <Link to="/blog">
+            <Button
+              variant="ghost"
+              className="mb-8 text-muted-foreground hover:text-foreground transition-colors"
+              size="sm"
+            >
+              <ArrowLeft size={16} className="mr-2" />
+              Back to All Posts
+            </Button>
+          </Link>
 
           {/* Breadcrumbs */}
           <BlogBreadcrumbs category={categorySlug} />
@@ -190,12 +191,11 @@ export function BlogCategoryPage() {
               <p className="text-muted-foreground text-lg">
                 No posts found in this category yet.
               </p>
-              <Button
-                className="mt-6"
-                onClick={() => (window.location.hash = 'blog')}
-              >
-                View All Posts
-              </Button>
+              <Link to="/blog">
+                <Button className="mt-6">
+                  View All Posts
+                </Button>
+              </Link>
             </div>
           )}
 

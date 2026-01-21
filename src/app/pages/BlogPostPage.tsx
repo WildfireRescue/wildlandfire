@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { ArrowLeft } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
@@ -26,6 +26,7 @@ import type { BlogPost } from '../../lib/blogTypes';
 
 export function BlogPostPage() {
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
   const [post, setPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -36,7 +37,7 @@ export function BlogPostPage() {
   useEffect(() => {
     // Redirect if no slug provided
     if (!slug) {
-      window.location.href = '/blog';
+      navigate('/blog');
       return;
     }
 
@@ -349,7 +350,7 @@ export function BlogPostPage() {
     };
 
     const handleGoBack = () => {
-      window.location.hash = 'blog';
+      navigate('/blog');
     };
 
     // Determine error icon and message
@@ -459,15 +460,16 @@ export function BlogPostPage() {
         {/* Centered Content Layout - No Sidebar */}
         <div className="container mx-auto px-4 sm:px-6 lg:px-12 max-w-5xl">
           {/* Back Button */}
-          <Button
-            variant="ghost"
-            onClick={() => (window.location.hash = 'blog')}
-            className="mb-8 -ml-4 text-muted-foreground hover:text-foreground transition-colors"
-            size="sm"
-          >
-            <ArrowLeft size={16} className="mr-2" />
-            Back to Blog
-          </Button>
+          <Link to="/blog">
+            <Button
+              variant="ghost"
+              className="mb-8 -ml-4 text-muted-foreground hover:text-foreground transition-colors"
+              size="sm"
+            >
+              <ArrowLeft size={16} className="mr-2" />
+              Back to Blog
+            </Button>
+          </Link>
 
           {/* Breadcrumbs */}
           <BlogBreadcrumbs category={post.category} title={post.title} />
@@ -582,14 +584,15 @@ export function BlogPostPage() {
 
           {/* Back Button (bottom) */}
           <div className="mt-16 text-center">
-            <Button
-              variant="outline"
-              onClick={() => (window.location.hash = 'blog')}
-              className="px-8 py-6 font-medium text-base"
-            >
-              <ArrowLeft size={18} className="mr-2" />
-              Back to All Posts
-            </Button>
+            <Link to="/blog">
+              <Button
+                variant="outline"
+                className="px-8 py-6 font-medium text-base"
+              >
+                <ArrowLeft size={18} className="mr-2" />
+                Back to All Posts
+              </Button>
+            </Link>
           </div>
         </div>
       </div>

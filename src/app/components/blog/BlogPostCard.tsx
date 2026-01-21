@@ -3,6 +3,7 @@
 // Card for displaying blog post preview in lists/grids
 // =====================================================
 
+import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Calendar, Clock } from 'lucide-react';
 import { Button } from '../ui/button';
@@ -18,22 +19,20 @@ interface BlogPostCardProps {
 }
 
 export function BlogPostCard({ post, index = 0, featured = false }: BlogPostCardProps) {
-  const handleClick = () => {
-    window.location.hash = `blog/${safeSlug(post.slug)}`;
-  };
+  const blogUrl = `/blog/${safeSlug(post.slug)}`;
 
   // Resolve cover image with fallback
   const coverImageSrc = safeImageSrc(post.cover_image_url, PLACEHOLDER_IMAGE);
 
   if (featured) {
     return (
-      <motion.article
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: index * 0.1 }}
-        className="group relative bg-card/50 border border-border/40 rounded-2xl overflow-hidden hover:border-primary/40 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/5 backdrop-blur-sm cursor-pointer"
-        onClick={handleClick}
-      >
+      <Link to={blogUrl} className="block no-underline">
+        <motion.article
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: index * 0.1 }}
+          className="group relative bg-card/50 border border-border/40 rounded-2xl overflow-hidden hover:border-primary/40 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/5 backdrop-blur-sm cursor-pointer"
+        >
         <div className="grid md:grid-cols-2 gap-6">
           {/* Cover Image */}
           <div className="relative h-72 md:h-full overflow-hidden">
@@ -98,17 +97,18 @@ export function BlogPostCard({ post, index = 0, featured = false }: BlogPostCard
           </div>
         </div>
       </motion.article>
+      </Link>
     );
   }
 
   return (
-    <motion.article
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1 }}
-      className="group bg-card/50 border border-border/40 rounded-xl overflow-hidden hover:border-primary/40 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/5 flex flex-col backdrop-blur-sm cursor-pointer h-full"
-      onClick={handleClick}
-    >
+    <Link to={blogUrl} className="block no-underline h-full">
+      <motion.article
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: index * 0.1 }}
+        className="group bg-card/50 border border-border/40 rounded-xl overflow-hidden hover:border-primary/40 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/5 flex flex-col backdrop-blur-sm cursor-pointer h-full"
+      >
       {/* Cover Image */}
       <div className="relative h-64 overflow-hidden">
         <img
@@ -169,5 +169,6 @@ export function BlogPostCard({ post, index = 0, featured = false }: BlogPostCard
         </div>
       </div>
     </motion.article>
+    </Link>
   );
 }
