@@ -63,7 +63,7 @@ export default function ArticleContent({ blocks }: { blocks: Block[] }) {
             return (
               <div
                 key={i}
-                className="article-html my-6"
+                className="prose prose-lg md:prose-xl max-w-none [&_p]:mb-6 [&_p]:leading-relaxed [&_p]:text-base md:[&_p]:text-lg [&_h2]:text-2xl md:[&_h2]:text-3xl [&_h2]:font-bold [&_h2]:mt-12 [&_h2]:mb-6 [&_h3]:text-xl md:[&_h3]:text-2xl [&_h3]:font-semibold [&_h3]:mt-8 [&_h3]:mb-4"
                 dangerouslySetInnerHTML={{ __html: transformed }}
               />
             );
