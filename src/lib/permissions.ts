@@ -56,25 +56,16 @@ export async function checkEditorPermissions(): Promise<PermissionCheckResult> {
     if (authError) {
       console.error('[checkEditorPermissions] Auth error:', authError);
       
-      // If it's a "session missing" error, treat it as no_session (user not logged in)
-      if (authError.message && authError.message.includes('session')) {
-        return {
-          status: 'no_session',
-          hasAccess: false,
-          user: null,
-          profile: null,
-          message: 'Please sign in to access the editor.'
-        };
-      }
-      
-      // Other auth errors are actual errors
+      // Any auth error should default to showing login page (no_session)
+      // This includes session missing, abort errors, and network issues
+      // Better to let them log in than show error page
       return {
-        status: 'error',
+        status: 'no_session',
         hasAccess: false,
         user: null,
         profile: null,
-        message: `Authentication error: ${authError.message}`,
-        technicalDetails: authError
+        message: 'Please sign in to access the editor.',
+        technicalDetails: { authError }
       };
     }
 
