@@ -10,8 +10,12 @@ export function AuthCallbackPage() {
     (async () => {
       try {
         console.log('[AuthCallback] Processing auth callback...');
+        console.log('[AuthCallback] Full URL:', window.location.href);
+        console.log('[AuthCallback] Query string:', window.location.search);
+        console.log('[AuthCallback] Hash:', window.location.hash);
         
         // ✅ This consumes the link URL and writes the session into storage.
+        // The URL contains the auth code in query parameters
         const { error } = await supabase.auth.exchangeCodeForSession(window.location.href);
         
         if (error) {
