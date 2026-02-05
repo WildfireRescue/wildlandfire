@@ -36,10 +36,10 @@ export function AuthCallbackPage() {
 
         setMsg('Signed in! Sending you to the blog editor…');
 
-        // ✅ Redirect directly to admin/blog (not publish) to avoid redirect loop
+        // ✅ Redirect directly to blog/editor (not publish) to avoid redirect loop
         // Use replace so callback URL doesn't stay in history
         setTimeout(() => {
-          window.location.replace(`${window.location.origin}/#admin/blog`);
+          window.location.replace(`${window.location.origin}/#blog/editor`);
         }, 500);
       } catch (e: any) {
         if (!isMounted) return;

@@ -182,10 +182,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       // Handle specific auth events
       if (event === 'SIGNED_IN' && newSession) {
-        console.log('[AuthProvider] User signed in, redirecting to admin/blog');
-        // Only redirect if not already on admin page
-        if (!window.location.hash.includes('admin')) {
-          window.location.hash = 'admin/blog';
+        console.log('[AuthProvider] User signed in, redirecting to blog/editor');
+        // Only redirect if not already on editor page
+        if (!window.location.hash.includes('blog/editor')) {
+          window.location.hash = 'blog/editor';
         }
       }
       

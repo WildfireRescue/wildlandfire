@@ -66,7 +66,7 @@ export default function App() {
                   <Route path="/blog/:slug" element={<BlogPostPage />} />
                   
                   {/* Admin routes */}
-                  <Route path="/admin/blog" element={<BlogEditorPage />} />
+                  <Route path="/blog/editor" element={<BlogEditorPage />} />
                   <Route path="/auth-callback" element={<AuthCallbackPage />} />
                   
                   {/* Legal routes */}
@@ -75,7 +75,8 @@ export default function App() {
                   
                   {/* Legacy redirects - old hash routes */}
                   <Route path="/articles/*" element={<Navigate to="/blog" replace />} />
-                  <Route path="/publish" element={<Navigate to="/admin/blog" replace />} />
+                  <Route path="/admin/blog" element={<Navigate to="/blog/editor" replace />} />
+                  <Route path="/publish" element={<Navigate to="/blog/editor" replace />} />
                   
                   {/* 404 - redirect to home */}
                   <Route path="*" element={<Navigate to="/" replace />} />
