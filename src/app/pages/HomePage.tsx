@@ -5,7 +5,7 @@ import { ImpactStats } from '../components/ImpactStats';
 import { FinalUrgencyCTA } from '../components/FinalUrgencyCTA';
 import { TrustIndicators } from '../components/TrustIndicators';
 import { FloatingProgressIndicator } from '../components/FloatingProgressIndicator';
-import { LiveDonationNotifications } from '../components/LiveDonationNotifications';
+// import { LiveDonationNotifications } from '../components/LiveDonationNotifications';
 
 export function HomePage() {
   return (
@@ -19,7 +19,7 @@ export function HomePage() {
       
       {/* Floating/Sticky Elements */}
       <FloatingProgressIndicator />
-      <LiveDonationNotifications />
+      {/* <LiveDonationNotifications /> */}
     </>
   );
 }

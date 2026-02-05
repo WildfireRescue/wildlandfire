@@ -55,6 +55,19 @@ export async function checkEditorPermissions(): Promise<PermissionCheckResult> {
     
     if (authError) {
       console.error('[checkEditorPermissions] Auth error:', authError);
+      
+      // If it's a "session missing" error, treat it as no_session (user not logged in)
+      if (authError.message && authError.message.includes('session')) {
+        return {
+          status: 'no_session',
+          hasAccess: false,
+          user: null,
+          profile: null,
+          message: 'Please sign in to access the editor.'
+        };
+      }
+      
+      // Other auth errors are actual errors
       return {
         status: 'error',
         hasAccess: false,

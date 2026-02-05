@@ -15,8 +15,10 @@ import { withTimeout, TimeoutError } from '../../../lib/promiseUtils.ts';
 import { checkEditorPermissions, getPermissionInstructions, type PermissionCheckResult } from '../../../lib/permissions.ts';
 import type { BlogCategory } from '../../../lib/blogTypes';
 
-export fupermissionResult, setPermissionResult] = useState<PermissionCheckResult | null>(null);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true
+export function BlogEditorPage() {
+  // Permission checking
+  const [permissionResult, setPermissionResult] = useState<PermissionCheckResult | null>(null);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [authError, setAuthError] = useState<string | null>(null);
   const [categories, setCategories] = useState<BlogCategory[]>([]);
 
@@ -31,6 +33,8 @@ export fupermissionResult, setPermissionResult] = useState<PermissionCheckResult
   const autoSlug = useMemo(() => generateSlug(title), [title]);
   const [slug, setSlug] = useState('');
   const [excerpt, setExcerpt] = useState('');
+  const [metaTitle, setMetaTitle] = useState('');
+  const [metaDescription, setMetaDescription] = useState('');
   const [content, setContent] = useState('');
   const [coverUrl, setCoverUrl] = useState('');
   const [category, setCategory] = useState('');
@@ -77,17 +81,19 @@ export fupermissionResult, setPermissionResult] = useState<PermissionCheckResult
         if (!mounted) return;
         
         console.error('[BlogEditor] Permission check error:', e);
+        
+        // On ANY error, default to showing login page rather than error screen
         setPermissionResult({
-          status: 'error',
+          status: 'no_session',
           hasAccess: false,
           user: null,
           profile: null,
-          message: 'Failed to check permissions',
-          technicalDetails: e
-        }
-          setIsCheckingAuth(false);
-        }
+          message: 'Please log in to access the editor.',
+          technicalDetails: null
+        });
       }
+      
+      setIsCheckingAuth(false);
     }
     
     checkAuth();
@@ -186,6 +192,8 @@ export fupermissionResult, setPermissionResult] = useState<PermissionCheckResult
         title: title.trim(),
         slug: finalSlug,
         excerpt: excerpt.trim() || null,
+        meta_title: metaTitle.trim() || null,
+        meta_description: metaDescription.trim() || null,
         content_markdown: content.trim(),
         cover_image_url: coverUrl.trim() || null,
         category: category || null,
@@ -254,6 +262,8 @@ export fupermissionResult, setPermissionResult] = useState<PermissionCheckResult
       setSlug('');
       slugTouched.current = false;
       setExcerpt('');
+      setMetaTitle('');
+      setMetaDescription('');
       setContent('');
       setCoverUrl('');
       setTags('');
@@ -502,6 +512,45 @@ export fupermissionResult, setPermissionResult] = useState<PermissionCheckResult
               rows={3}
               className="w-full px-4 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none"
             />
+          </div>
+
+          {/* SEO Fields */}
+          <div className="bg-muted/30 border border-border rounded-lg p-6 space-y-4">
+            <h3 className="font-semibold text-sm">SEO Fields</h3>
+            
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                SEO Title <span className="text-muted-foreground font-normal">(≤60 characters)</span>
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={metaTitle}
+                  onChange={(e) => setMetaTitle(e.target.value.slice(0, 60))}
+                  placeholder="SEO optimized title for search engines"
+                  maxLength={60}
+                  className="w-full px-4 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+                <span className="absolute right-3 top-3 text-xs text-muted-foreground">{metaTitle.length}/60</span>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Meta Description <span className="text-muted-foreground font-normal">(≤160 characters)</span>
+              </label>
+              <div className="relative">
+                <textarea
+                  value={metaDescription}
+                  onChange={(e) => setMetaDescription(e.target.value.slice(0, 160))}
+                  placeholder="Summary that appears in search results"
+                  maxLength={160}
+                  rows={3}
+                  className="w-full px-4 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                />
+                <span className="absolute right-3 bottom-3 text-xs text-muted-foreground">{metaDescription.length}/160</span>
+              </div>
+            </div>
           </div>
 
           {/* Content */}

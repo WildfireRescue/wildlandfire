@@ -17,7 +17,7 @@ const ThankYouPage = lazy(() => import('./pages/ThankYouPage').then(m => ({ defa
 const BlogIndexPage = lazy(() => import('./pages/BlogIndexPage').then(m => ({ default: m.BlogIndexPage })));
 const BlogPostPage = lazy(() => import('./pages/BlogPostPage').then(m => ({ default: m.BlogPostPage })));
 const BlogCategoryPage = lazy(() => import('./pages/BlogCategoryPage').then(m => ({ default: m.BlogCategoryPage })));
-const BlogEditorPage = lazy(() => import('./pages/admin/BlogEditorPageEnhanced').then(m => ({ default: m.BlogEditorPageEnhanced })));
+const BlogEditorPage = lazy(() => import('./pages/admin/BlogEditorPage').then(m => ({ default: m.BlogEditorPage })));
 const AuthCallbackPage = lazy(() => import('./pages/AuthCallbackPage').then(m => ({ default: m.AuthCallbackPage })));
 const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage').then(m => ({ default: m.PrivacyPolicyPage })));
 const TermsOfUsePage = lazy(() => import('./pages/TermsOfUsePage').then(m => ({ default: m.TermsOfUsePage })));
@@ -59,7 +59,8 @@ export default function App() {
                   <Route path="/stories" element={<StoriesPage />} />
                   <Route path="/grants" element={<GrantsPage />} />
                   
-                  {/* Blog routes */}
+                  {/* Blog routes - more specific routes first */}
+                  <Route path="/blog/editor" element={<BlogEditorPage />} />
                   <Route path="/blog" element={<BlogIndexPage />} />
                   <Route path="/blog/category/:categorySlug" element={<BlogCategoryPage />} />
                   <Route path="/blog/:slug" element={<BlogPostPage />} />

@@ -135,7 +135,16 @@ export function BlogEditorPageEnhanced() {
       
       try {
         console.log('[BlogEditorEnhanced] Checking permissions...');
-        const result = await checkEditorPermissions();
+        
+        // Add timeout to prevent hanging
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Permission check timed out after 10 seconds')), 10000)
+        );
+        
+        const result = await Promise.race([
+          checkEditorPermissions(),
+          timeoutPromise
+        ]) as any;
         
         if (!mounted) return;
         
@@ -150,13 +159,16 @@ export function BlogEditorPageEnhanced() {
         if (!mounted) return;
         
         console.error('[BlogEditorEnhanced] Permission check error:', e);
+        
+        // On ANY error, default to showing login page rather than error screen
+        // This is safer for UX - user can always try to login
         setPermissionResult({
-          status: 'error',
+          status: 'no_session',
           hasAccess: false,
           user: null,
           profile: null,
-          message: 'Failed to check permissions',
-          technicalDetails: e
+          message: 'Please log in to access the editor.',
+          technicalDetails: null
         });
       } finally {
         if (mounted) {
