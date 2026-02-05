@@ -16,6 +16,8 @@ import { checkEditorPermissions, getPermissionInstructions, type PermissionCheck
 import type { BlogCategory } from '../../../lib/blogTypes';
 
 export function BlogEditorPage() {
+  console.log('[BlogEditorPage] Component mounted');
+  
   // Permission checking
   const [permissionResult, setPermissionResult] = useState<PermissionCheckResult | null>(null);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
@@ -63,8 +65,32 @@ export function BlogEditorPage() {
       setIsCheckingAuth(true);
       setAuthError(null);
       
-      
       try {
+        // First, check if there's an auth code in the URL that needs to be exchanged
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get('code');
+        
+        if (code) {
+          console.log('[BlogEditor] Auth code detected, exchanging for session...');
+          const { error } = await supabase.auth.exchangeCodeForSession(window.location.href);
+          
+          if (error) {
+            console.error('[BlogEditor] Code exchange error:', error);
+          } else {
+            console.log('[BlogEditor] Code exchanged successfully');
+            
+            // Give session a moment to settle
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
+            // Clean up the URL to remove the code
+            if (mounted) {
+              window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
+            }
+          }
+        }
+        
+        if (!mounted) return;
+        
         console.log('[BlogEditor] Checking permissions...');
         const result = await checkEditorPermissions();
         
