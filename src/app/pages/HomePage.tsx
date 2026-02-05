@@ -15,9 +15,12 @@ export function HomePage() {
     const code = params.get('code');
     
     if (code) {
-      console.log('[HomePage] Auth code detected, redirecting to editor...');
-      // Redirect to editor - the code stays in the URL for the auth exchange
-      window.location.href = '/#blog/editor';
+      console.log('[HomePage] Auth code detected in URL, redirecting to editor...');
+      console.log('[HomePage] Current URL:', window.location.href);
+      // Redirect to editor with the code still in the URL
+      // The editor will handle the code exchange
+      window.location.replace(window.location.origin + '/#blog/editor');
+      return; // Stop rendering homepage
     }
   }, []);
 
