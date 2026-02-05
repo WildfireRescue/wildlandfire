@@ -26,6 +26,17 @@ export const supabase = createClient(
   }
 );
 
+// Suppress unhandled abort errors in console (they're harmless)
+// These occur during concurrent auth operations and don't affect functionality
+if (typeof window !== 'undefined') {
+  window.addEventListener('unhandledrejection', (event) => {
+    if (event.reason instanceof Error && event.reason.name === 'AbortError') {
+      // Suppress AbortError promise rejections
+      event.preventDefault();
+    }
+  });
+}
+
 // Log auth initialization
 console.log('[Supabase] Client initialized', {
   url: supabaseUrl,

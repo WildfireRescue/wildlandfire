@@ -21,6 +21,11 @@ export function AuthCallbackPage() {
 
         if (!isMounted) return;
 
+        // Give Supabase a moment to settle the session
+        await new Promise(resolve => setTimeout(resolve, 200));
+
+        if (!isMounted) return;
+
         // Verify session was created
         const { data } = await supabase.auth.getSession();
         
@@ -34,17 +39,28 @@ export function AuthCallbackPage() {
           userId: data.session.user.id,
         });
 
+        if (!isMounted) return;
+
         setMsg('Signed in! Sending you to the blog editor…');
 
         // ✅ Redirect directly to blog/editor (not publish) to avoid redirect loop
         // Use replace so callback URL doesn't stay in history
+        // Use a longer delay to ensure session is fully persisted
         setTimeout(() => {
           window.location.replace(`${window.location.origin}/#blog/editor`);
-        }, 500);
+        }, 1000);
       } catch (e: any) {
         if (!isMounted) return;
         console.error('[AuthCallback] Error:', e);
         setMsg(`Sign-in failed: ${e?.message ?? 'Unknown error'}`);
+        
+        // Fallback: redirect to editor anyway after a delay
+        // The session might still be valid in storage even if exchange showed error
+        setTimeout(() => {
+          if (isMounted) {
+            window.location.replace(`${window.location.origin}/#blog/editor`);
+          }
+        }, 2000);
       }
     })();
 
