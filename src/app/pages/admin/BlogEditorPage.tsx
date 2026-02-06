@@ -148,7 +148,8 @@ export function BlogEditorPage() {
   }, []);
 
   function getEmailRedirectTo() {
-    return `${window.location.origin}/#auth-callback`;
+    // CRITICAL: Must use path-based URL (not hash #) because app uses React Router
+    return `${window.location.origin}/auth-callback`;
   }
 
   async function sendMagicLink() {
@@ -159,9 +160,18 @@ export function BlogEditorPage() {
     try {
       const email = loginEmail.trim().toLowerCase();
       if (!email) {
-        setLoginError('Enter an email address.');
+        setLoginError('Please enter an email address.');
         return;
       }
+
+      // Basic email validation
+      if (!email.includes('@') || !email.includes('.')) {
+        setLoginError('Please enter a valid email address.');
+        return;
+      }
+
+      console.log('[BlogEditor] Sending magic link to:', email);
+      console.log('[BlogEditor] Redirect URL:', getEmailRedirectTo());
 
       const { error } = await supabase.auth.signInWithOtp({
         email,
@@ -172,11 +182,30 @@ export function BlogEditorPage() {
       });
 
       if (error) {
-        setLoginError(error.message);
+        console.error('[BlogEditor] Magic link error:', error);
+        
+        // Provide user-friendly error messages
+        let errorMessage = error.message;
+        
+        if (error.message.includes('email not confirmed')) {
+          errorMessage = 'This email address has not been verified yet. Please check your email for a confirmation link.';
+        } else if (error.message.includes('invalid_redirect')) {
+          errorMessage = 'Configuration error: Invalid redirect URL. Please contact support.';
+        } else if (error.message.includes('rate limit')) {
+          errorMessage = 'Too many attempts. Please wait a few minutes before trying again.';
+        } else if (error.message.includes('not authorized')) {
+          errorMessage = 'This email is not authorized to access the blog editor. Please contact an administrator.';
+        }
+        
+        setLoginError(errorMessage);
         return;
       }
 
+      console.log('[BlogEditor] Magic link sent successfully');
       setLoginSent(true);
+    } catch (e: any) {
+      console.error('[BlogEditor] Unexpected error sending magic link:', e);
+      setLoginError('An unexpected error occurred. Please try again.');
     } finally {
       setLoginBusy(false);
     }
@@ -391,17 +420,22 @@ export function BlogEditorPage() {
 
                 {loginSent && (
                   <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
-                    <p className="text-primary text-sm">✅ Check your email for the login link!</p>
+                    <p className="text-primary text-sm font-medium mb-2">✅ Check your email for the login link!</p>
+                    <p className="text-muted-foreground text-xs">
+                      Didn't receive it? Check your spam folder or request a new link after 30 seconds.
+                    </p>
                   </div>
                 )}
 
-                <Button
-                  onClick={sendMagicLink}
-                  disabled={loginBusy || loginSent}
-                  className="w-full"
-                >
-                  {loginBusy ? 'Sending...' : loginSent ? 'Link Sent!' : 'Send Magic Link'}
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={sendMagicLink}
+                    disabled={loginBusy}
+                    className="flex-1"
+                  >
+                    {loginBusy ? 'Sending...' : loginSent ? 'Resend Magic Link' : 'Send Magic Link'}
+                  </Button>
+                </div>
               </div>
             </div>
           </motion.div>
@@ -682,7 +716,7 @@ export function BlogEditorPage() {
 
             <Button
               variant="outline"
-              onClick={() => window.location.hash = 'blog'}
+              onClick={() => window.location.href = '/blog'}
             >
               <Eye size={18} className="mr-2" />
               View Blog

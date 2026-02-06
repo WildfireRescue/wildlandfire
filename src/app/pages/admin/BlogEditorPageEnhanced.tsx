@@ -198,7 +198,8 @@ export function BlogEditorPageEnhanced() {
   }, []);
 
   function getEmailRedirectTo() {
-    return `${window.location.origin}/#auth-callback`;
+    // CRITICAL: Must use path-based URL (not hash #) because app uses React Router
+    return `${window.location.origin}/auth-callback`;
   }
 
   async function sendMagicLink() {
@@ -1253,7 +1254,7 @@ export function BlogEditorPageEnhanced() {
 
               <Button
                 variant="outline"
-                onClick={() => window.location.hash = 'blog'}
+                onClick={() => window.location.href = '/blog'}
               >
                 <Eye size={18} className="mr-2" />
                 View Blog
