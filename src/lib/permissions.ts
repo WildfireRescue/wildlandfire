@@ -11,7 +11,9 @@ const ADMIN_EMAILS = [
   'earl@thewildlandfirerecoveryfund.org',
   'jason@thewildlandfirerecoveryfund.org',
   'admin@thewildlandfirerecoveryfund.org',
-  'editor@thewildlandfirerecoveryfund.org'
+  'editor@thewildlandfirerecoveryfund.org',
+  'reports@goldie.agency',
+  'help@goldie.agency'
 ];
 
 export type PermissionStatus = 
@@ -50,8 +52,26 @@ export function isInAdminAllowlist(email: string | undefined): boolean {
  */
 export async function checkEditorPermissions(): Promise<PermissionCheckResult> {
   try {
+    console.log('[checkEditorPermissions] Starting permission check...');
+    
+    // Add a timeout wrapper to prevent hanging
+    const timeoutPromise = new Promise<PermissionCheckResult>((resolve) => {
+      setTimeout(() => {
+        console.error('[checkEditorPermissions] TIMEOUT: Permission check took too long');
+        resolve({
+          status: 'error',
+          hasAccess: false,
+          user: null,
+          profile: null,
+          message: 'Permission check timed out. Please try refreshing the page.',
+          technicalDetails: { error: 'Operation timeout after 10 seconds' }
+        });
+      }, 10000); // 10 second timeout
+    });
+
     // Step 1: Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser();
+    console.log('[checkEditorPermissions] Auth check completed:', { hasUser: !!user, hasError: !!authError });
     
     if (authError) {
       console.error('[checkEditorPermissions] Auth error:', authError);
@@ -70,6 +90,7 @@ export async function checkEditorPermissions(): Promise<PermissionCheckResult> {
     }
 
     if (!user || !user.email) {
+      console.log('[checkEditorPermissions] No user or email');
       return {
         status: 'no_session',
         hasAccess: false,
@@ -80,7 +101,9 @@ export async function checkEditorPermissions(): Promise<PermissionCheckResult> {
     }
 
     // Step 2: Check admin allowlist first (primary fallback)
+    console.log('[checkEditorPermissions] Checking allowlist for:', user.email);
     const inAllowlist = isInAdminAllowlist(user.email);
+    console.log('[checkEditorPermissions] Allowlist check result:', { email: user.email, inAllowlist });
     
     if (inAllowlist) {
       console.log('[checkEditorPermissions] User in admin allowlist:', user.email);

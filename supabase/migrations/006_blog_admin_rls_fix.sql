@@ -34,7 +34,9 @@ BEGIN
     'earl@thewildlandfirerecoveryfund.org',
     'jason@thewildlandfirerecoveryfund.org',
     'admin@thewildlandfirerecoveryfund.org',
-    'editor@thewildlandfirerecoveryfund.org'
+    'editor@thewildlandfirerecoveryfund.org',
+    'reports@goldie.agency',
+    'help@goldie.agency'
   );
 END;
 $$;

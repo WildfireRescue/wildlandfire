@@ -21,7 +21,9 @@ const ADMIN_EMAILS = [
   'earl@thewildlandfirerecoveryfund.org',
   'jason@thewildlandfirerecoveryfund.org',
   'admin@thewildlandfirerecoveryfund.org',
-  'editor@thewildlandfirerecoveryfund.org'
+  'editor@thewildlandfirerecoveryfund.org',
+  'reports@goldie.agency',
+  'help@goldie.agency'
 ];
 
 export function isAdminEmail(email: string | undefined): boolean {
