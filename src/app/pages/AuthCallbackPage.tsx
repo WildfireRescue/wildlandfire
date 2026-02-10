@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase.ts';
 
 export function AuthCallbackPage() {
+  console.log('[AuthCallback] Component rendered!');
   const [msg, setMsg] = useState('Completing sign-in…');
   const [errorDetails, setErrorDetails] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log('[AuthCallback] useEffect running...');
     let isMounted = true;
 
     (async () => {

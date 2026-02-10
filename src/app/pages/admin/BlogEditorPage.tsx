@@ -212,7 +212,14 @@ export function BlogEditorPage() {
   }
 
   async function signOut() {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+      // Redirect to home page after sign out
+      window.location.href = '/';
+    } catch (error) {
+      console.error('[BlogEditor] Sign out error:', error);
+      alert('Sign out failed. Please try again.');
+    }
   }
 
   async function savePost() {
