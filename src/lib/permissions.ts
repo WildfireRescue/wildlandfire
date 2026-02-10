@@ -120,11 +120,14 @@ export async function checkEditorPermissions(): Promise<PermissionCheckResult> {
     }
 
     // Step 3: Try to fetch profile from database
+    console.log('[checkEditorPermissions] Fetching profile from database for user:', user.id);
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', user.id)
       .maybeSingle();
+
+    console.log('[checkEditorPermissions] Profile fetch completed:', { profileExists: !!profile, hasError: !!profileError });
 
     // Handle profile fetch errors
     if (profileError) {
