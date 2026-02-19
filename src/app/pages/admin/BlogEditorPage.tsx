@@ -13,14 +13,19 @@ import { createPost, getCategories } from '../../../lib/supabaseBlog.ts';
 import { generateSlug, calculateReadingTime } from '../../../lib/blogHelpers.ts';
 import { withTimeout, TimeoutError } from '../../../lib/promiseUtils.ts';
 import { checkEditorPermissions, getPermissionInstructions, type PermissionCheckResult } from '../../../lib/permissions.ts';
+import { useAuthContext } from '../../../contexts/AuthContext';
 import type { BlogCategory } from '../../../lib/blogTypes';
 
 export function BlogEditorPage() {
   console.log('[BlogEditorPage] Component mounted');
   
+  // Get auth state from AuthProvider (prevents race condition)
+  const authContext = useAuthContext();
+  
   // Permission checking
   const [permissionResult, setPermissionResult] = useState<PermissionCheckResult | null>(null);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [checkAuthTimeout, setCheckAuthTimeout] = useState<NodeJS.Timeout | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
   const [categories, setCategories] = useState<BlogCategory[]>([]);
 
@@ -57,42 +62,48 @@ export function BlogEditorPage() {
   }, [autoSlug]);
 
   // Load session + check editor status
-  // DO NOT register auth listener here - it's handled in AuthProvider
+  // FIXED: Wait for AuthProvider to load session before checking permissions
   useEffect(() => {
     let mounted = true;
+    let timeoutId: NodeJS.Timeout | null = null;
     
-    async function checkAuth() {
+    // If AuthProvider is still loading, wait for it to finish
+    if (authContext.loading) {
+      console.log('[BlogEditor] Waiting for AuthProvider to load session...');
+      return;
+    }
+    
+    async function checkPermissions() {
       setIsCheckingAuth(true);
       setAuthError(null);
       
       try {
-        // First, check if there's an auth code in the URL that needs to be exchanged
-        const params = new URLSearchParams(window.location.search);
-        const code = params.get('code');
+        console.log('[BlogEditor] Checking permissions (session loaded from AuthProvider)...');
         
-        if (code) {
-          console.log('[BlogEditor] Auth code detected, exchanging for session...');
-          const { error } = await supabase.auth.exchangeCodeForSession(window.location.href);
-          
-          if (error) {
-            console.error('[BlogEditor] Code exchange error:', error);
-          } else {
-            console.log('[BlogEditor] Code exchanged successfully');
-            
-            // Give session a moment to settle
-            await new Promise(resolve => setTimeout(resolve, 300));
-            
-            // Clean up the URL to remove the code
-            if (mounted) {
-              window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
-            }
+        // Set up a timeout in case permission check hangs
+        timeoutId = setTimeout(() => {
+          if (mounted) {
+            console.error('[BlogEditor] Permission check timeout after 8 seconds');
+            setIsCheckingAuth(false);
+            // Show login screen as fallback
+            setPermissionResult({
+              status: 'no_session',
+              hasAccess: false,
+              user: null,
+              profile: null,
+              message: 'Permission check timed out. Please try logging in again.',
+              technicalDetails: null
+            });
           }
-        }
+        }, 8000);
         
-        if (!mounted) return;
-        
-        console.log('[BlogEditor] Checking permissions...');
         const result = await checkEditorPermissions();
+        
+        // Clear timeout if check completed in time
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+          timeoutId = null;
+        }
         
         if (!mounted) return;
         
@@ -104,6 +115,11 @@ export function BlogEditorPage() {
         
         setPermissionResult(result);
       } catch (e: any) {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+          timeoutId = null;
+        }
+        
         if (!mounted) return;
         
         console.error('[BlogEditor] Permission check error:', e);
@@ -122,18 +138,18 @@ export function BlogEditorPage() {
       setIsCheckingAuth(false);
     }
     
-    checkAuth();
-
-    // ❌ DO NOT subscribe to auth state changes here
-    // The listener is already registered in AuthProvider (App.tsx)
-    // Multiple listeners cause AbortError, memory leaks, and stuck states
+    // Check permissions once AuthProvider has loaded
+    checkPermissions();
 
     // Cleanup function
     return () => {
       mounted = false;
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
       console.log('[BlogEditor] Component unmounted');
     };
-  }, []);
+  }, [authContext.loading]); // Trigger when authContext.loading changes
 
   // Load categories
   useEffect(() => {
@@ -363,7 +379,24 @@ export function BlogEditorPage() {
         <div className="container mx-auto px-4">
           <div className="max-w-xl mx-auto bg-card border border-border rounded-xl p-8 text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Checking permissions...</p>
+            <p className="text-muted-foreground mb-4">Checking permissions...</p>
+            <p className="text-xs text-muted-foreground mb-6">
+              This should only take a moment. If this takes longer than 10 seconds, try the button below.
+            </p>
+            <Button
+              onClick={() => {
+                // Force a re-check by toggling the loading state
+                setIsCheckingAuth(false);
+                setTimeout(() => {
+                  setIsCheckingAuth(true);
+                  setPermissionResult(null);
+                }, 100);
+              }}
+              variant="outline"
+              size="sm"
+            >
+              Retry Permission Check
+            </Button>
           </div>
         </div>
       </div>

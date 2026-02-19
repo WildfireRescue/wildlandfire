@@ -5,6 +5,7 @@ export function AuthCallbackPage() {
   console.log('[AuthCallback] Component rendered!');
   const [msg, setMsg] = useState('Completing sign-in…');
   const [errorDetails, setErrorDetails] = useState<string | null>(null);
+  const [redirecting, setRedirecting] = useState(false);
 
   useEffect(() => {
     console.log('[AuthCallback] useEffect running...');
@@ -40,8 +41,13 @@ export function AuthCallbackPage() {
         const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(window.location.href);
         
         if (exchangeError) {
-          console.error('[AuthCallback] Exchange code error:', exchangeError);
-          throw exchangeError;
+          console.warn('[AuthCallback] Exchange code error (non-blocking):', exchangeError?.message);
+          // PKCE errors are ok - the session might already be in storage
+          // If it's a real error, we'll catch it in the next getSession call
+          if (!exchangeError?.message?.includes('PKCE')) {
+            throw exchangeError;
+          }
+          console.log('[AuthCallback] PKCE verifier not found, but session may be in storage');
         }
 
         if (!isMounted) return;
@@ -67,13 +73,22 @@ export function AuthCallbackPage() {
         if (!isMounted) return;
 
         setMsg('✅ Signed in successfully! Redirecting to blog editor...');
+        setRedirecting(true);
 
         // ✅ Redirect directly to blog/editor using path-based routing (React Router)
         // Use replace so callback URL doesn't stay in history
         // Use a longer delay to ensure session is fully persisted
-        setTimeout(() => {
-          window.location.replace(`${window.location.origin}/blog/editor`);
-        }, 1000);
+        const redirectTimeout = setTimeout(() => {
+          if (isMounted) {
+            console.log('[AuthCallback] Redirecting to /blog/editor');
+            // Use window.location.href (not replace) for clean navigation
+            window.location.href = `${window.location.origin}/blog/editor`;
+          }
+        }, 500);
+
+        return () => {
+          clearTimeout(redirectTimeout);
+        };
       } catch (e: any) {
         if (!isMounted) return;
         console.error('[AuthCallback] Error:', e);
@@ -96,12 +111,17 @@ export function AuthCallbackPage() {
         setMsg(`❌ ${errorMsg}`);
         setErrorDetails(details);
         
-        // Fallback: redirect to editor login page after showing error
-        setTimeout(() => {
+        // Fallback: redirect to editor login page after showing error for 5 seconds
+        const fallbackTimeout = setTimeout(() => {
           if (isMounted) {
-            window.location.replace(`${window.location.origin}/blog/editor`);
+            console.log('[AuthCallback] Fallback redirect to /blog/editor after error');
+            window.location.href = `${window.location.origin}/blog/editor`;
           }
         }, 5000);
+
+        return () => {
+          clearTimeout(fallbackTimeout);
+        };
       }
     })();
 
@@ -124,8 +144,13 @@ export function AuthCallbackPage() {
         }}>
           <p style={{ margin: 0, fontSize: 14, color: '#c00' }}>{errorDetails}</p>
           <p style={{ margin: '8px 0 0 0', fontSize: 12, color: '#666' }}>
-            Redirecting to login page in 5 seconds...
+            {redirecting ? 'Redirecting...' : 'Redirecting to login page in 5 seconds...'}
           </p>
+        </div>
+      )}
+      {redirecting && (
+        <div style={{ marginTop: 20, padding: 16, background: '#efe', border: '1px solid #cfc', borderRadius: 8 }}>
+          <p style={{ margin: 0, fontSize: 14, color: '#060' }}>Redirecting to editor...</p>
         </div>
       )}
     </div>
