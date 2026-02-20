@@ -1,330 +1,253 @@
 // =====================================================
 // PERMISSION CHECKING UTILITIES
-// Robust permission checking with detailed error states
+// Fast + reliable permission checking (no hanging)
 // =====================================================
 
-import { supabase } from './supabase';
-import type { UserProfile } from './blogTypes';
+import { supabase } from "./supabase";
+import type { UserProfile } from "./blogTypes";
 
 // Admin allowlist - must match the list in migration files
 const ADMIN_EMAILS = [
-  'earl@thewildlandfirerecoveryfund.org',
-  'jason@thewildlandfirerecoveryfund.org',
-  'admin@thewildlandfirerecoveryfund.org',
-  'editor@thewildlandfirerecoveryfund.org',
-  'reports@goldie.agency',
-  'help@goldie.agency'
+  "earl@thewildlandfirerecoveryfund.org",
+  "jason@thewildlandfirerecoveryfund.org",
+  "admin@thewildlandfirerecoveryfund.org",
+  "editor@thewildlandfirerecoveryfund.org",
+  "reports@goldie.agency",
+  "help@goldie.agency",
 ];
 
-export type PermissionStatus = 
-  | 'loading'
-  | 'no_session'        // Not logged in
-  | 'no_profile'        // Logged in but no profile exists
-  | 'insufficient_role' // Profile exists but role is 'user'
-  | 'editor'            // Has editor role
-  | 'admin'             // Has admin role
-  | 'allowlist'         // Email in admin allowlist (fallback)
-  | 'error';            // An error occurred
+export type PermissionStatus =
+  | "loading"
+  | "no_session"
+  | "no_profile"
+  | "insufficient_role"
+  | "editor"
+  | "admin"
+  | "allowlist"
+  | "error";
 
 export interface PermissionCheckResult {
   status: PermissionStatus;
   hasAccess: boolean;
-  user: {
-    id: string;
-    email: string;
-  } | null;
+  user: { id: string; email: string } | null;
   profile: UserProfile | null;
   message: string;
   technicalDetails?: any;
 }
 
-/**
- * Check if an email is in the admin allowlist
- */
-export function isInAdminAllowlist(email: string | undefined): boolean {
-  if (!email) return false;
-  return ADMIN_EMAILS.includes(email.toLowerCase());
+/** Normalize email */
+function norm(email?: string | null) {
+  return (email ?? "").trim().toLowerCase();
 }
 
-/**
- * Comprehensive permission check for editor access
- * Returns detailed status information for better UI feedback
- * 
- * FIXED: Added real timeout with Promise.race to prevent hanging
- * FIXED: Improved error handling for network issues
- */
-export async function checkEditorPermissions(): Promise<PermissionCheckResult> {
+/** Check if an email is in the admin allowlist */
+export function isInAdminAllowlist(email: string | undefined): boolean {
+  if (!email) return false;
+  return ADMIN_EMAILS.includes(norm(email));
+}
+
+/** Promise timeout helper (RESOLVES fallback; never throws) */
+async function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
+  let timer: any;
   try {
-    console.log('[checkEditorPermissions] Starting permission check...');
-    
-    // Create a real timeout that throws
-    const timeoutPromise = new Promise<PermissionCheckResult>((_, reject) => {
-      setTimeout(() => {
-        console.error('[checkEditorPermissions] TIMEOUT: Permission check took too long (6 seconds)');
-        reject(new Error('Permission check timeout'));
-      }, 6000); // 6 second timeout
-    });
-
-    // Race between the actual check and the timeout
-    let checkPromise: Promise<PermissionCheckResult>;
-    
-    try {
-      // Step 1: Check authentication (no timeout needed on this one)
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      console.log('[checkEditorPermissions] Auth check completed:', { hasUser: !!user, hasError: !!authError });
-      
-      if (authError) {
-        console.error('[checkEditorPermissions] Auth error:', authError);
-        
-        // Any auth error should default to showing login page (no_session)
-        // This includes session missing, abort errors, and network issues
-        // Better to let them log in than show error page
-        return {
-          status: 'no_session',
-          hasAccess: false,
-          user: null,
-          profile: null,
-          message: 'Please sign in to access the editor.',
-          technicalDetails: { authError }
-        };
-      }
-
-      if (!user || !user.email) {
-        console.log('[checkEditorPermissions] No user or email');
-        return {
-          status: 'no_session',
-          hasAccess: false,
-          user: null,
-          profile: null,
-          message: 'Please sign in to access the editor.'
-        };
-      }
-
-      // Step 2: Check admin allowlist first (primary fallback, no network call)
-      console.log('[checkEditorPermissions] Checking allowlist for:', user.email);
-      const inAllowlist = isInAdminAllowlist(user.email);
-      console.log('[checkEditorPermissions] Allowlist check result:', { email: user.email, inAllowlist });
-      
-      if (inAllowlist) {
-        console.log('[checkEditorPermissions] User in admin allowlist:', user.email);
-        return {
-          status: 'allowlist',
-          hasAccess: true,
-          user: {
-            id: user.id,
-            email: user.email
-          },
-          profile: null, // Profile may not exist, but allowlist grants access
-          message: 'Access granted via admin allowlist.'
-        };
-      }
-
-      // Step 3: Try to fetch profile from database (with timeout)
-      console.log('[checkEditorPermissions] Fetching profile from database for user:', user.id);
-      
-      checkPromise = (async () => {
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .maybeSingle();
-
-        console.log('[checkEditorPermissions] Profile fetch completed:', { profileExists: !!profile, hasError: !!profileError });
-
-        // Handle profile fetch errors
-        if (profileError) {
-          console.error('[checkEditorPermissions] Profile fetch error:', profileError);
-          
-          // Check if it's a "not found" error vs actual database error
-          if (profileError.code === 'PGRST116') {
-            return {
-              status: 'no_profile',
-              hasAccess: false,
-              user: {
-                id: user.id,
-                email: user.email
-              },
-              profile: null,
-              message: 'No profile found. Please contact an administrator to set up your account.',
-              technicalDetails: {
-                note: 'Profile row does not exist in database',
-                email: user.email
-              }
-            };
-          }
-          
-          // Other database errors (RLS, permissions, etc.)
-          return {
-            status: 'error',
-            hasAccess: false,
-            user: {
-              id: user.id,
-              email: user.email
-            },
-            profile: null,
-            message: 'Database error checking permissions. Please contact support.',
-            technicalDetails: {
-              error: profileError,
-              note: 'This may be an RLS policy issue'
-            }
-          };
-        }
-
-        // Profile exists and was fetched successfully
-        if (!profile) {
-          return {
-            status: 'no_profile',
-            hasAccess: false,
-            user: {
-              id: user.id,
-              email: user.email
-            },
-            profile: null,
-            message: 'No profile found. Please contact an administrator to set up your account.',
-            technicalDetails: {
-              note: 'Profile query returned null',
-              email: user.email
-            }
-          };
-        }
-
-        // Step 5: Check role
-        const role = profile.role;
-        
-        if (role === 'admin') {
-          return {
-            status: 'admin',
-            hasAccess: true,
-            user: {
-              id: user.id,
-              email: user.email
-            },
-            profile: profile as UserProfile,
-            message: 'Full admin access granted.'
-          };
-        }
-        
-        if (role === 'editor') {
-          return {
-            status: 'editor',
-            hasAccess: true,
-            user: {
-              id: user.id,
-              email: user.email
-            },
-            profile: profile as UserProfile,
-            message: 'Editor access granted.'
-          };
-        }
-
-        // Role exists but is 'user' or something else
-        return {
-          status: 'insufficient_role',
-          hasAccess: false,
-          user: {
-            id: user.id,
-            email: user.email
-          },
-          profile: profile as UserProfile,
-          message: `Access denied. Your role is "${role}" but you need "editor" or "admin" role.`,
-          technicalDetails: {
-            currentRole: role,
-            requiredRoles: ['editor', 'admin']
-          }
-        };
-      })();
-
-      // Race the profile check against timeout
-      return await Promise.race([checkPromise, timeoutPromise]);
-      
-    } catch (error: any) {
-      console.error('[checkEditorPermissions] Error during permission check:', error);
-      
-      // If it's a timeout error, provide a fallback response
-      if (error?.message?.includes('timeout')) {
-        return {
-          status: 'error',
-          hasAccess: false,
-          user: null,
-          profile: null,
-          message: 'The permission check is taking too long. Please refresh the page and try again.',
-          technicalDetails: { error: 'Operation timeout' }
-        };
-      }
-      
-      throw error;
-    }
-
-  } catch (error: any) {
-    console.error('[checkEditorPermissions] Unexpected error:', error);
-    return {
-      status: 'error',
-      hasAccess: false,
-      user: null,
-      profile: null,
-      message: 'An unexpected error occurred. Please try again.',
-      technicalDetails: error
-    };
+    return await Promise.race([
+      promise,
+      new Promise<T>((resolve) => {
+        timer = setTimeout(() => resolve(fallback), ms);
+      }),
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
   }
 }
 
 /**
- * Quick check if user has editor access (simplified)
+ * Comprehensive permission check for editor access
+ *
+ * Key changes:
+ * ✅ Uses getSession() (instant/local) instead of getUser() (network/hangs)
+ * ✅ Allowlist check happens immediately (no DB needed)
+ * ✅ Profile fetch has a real timeout and returns a safe error object (no throws)
  */
+export async function checkEditorPermissions(): Promise<PermissionCheckResult> {
+  console.log("[checkEditorPermissions] start");
+
+  // 1) Get session locally (fast)
+  const sessionRes = await supabase.auth.getSession();
+  const session = sessionRes.data.session;
+
+  if (!session || !session.user || !session.user.email) {
+    return {
+      status: "no_session",
+      hasAccess: false,
+      user: null,
+      profile: null,
+      message: "Please sign in to access the editor.",
+      technicalDetails: { note: "No session in storage" },
+    };
+  }
+
+  const userId = session.user.id;
+  const email = norm(session.user.email);
+
+  // 2) Allowlist = immediate access (no DB call)
+  if (isInAdminAllowlist(email)) {
+    console.log("[checkEditorPermissions] allowlist access:", email);
+    return {
+      status: "allowlist",
+      hasAccess: true,
+      user: { id: userId, email },
+      profile: null,
+      message: "Access granted via admin allowlist.",
+    };
+  }
+
+  // 3) Fetch profile with a REAL timeout (8s) and safe fallback
+  const fallback: { profile: UserProfile | null; error: any } = {
+    profile: null,
+    error: { message: "Profile lookup timed out", code: "TIMEOUT" },
+  };
+
+  const profRes = await withTimeout(
+    supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", userId)
+      .maybeSingle()
+      .then(({ data, error }) => ({ profile: data as UserProfile | null, error })),
+    8000,
+    fallback
+  );
+
+  // If timed out
+  if (profRes.error?.code === "TIMEOUT") {
+    return {
+      status: "error",
+      hasAccess: false,
+      user: { id: userId, email },
+      profile: null,
+      message:
+        "You are signed in, but permissions lookup timed out. This is usually an RLS policy issue on the profiles table.",
+      technicalDetails: profRes.error,
+    };
+  }
+
+  // If DB returned an error (RLS / permissions / etc.)
+  if (profRes.error) {
+    console.error("[checkEditorPermissions] profile error:", profRes.error);
+    return {
+      status: "error",
+      hasAccess: false,
+      user: { id: userId, email },
+      profile: null,
+      message:
+        "Database error checking permissions. This is usually an RLS policy issue on the profiles table.",
+      technicalDetails: profRes.error,
+    };
+  }
+
+  const profile = profRes.profile;
+
+  // No profile row
+  if (!profile) {
+    return {
+      status: "no_profile",
+      hasAccess: false,
+      user: { id: userId, email },
+      profile: null,
+      message: "No profile found. Please contact an administrator to set up your account.",
+      technicalDetails: { note: "profiles row missing for this user id" },
+    };
+  }
+
+  // 4) Role check
+  const role = (profile as any).role;
+
+  if (role === "admin") {
+    return {
+      status: "admin",
+      hasAccess: true,
+      user: { id: userId, email },
+      profile,
+      message: "Full admin access granted.",
+    };
+  }
+
+  if (role === "editor") {
+    return {
+      status: "editor",
+      hasAccess: true,
+      user: { id: userId, email },
+      profile,
+      message: "Editor access granted.",
+    };
+  }
+
+  return {
+    status: "insufficient_role",
+    hasAccess: false,
+    user: { id: userId, email },
+    profile,
+    message: `Access denied. Your role is "${role}" but you need "editor" or "admin".`,
+    technicalDetails: { currentRole: role, requiredRoles: ["editor", "admin"] },
+  };
+}
+
+/** Quick check if user has editor access (simplified) */
 export async function hasEditorAccess(): Promise<boolean> {
   const result = await checkEditorPermissions();
   return result.hasAccess;
 }
 
-/**
- * Get user-friendly error message for permission status
- */
+/** Get user-friendly error message for permission status */
 export function getPermissionErrorMessage(status: PermissionStatus): string {
   switch (status) {
-    case 'no_session':
-      return 'Please sign in to access the blog editor.';
-    case 'no_profile':
-      return 'Your account is not set up yet. Please contact an administrator to create your profile.';
-    case 'insufficient_role':
-      return 'You don\'t have permission to access the blog editor. Please contact an administrator to upgrade your role.';
-    case 'error':
-      return 'An error occurred while checking permissions. Please try again or contact support.';
+    case "no_session":
+      return "Please sign in to access the blog editor.";
+    case "no_profile":
+      return "Your account is not set up yet. Please contact an administrator to create your profile.";
+    case "insufficient_role":
+      return "You don't have permission to access the blog editor. Please contact an administrator to upgrade your role.";
+    case "error":
+      return "An error occurred while checking permissions. Please try again or contact support.";
     default:
-      return 'Access denied.';
+      return "Access denied.";
   }
 }
 
-/**
- * Get instructions for resolving permission issues
- */
+/** Get instructions for resolving permission issues */
 export function getPermissionInstructions(result: PermissionCheckResult): string[] {
   const instructions: string[] = [];
-  
+
   switch (result.status) {
-    case 'no_session':
-      instructions.push('Enter your email address below to receive a login link.');
+    case "no_session":
+      instructions.push("Enter your email address below to receive a login link.");
       break;
-      
-    case 'no_profile':
-      instructions.push('Your user account exists but no profile has been created.');
-      instructions.push('An administrator needs to run this SQL command:');
-      instructions.push(`INSERT INTO profiles (id, email, role) VALUES ('${result.user?.id}', '${result.user?.email}', 'editor');`);
-      instructions.push('Or add your email to the admin allowlist in the code.');
+
+    case "no_profile":
+      instructions.push("Your user account exists but no profile has been created.");
+      instructions.push("An administrator can run this SQL command:");
+      instructions.push(
+        `INSERT INTO profiles (id, email, role) VALUES ('${result.user?.id}', '${result.user?.email}', 'editor');`
+      );
+      instructions.push("Or add your email to the admin allowlist in the code.");
       break;
-      
-    case 'insufficient_role':
+
+    case "insufficient_role":
       instructions.push(`Your current role: ${result.profile?.role}`);
-      instructions.push('An administrator needs to run this SQL command:');
-      instructions.push(`UPDATE profiles SET role = 'editor' WHERE email = '${result.user?.email}';`);
+      instructions.push("An administrator can run this SQL command:");
+      instructions.push(
+        `UPDATE profiles SET role = 'editor' WHERE id = '${result.user?.id}';`
+      );
       break;
-      
-    case 'error':
-      instructions.push('If this persists, check:');
-      instructions.push('1. Database connection');
-      instructions.push('2. RLS policies on profiles table');
-      instructions.push('3. Browser console for detailed errors');
+
+    case "error":
+      instructions.push("If this persists, check:");
+      instructions.push("1. RLS policies on profiles table");
+      instructions.push("2. profiles table exists and has expected columns");
+      instructions.push("3. Browser console for detailed errors");
       break;
   }
-  
+
   return instructions;
 }

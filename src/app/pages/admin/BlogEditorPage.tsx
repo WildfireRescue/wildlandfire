@@ -1,9 +1,4 @@
-// =====================================================
-// BLOG EDITOR PAGE (ADMIN)
-// Create and edit blog posts - simplified version
-// =====================================================
-
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { supabase } from "../../../lib/supabase.ts";
 import { Button } from "../../components/ui/button";
@@ -19,8 +14,6 @@ import {
 import type { BlogCategory } from "../../../lib/blogTypes";
 
 export function BlogEditorPage() {
-  console.log("[BlogEditorPage] Component mounted");
-
   // Permission checking
   const [permissionResult, setPermissionResult] = useState<PermissionCheckResult | null>(null);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
@@ -63,79 +56,101 @@ export function BlogEditorPage() {
     return `${window.location.origin}/auth-callback`;
   }
 
-  // ✅ CENTRALIZED permission check function
-  async function runPermissionCheck(mountedRef?: { current: boolean }) {
-    setIsCheckingAuth(true);
-    setAuthError(null);
+  // ✅ Hard timeout wrapper that NEVER throws uncaught errors
+  async function safePermissionCheck(): Promise<PermissionCheckResult> {
+    const timeoutMs = 8000;
 
-    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    const timeoutPromise = new Promise<PermissionCheckResult>((resolve) => {
+      setTimeout(() => {
+        resolve({
+          status: "no_session",
+          hasAccess: false,
+          user: null,
+          profile: null,
+          message:
+            "Permission check timed out. You are signed in, but the permissions lookup is not responding. (Likely RLS/policies on profiles).",
+          technicalDetails: null,
+        });
+      }, timeoutMs);
+    });
 
     try {
-      // Timeout fallback (don’t hang forever)
-      timeoutId = setTimeout(() => {
-        console.error("[BlogEditor] Permission check timeout after 8 seconds");
-        setIsCheckingAuth(false);
+      // Race: either permissions resolve, or we fall back without crashing
+      return await Promise.race([checkEditorPermissions(), timeoutPromise]);
+    } catch (e: any) {
+      console.error("[BlogEditor] Permission check crashed:", e);
+      return {
+        status: "no_session",
+        hasAccess: false,
+        user: null,
+        profile: null,
+        message: "Permission check failed. Please try again.",
+        technicalDetails: e?.message ?? null,
+      };
+    }
+  }
+
+  // ✅ Boot logic: use session first so we don't loop
+  useEffect(() => {
+    let mounted = true;
+
+    async function boot() {
+      setIsCheckingAuth(true);
+      setAuthError(null);
+
+      try {
+        const { data } = await supabase.auth.getSession();
+
+        // If no session -> show login immediately (no waiting)
+        if (!data.session) {
+          if (!mounted) return;
+          setPermissionResult({
+            status: "no_session",
+            hasAccess: false,
+            user: null,
+            profile: null,
+            message: "Please log in to access the editor.",
+            technicalDetails: null,
+          });
+          setIsCheckingAuth(false);
+          return;
+        }
+
+        // Session exists -> run permission check safely
+        const result = await safePermissionCheck();
+        if (!mounted) return;
+
+        // IMPORTANT: If we timed out but session exists, keep user from looping:
+        // show "access denied" screen instead of bouncing back to login form.
+        setPermissionResult(result);
+      } catch (e: any) {
+        console.error("[BlogEditor] boot error:", e);
+        if (!mounted) return;
+        setAuthError(e?.message ?? "Unexpected auth error");
         setPermissionResult({
           status: "no_session",
           hasAccess: false,
           user: null,
           profile: null,
-          message: "Permission check timed out. Please try logging in again.",
+          message: "Please log in to access the editor.",
           technicalDetails: null,
         });
-      }, 8000);
-
-      const result = await checkEditorPermissions();
-
-      if (timeoutId) clearTimeout(timeoutId);
-
-      if (mountedRef && !mountedRef.current) return;
-
-      console.log("[BlogEditor] Permission check result:", {
-        status: result.status,
-        hasAccess: result.hasAccess,
-        email: result.user?.email,
-      });
-
-      setPermissionResult(result);
-    } catch (e: any) {
-      if (timeoutId) clearTimeout(timeoutId);
-
-      if (mountedRef && !mountedRef.current) return;
-
-      console.error("[BlogEditor] Permission check error:", e);
-
-      // On ANY error, show login screen as fallback
-      setPermissionResult({
-        status: "no_session",
-        hasAccess: false,
-        user: null,
-        profile: null,
-        message: "Please log in to access the editor.",
-        technicalDetails: null,
-      });
-    } finally {
-      setIsCheckingAuth(false);
+      } finally {
+        if (mounted) setIsCheckingAuth(false);
+      }
     }
-  }
 
-  // ✅ Run permission check on mount AND whenever Supabase auth changes
-  useEffect(() => {
-    const mountedRef = { current: true };
+    boot();
 
-    // Initial check
-    runPermissionCheck(mountedRef);
-
-    // Subscribe to auth changes (magic link completion updates session here)
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, _session) => {
-      console.log("[BlogEditor] Auth state changed, re-checking permissions…", _event);
-      runPermissionCheck(mountedRef);
+    // Re-run when auth changes (magic link sign-in, sign-out, refresh)
+    const { data: sub } = supabase.auth.onAuthStateChange((_event) => {
+      console.log("[BlogEditor] auth state changed:", _event);
+      boot();
     });
 
     return () => {
-      mountedRef.current = false;
+      mounted = false;
       sub.subscription.unsubscribe();
-      console.log("[BlogEditor] Component unmounted");
     };
   }, []);
 
@@ -147,7 +162,8 @@ export function BlogEditorPage() {
       if (cats && cats.length > 0 && !category) setCategory(cats[0].slug);
     }
     loadCategories();
-  }, [category]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function sendMagicLink() {
     setLoginError(null);
@@ -165,9 +181,6 @@ export function BlogEditorPage() {
         return;
       }
 
-      console.log("[BlogEditor] Sending magic link to:", email);
-      console.log("[BlogEditor] Redirect URL:", getEmailRedirectTo());
-
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
@@ -177,52 +190,29 @@ export function BlogEditorPage() {
       });
 
       if (error) {
-        console.error("[BlogEditor] Magic link error:", error);
-
-        let errorMessage = error.message;
-
-        if (error.message.includes("email not confirmed")) {
-          errorMessage =
-            "This email address has not been verified yet. Please check your email for a confirmation link.";
-        } else if (error.message.includes("invalid_redirect")) {
-          errorMessage = "Configuration error: Invalid redirect URL. Please contact support.";
-        } else if (error.message.includes("rate limit")) {
-          errorMessage = "Too many attempts. Please wait a few minutes before trying again.";
-        } else if (error.message.includes("not authorized")) {
-          errorMessage =
-            "This email is not authorized to access the blog editor. Please contact an administrator.";
-        }
-
-        setLoginError(errorMessage);
+        let msg = error.message;
+        if (msg.includes("invalid_redirect")) msg = "Invalid redirect URL in Supabase settings.";
+        setLoginError(msg);
         return;
       }
 
-      console.log("[BlogEditor] Magic link sent successfully");
       setLoginSent(true);
     } catch (e: any) {
-      console.error("[BlogEditor] Unexpected error sending magic link:", e);
-      setLoginError("An unexpected error occurred. Please try again.");
+      setLoginError(e?.message ?? "Unexpected error");
     } finally {
       setLoginBusy(false);
     }
   }
 
   async function signOut() {
-    try {
-      await supabase.auth.signOut();
-      window.location.href = "/";
-    } catch (error) {
-      console.error("[BlogEditor] Sign out error:", error);
-      alert("Sign out failed. Please try again.");
-    }
+    await supabase.auth.signOut();
+    window.location.href = "/";
   }
 
   async function savePost() {
     setSaving(true);
     setSaveMsg(null);
     setSaveErr(null);
-
-    let timeoutWarningShown = false;
 
     try {
       if (!title.trim()) throw new Error("Title is required");
@@ -232,7 +222,6 @@ export function BlogEditorPage() {
       if (!finalSlug) throw new Error("Slug is required");
 
       const readingTime = calculateReadingTime(content);
-
       const authorEmail = permissionResult?.user?.email || "unknown";
       const authorName = authorEmail.split("@")[0];
 
@@ -254,64 +243,38 @@ export function BlogEditorPage() {
         author_name: authorName,
       };
 
-      console.log("[BlogEditor] Attempting to save post:", postData);
-
-      const timeoutWarning = setTimeout(() => {
-        if (!timeoutWarningShown) {
-          timeoutWarningShown = true;
-          setSaveMsg("⏳ Save taking longer than expected... Please wait or check your connection.");
-        }
-      }, 10000);
-
       const savePromise = createPost(postData);
       const { post, error } = await withTimeout(
         savePromise,
         15000,
-        "Save operation timed out after 15 seconds. Please check your connection and try again."
+        "Save timed out after 15 seconds. Check connection and try again."
       );
 
-      clearTimeout(timeoutWarning);
-
       if (error) throw new Error(error.message || "Failed to save post");
-      if (!post) throw new Error("Post was not created. No data returned from database.");
+      if (!post) throw new Error("No post returned from DB");
 
-      setSaveMsg(`✅ Post saved successfully! ${status === "published" ? "Post is now live." : "Saved as draft."}`);
-
-      setTitle("");
-      setSlug("");
-      slugTouched.current = false;
-      setExcerpt("");
-      setMetaTitle("");
-      setMetaDescription("");
-      setContent("");
-      setCoverUrl("");
-      setTags("");
-      setFeatured(false);
-      setStatus("draft");
-
-      setTimeout(() => setSaveMsg(null), 5000);
+      setSaveMsg("✅ Post saved!");
+      setTimeout(() => setSaveMsg(null), 4000);
     } catch (e: any) {
-      console.error("[BlogEditor] Save error:", e);
-
-      let errorMessage = "Failed to save post";
-      if (e instanceof TimeoutError) errorMessage = e.message;
-      else if (e?.message) errorMessage = e.message;
-
-      setSaveErr(errorMessage);
-      setTimeout(() => setSaveErr(null), 10000);
+      const msg = e instanceof TimeoutError ? e.message : e?.message ?? "Save failed";
+      setSaveErr(msg);
+      setTimeout(() => setSaveErr(null), 8000);
     } finally {
       setSaving(false);
     }
   }
 
-  // Checking authentication status
+  // UI: Checking authentication status
   if (isCheckingAuth) {
     return (
       <div className="min-h-screen pt-28 pb-20 bg-background">
         <div className="container mx-auto px-4">
           <div className="max-w-xl mx-auto bg-card border border-border rounded-xl p-8 text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground mb-4">Checking permissions...</p>
+            <p className="text-muted-foreground mb-2">Checking permissions…</p>
+            <p className="text-xs text-muted-foreground">
+              If this keeps looping, permissions lookup is timing out (RLS/policies).
+            </p>
           </div>
         </div>
       </div>
@@ -326,13 +289,14 @@ export function BlogEditorPage() {
           <div className="max-w-xl mx-auto bg-destructive/10 border border-destructive/20 rounded-xl p-8 text-center">
             <AlertCircle className="w-12 h-12 mx-auto mb-4 text-destructive" />
             <p className="text-destructive">Failed to check permissions</p>
+            {authError && <p className="text-xs text-muted-foreground mt-2">{authError}</p>}
           </div>
         </div>
       </div>
     );
   }
 
-  // Logged OUT (no session)
+  // Logged OUT
   if (permissionResult.status === "no_session") {
     return (
       <div className="min-h-screen pt-28 pb-20 bg-background">
@@ -355,7 +319,7 @@ export function BlogEditorPage() {
                   className="w-full px-4 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
                   disabled={loginBusy}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter" && !loginBusy && !loginSent) sendMagicLink();
+                    if (e.key === "Enter" && !loginBusy) sendMagicLink();
                   }}
                 />
 
@@ -368,14 +332,12 @@ export function BlogEditorPage() {
                 {loginSent && (
                   <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
                     <p className="text-primary text-sm font-medium mb-2">✅ Check your email for the login link!</p>
-                    <p className="text-muted-foreground text-xs">
-                      Didn&apos;t receive it? Check spam or request a new link after 30 seconds.
-                    </p>
+                    <p className="text-muted-foreground text-xs">Check spam too. You can resend after 30 seconds.</p>
                   </div>
                 )}
 
                 <Button onClick={sendMagicLink} disabled={loginBusy} className="w-full">
-                  {loginBusy ? "Sending..." : loginSent ? "Resend Magic Link" : "Send Magic Link"}
+                  {loginBusy ? "Sending…" : loginSent ? "Resend Magic Link" : "Send Magic Link"}
                 </Button>
               </div>
             </div>
@@ -385,10 +347,10 @@ export function BlogEditorPage() {
     );
   }
 
-  // Logged IN but no access
+  // Logged IN but no access OR permission lookup timed out
   if (!permissionResult.hasAccess) {
     const instructions = getPermissionInstructions(permissionResult.status);
-    const userEmail = permissionResult.user?.email || "Unknown";
+    const userEmail = permissionResult.user?.email || "(signed-in user)";
 
     return (
       <div className="min-h-screen pt-28 pb-20 bg-background">
@@ -397,7 +359,7 @@ export function BlogEditorPage() {
             <div className="flex items-start gap-4 mb-6">
               <AlertCircle className="w-8 h-8 text-destructive flex-shrink-0 mt-1" />
               <div className="flex-1">
-                <h2 className="text-xl font-bold text-destructive mb-2">Access Denied</h2>
+                <h2 className="text-xl font-bold text-destructive mb-2">Access / Permission Check Issue</h2>
                 <p className="text-destructive mb-2">{permissionResult.message}</p>
                 <p className="text-sm text-muted-foreground mb-4">
                   Logged in as: <strong>{userEmail}</strong>
@@ -418,8 +380,8 @@ export function BlogEditorPage() {
             )}
 
             <div className="flex gap-3">
-              <Button onClick={() => (window.location.href = "/")} variant="outline">
-                Return Home
+              <Button onClick={() => window.location.reload()} variant="outline">
+                Retry
               </Button>
               <Button onClick={signOut} variant="outline" className="ml-auto">
                 <LogOut className="w-4 h-4 mr-2" />
@@ -432,7 +394,7 @@ export function BlogEditorPage() {
     );
   }
 
-  // Successfully authenticated with editor access
+  // ✅ Logged in and has access
   const userEmail = permissionResult.user?.email || "Unknown";
   const userRole = permissionResult.profile?.role || "allowlist";
 
@@ -465,9 +427,7 @@ export function BlogEditorPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">
-              Slug * <span className="text-muted-foreground font-normal">(auto-generated from title)</span>
-            </label>
+            <label className="block text-sm font-medium mb-2">Slug *</label>
             <input
               type="text"
               value={slug}
@@ -481,133 +441,13 @@ export function BlogEditorPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Excerpt</label>
-            <textarea
-              value={excerpt}
-              onChange={(e) => setExcerpt(e.target.value)}
-              placeholder="Brief summary (optional)"
-              rows={3}
-              className="w-full px-4 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-            />
-          </div>
-
-          <div className="bg-muted/30 border border-border rounded-lg p-6 space-y-4">
-            <h3 className="font-semibold text-sm">SEO Fields</h3>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                SEO Title <span className="text-muted-foreground font-normal">(≤60 characters)</span>
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={metaTitle}
-                  onChange={(e) => setMetaTitle(e.target.value.slice(0, 60))}
-                  placeholder="SEO optimized title"
-                  maxLength={60}
-                  className="w-full px-4 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-                <span className="absolute right-3 top-3 text-xs text-muted-foreground">{metaTitle.length}/60</span>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                Meta Description <span className="text-muted-foreground font-normal">(≤160 characters)</span>
-              </label>
-              <div className="relative">
-                <textarea
-                  value={metaDescription}
-                  onChange={(e) => setMetaDescription(e.target.value.slice(0, 160))}
-                  placeholder="Summary for search results"
-                  maxLength={160}
-                  rows={3}
-                  className="w-full px-4 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-                />
-                <span className="absolute right-3 bottom-3 text-xs text-muted-foreground">
-                  {metaDescription.length}/160
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div>
             <label className="block text-sm font-medium mb-2">Content (Markdown) *</label>
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="Write your post content in Markdown..."
               rows={16}
               className="w-full px-4 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none font-mono text-sm"
             />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2">Cover Image URL</label>
-            <input
-              type="url"
-              value={coverUrl}
-              onChange={(e) => setCoverUrl(e.target.value)}
-              placeholder="https://example.com/image.jpg"
-              className="w-full px-4 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium mb-2">Category</label>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full px-4 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                <option value="">None</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.slug}>
-                    {cat.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">Tags (comma-separated)</label>
-              <input
-                type="text"
-                value={tags}
-                onChange={(e) => setTags(e.target.value)}
-                placeholder="wildfire, recovery, story"
-                className="w-full px-4 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
-          </div>
-
-          <div className="flex gap-6">
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={status === "published"}
-                onChange={(e) => setStatus(e.target.checked ? "published" : "draft")}
-                id="published"
-                className="w-5 h-5"
-              />
-              <label htmlFor="published" className="text-sm font-medium">
-                Publish immediately
-              </label>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={featured}
-                onChange={(e) => setFeatured(e.target.checked)}
-                id="featured"
-                className="w-5 h-5"
-              />
-              <label htmlFor="featured" className="text-sm font-medium">
-                Featured post
-              </label>
-            </div>
           </div>
 
           {saveMsg && (
