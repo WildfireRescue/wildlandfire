@@ -23,8 +23,8 @@ const BlogEditorPage = lazy(() =>
   import("./pages/admin/BlogEditorPage").then((m) => ({ default: m.BlogEditorPage }))
 );
 
-// ✅ Use the deterministic callback component that exchanges the code and redirects
-const AuthCallback = lazy(() => import("./pages/AuthCallback").then((m) => ({ default: m.default })));
+// ✅ simplest possible lazy import for default-exported component
+const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 
 const PrivacyPolicyPage = lazy(() =>
   import("./pages/PrivacyPolicyPage").then((m) => ({ default: m.PrivacyPolicyPage }))
@@ -50,7 +50,6 @@ function PageLoader() {
   );
 }
 
-// Wildland Fire Recovery Fund - Main Application Component
 export default function App() {
   return (
     <BrowserRouter>
@@ -71,10 +70,10 @@ export default function App() {
                   <Route path="/stories" element={<StoriesPage />} />
                   <Route path="/grants" element={<GrantsPage />} />
 
-                  {/* ✅ Auth callback (must exist for magic link PKCE exchange) */}
+                  {/* ✅ Auth callback route */}
                   <Route path="/auth-callback" element={<AuthCallback />} />
 
-                  {/* Blog routes - more specific routes first */}
+                  {/* Blog routes */}
                   <Route path="/blog/editor" element={<BlogEditorPage />} />
                   <Route path="/blog" element={<BlogIndexPage />} />
                   <Route path="/blog/category/:categorySlug" element={<BlogCategoryPage />} />
