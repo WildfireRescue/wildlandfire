@@ -32,7 +32,7 @@ export interface PermissionCheckResult {
   user: { id: string; email: string } | null;
   profile: UserProfile | null;
   message: string;
-  technicalDetails?: any;
+  technicalDetails?: unknown;
 }
 
 /** Normalize email */
@@ -48,7 +48,8 @@ export function isInAdminAllowlist(email: string | undefined): boolean {
 
 /** Promise timeout helper (RESOLVES fallback; never throws) */
 async function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
-  let timer: any;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+
   try {
     return await Promise.race([
       promise,
@@ -64,19 +65,16 @@ async function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Pro
 /**
  * Comprehensive permission check for editor access
  *
- * Key changes:
  * ✅ Uses getSession() (instant/local) instead of getUser() (network/hangs)
  * ✅ Allowlist check happens immediately (no DB needed)
  * ✅ Profile fetch has a real timeout and returns a safe error object (no throws)
  */
 export async function checkEditorPermissions(): Promise<PermissionCheckResult> {
-  console.log("[checkEditorPermissions] start");
-
   // 1) Get session locally (fast)
-  const sessionRes = await supabase.auth.getSession();
-  const session = sessionRes.data.session;
+  const { data } = await supabase.auth.getSession();
+  const session = data.session;
 
-  if (!session || !session.user || !session.user.email) {
+  if (!session?.user?.email) {
     return {
       status: "no_session",
       hasAccess: false,
@@ -92,7 +90,6 @@ export async function checkEditorPermissions(): Promise<PermissionCheckResult> {
 
   // 2) Allowlist = immediate access (no DB call)
   if (isInAdminAllowlist(email)) {
-    console.log("[checkEditorPermissions] allowlist access:", email);
     return {
       status: "allowlist",
       hasAccess: true,
@@ -102,10 +99,10 @@ export async function checkEditorPermissions(): Promise<PermissionCheckResult> {
     };
   }
 
-  // 3) Fetch profile with a REAL timeout (8s) and safe fallback
-  const fallback: { profile: UserProfile | null; error: any } = {
+  // 3) Fetch profile with a real timeout (8s)
+  const fallback: { profile: UserProfile | null; error: { code: string; message: string } } = {
     profile: null,
-    error: { message: "Profile lookup timed out", code: "TIMEOUT" },
+    error: { code: "TIMEOUT", message: "Profile lookup timed out" },
   };
 
   const profRes = await withTimeout(
@@ -116,11 +113,11 @@ export async function checkEditorPermissions(): Promise<PermissionCheckResult> {
       .maybeSingle()
       .then(({ data, error }) => ({ profile: data as UserProfile | null, error })),
     8000,
-    fallback
+    fallback as any
   );
 
-  // If timed out
-  if (profRes.error?.code === "TIMEOUT") {
+  // Timed out
+  if ((profRes as any).error?.code === "TIMEOUT") {
     return {
       status: "error",
       hasAccess: false,
@@ -128,13 +125,12 @@ export async function checkEditorPermissions(): Promise<PermissionCheckResult> {
       profile: null,
       message:
         "You are signed in, but permissions lookup timed out. This is usually an RLS policy issue on the profiles table.",
-      technicalDetails: profRes.error,
+      technicalDetails: (profRes as any).error,
     };
   }
 
-  // If DB returned an error (RLS / permissions / etc.)
-  if (profRes.error) {
-    console.error("[checkEditorPermissions] profile error:", profRes.error);
+  // DB error (RLS / permissions / etc.)
+  if ((profRes as any).error) {
     return {
       status: "error",
       hasAccess: false,
@@ -142,11 +138,11 @@ export async function checkEditorPermissions(): Promise<PermissionCheckResult> {
       profile: null,
       message:
         "Database error checking permissions. This is usually an RLS policy issue on the profiles table.",
-      technicalDetails: profRes.error,
+      technicalDetails: (profRes as any).error,
     };
   }
 
-  const profile = profRes.profile;
+  const profile = (profRes as any).profile as UserProfile | null;
 
   // No profile row
   if (!profile) {
@@ -236,9 +232,7 @@ export function getPermissionInstructions(result: PermissionCheckResult): string
     case "insufficient_role":
       instructions.push(`Your current role: ${result.profile?.role}`);
       instructions.push("An administrator can run this SQL command:");
-      instructions.push(
-        `UPDATE profiles SET role = 'editor' WHERE id = '${result.user?.id}';`
-      );
+      instructions.push(`UPDATE profiles SET role = 'editor' WHERE id = '${result.user?.id}';`);
       break;
 
     case "error":
