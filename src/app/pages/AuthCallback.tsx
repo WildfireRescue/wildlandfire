@@ -1,44 +1,19 @@
-import { useEffect, useState } from "react";
-import { supabase } from "../../lib/supabase.ts";
+import { useEffect } from "react";
 
 export default function AuthCallback() {
-  const [status, setStatus] = useState("Completing sign-in…");
-
   useEffect(() => {
-    let cancelled = false;
+    console.log("[AuthCallback] PKCE session should already be handled by Supabase");
 
-    (async () => {
-      try {
-        // Exchange ?code=... for a session (PKCE magic link)
-        const { error } = await supabase.auth.exchangeCodeForSession(window.location.href);
-        if (error) throw error;
-
-        // Confirm session exists
-        const { data } = await supabase.auth.getSession();
-        if (!data.session) throw new Error("No session after exchange.");
-
-        if (!cancelled) {
-          setStatus("Success. Redirecting…");
-          window.location.replace("/blog/editor");
-        }
-      } catch (e) {
-        console.error("[AuthCallback] Failed:", e);
-        if (!cancelled) {
-          setStatus("Sign-in failed. Please request a new magic link.");
-          setTimeout(() => window.location.replace("/blog/editor"), 1200);
-        }
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
+    // Small delay so Supabase finishes saving session
+    setTimeout(() => {
+      window.location.replace("/blog/editor");
+    }, 500);
   }, []);
 
   return (
-    <div style={{ padding: 24, fontFamily: "system-ui" }}>
-      <h2>Auth Callback</h2>
-      <p>{status}</p>
+    <div style={{ padding: 40, textAlign: "center", fontFamily: "system-ui" }}>
+      <h2>Signing you in…</h2>
+      <p>Redirecting to editor…</p>
     </div>
   );
 }
