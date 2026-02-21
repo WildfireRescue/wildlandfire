@@ -6,23 +6,7 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { supabase } from '../lib/supabase';
-import type { Session, User, AuthChangeEvent } from '@supabase/supabase-js';
 import type { UserProfile } from '../lib/blogTypes';
-
-// Admin allowlist - must match the list in migration 006_blog_admin_rls_fix.sql
-const ADMIN_EMAILS = [
-  'earl@thewildlandfirerecoveryfund.org',
-  'jason@thewildlandfirerecoveryfund.org',
-  'admin@thewildlandfirerecoveryfund.org',
-  'editor@thewildlandfirerecoveryfund.org',
-  'reports@goldie.agency',
-  'help@goldie.agency'
-];
-
-export function isAdminEmail(email: string | undefined): boolean {
-  if (!email) return false;
-  return ADMIN_EMAILS.includes(email.toLowerCase());
-}
 
 export interface AuthContextValue {
   session: Session | null;
@@ -90,12 +74,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
         
         setSession(currentSession);
 
-        // Load profile if user is authenticated
-        if (currentSession?.user) {
-          await loadProfile(currentSession.user);
-        } else {
-          setProfile(null);
-        }
+        // Skip profile loading - use allowlist-only for permissions
+        // Profile queries were causing hangs due to RLS policies
+        // Allowlist is checked in permissions.ts instead
+        setProfile(null);
         
         setError(null);
         setLoading(false);
@@ -110,60 +92,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     }
 
-    // Load user profile from database
-    async function loadProfile(user: User) {
-      try {
-        console.log('[AuthProvider] Loading profile for user:', user.id, user.email);
-        
-        // Profile fetch may return 500 or PGRST116 - handle gracefully
-        const { data, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .maybeSingle();
-
-        if (profileError) {
-          // Profile errors are non-blocking
-          if (profileError.code === 'PGRST116') {
-            console.warn('[AuthProvider] No profile found for user (non-blocking):', user.id);
-          } else if (profileError.message?.includes('500')) {
-            console.warn('[AuthProvider] Profile fetch returned 500 (non-blocking):', profileError.message);
-          } else {
-            console.warn('[AuthProvider] Profile fetch error (non-blocking):', profileError.message);
-          }
-          
-          // Check if user is in admin allowlist as fallback
-          if (isAdminEmail(user.email)) {
-            console.log('[AuthProvider] User email is in admin allowlist, creating virtual profile');
-            const virtualProfile: UserProfile = {
-              id: user.id,
-              email: user.email || '',
-              role: 'admin',
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            };
-            if (mounted) setProfile(virtualProfile);
-          } else {
-            console.log('[AuthProvider] User email NOT in admin allowlist, no profile available');
-            if (mounted) setProfile(null);
-          }
-        } else if (data) {
-          console.log('[AuthProvider] Profile loaded:', {
-            id: data.id,
-            email: data.email,
-            role: data.role
-          });
-          if (mounted) setProfile(data as UserProfile);
-        } else {
-          console.log('[AuthProvider] No profile data (non-blocking)');
-          if (mounted) setProfile(null);
-        }
-      } catch (e: any) {
-        console.warn('[AuthProvider] Profile load error (non-blocking):', e.message || e);
-        if (mounted) setProfile(null);
-      }
-    }
-
     // Handle auth state changes
     async function handleAuthChange(event: AuthChangeEvent, newSession: Session | null) {
       if (!mounted) return;
@@ -175,12 +103,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       setSession(newSession);
 
-      // Load profile for new session
-      if (newSession?.user) {
-        await loadProfile(newSession.user);
-      } else {
-        setProfile(null);
-      }
+      // Skip profile loading (allowlist-only mode)
+      setProfile(null);
 
       // Handle specific auth events
       if (event === 'SIGNED_IN' && newSession) {

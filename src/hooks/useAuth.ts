@@ -2,34 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import type { Session, User } from '@supabase/supabase-js';
 import type { UserProfile } from '../lib/blogTypes';
-
-// =====================================================
-// DEPRECATED: Use useAuthContext from ../contexts/AuthContext instead
-// This hook is kept for backward compatibility but will be removed
-// =====================================================
-
-export interface AuthState {
-  session: Session | null;
-  user: User | null;
-  profile: UserProfile | null;
-  loading: boolean;
-  error: string | null;
-}
-
-// Admin allowlist - must match the list in migration 006_blog_admin_rls_fix.sql
-const ADMIN_EMAILS = [
-  'earl@thewildlandfirerecoveryfund.org',
-  'jason@thewildlandfirerecoveryfund.org',
-  'admin@thewildlandfirerecoveryfund.org',
-  'editor@thewildlandfirerecoveryfund.org',
-  'reports@goldie.agency',
-  'help@goldie.agency'
-];
-
-export function isAdminEmail(email: string | undefined): boolean {
-  if (!email) return false;
-  return ADMIN_EMAILS.includes(email.toLowerCase());
-}
+import { isAdminEmail } from '../lib/permissions';
 
 /**
  * @deprecated Use useAuthContext from ../contexts/AuthContext instead

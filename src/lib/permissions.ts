@@ -34,10 +34,24 @@ export function isInAdminAllowlist(email: string | undefined): boolean {
   return ADMIN_EMAILS.includes(norm(email));
 }
 
+// Alias for backward compatibility
+export function isAdminEmail(email: string | undefined): boolean {
+  return isInAdminAllowlist(email);
+}
+
 export async function checkEditorPermissions(): Promise<PermissionCheckResult> {
   try {
     // Local / instant session read (no network)
-    const { data } = await supabase.auth.getSession();
+    // Add timeout guard just in case
+    const sessionPromise = supabase.auth.getSession();
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Session check timeout')), 3000)
+    );
+    
+    const { data } = await Promise.race([
+      sessionPromise,
+      timeoutPromise
+    ]) as Awaited<ReturnType<typeof supabase.auth.getSession>>;
     const session = data.session;
 
     if (!session?.user?.email) {

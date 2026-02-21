@@ -103,12 +103,37 @@ export function BlogEditorPage() {
     };
   }, []);
 
-  // Load categories (optional)
+  // Load categories with timeout protection
   useEffect(() => {
+    let isMounted = true;
+
     (async () => {
-      const { categories: cats } = await getCategories();
-      setCategories(cats || []);
+      try {
+        // Add 5 second timeout to prevent hanging
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Categories load timeout')), 5000)
+        );
+        
+        const categoriesPromise = getCategories();
+        const { categories: cats } = await Promise.race([
+          categoriesPromise,
+          timeoutPromise
+        ]) as Awaited<ReturnType<typeof getCategories>>;
+        
+        if (isMounted) {
+          setCategories(cats || []);
+        }
+      } catch (e) {
+        if (isMounted) {
+          console.warn('[BlogEditorPage] Categories load failed (non-blocking):', e);
+          setCategories([]);
+        }
+      }
     })();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   async function sendMagicLink() {

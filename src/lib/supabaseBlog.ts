@@ -5,6 +5,7 @@
 
 import { supabase } from './supabase';
 import type { BlogPost, BlogCategory, UserProfile, PaginationOptions, BlogListFilters } from './blogTypes';
+import { isAdminEmail } from './permissions';
 
 // =====================================================
 // POSTS
@@ -570,24 +571,6 @@ export async function getCurrentUserProfile() {
     console.warn('[getCurrentUserProfile] Unexpected error (non-blocking):', e.message || e);
     return { profile: null, error: null };
   }
-}
-
-// Admin allowlist - must match the list in migration 006_blog_admin_rls_fix.sql
-const ADMIN_EMAILS = [
-  'earl@thewildlandfirerecoveryfund.org',
-  'jason@thewildlandfirerecoveryfund.org',
-  'admin@thewildlandfirerecoveryfund.org',
-  'editor@thewildlandfirerecoveryfund.org',
-  'reports@goldie.agency',
-  'help@goldie.agency'
-];
-
-/**
- * Check if an email is in the admin allowlist
- */
-export function isAdminEmail(email: string | undefined): boolean {
-  if (!email) return false;
-  return ADMIN_EMAILS.includes(email.toLowerCase());
 }
 
 /**
