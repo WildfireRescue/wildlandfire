@@ -307,7 +307,6 @@ export function BlogEditorPage() {
           <div className="max-w-xl mx-auto bg-destructive/10 border border-destructive/20 rounded-xl p-8 text-center">
             <AlertCircle className="w-12 h-12 mx-auto mb-4 text-destructive" />
             <p className="text-destructive">No permission result</p>
-            <p className="text-xs text-muted-foreground mt-2 font-mono">{BUILD_TAG}</p>
           </div>
         </div>
       </div>
@@ -325,7 +324,6 @@ export function BlogEditorPage() {
                 <Mail size={24} className="text-primary" />
                 <h1 className="text-2xl font-bold">Blog Editor Login</h1>
               </div>
-              <p className="text-xs text-muted-foreground mb-6 font-mono">{BUILD_TAG}</p>
 
               <input
                 type="email"
@@ -367,7 +365,6 @@ export function BlogEditorPage() {
           <div className="max-w-2xl mx-auto bg-destructive/10 border border-destructive/20 rounded-xl p-8">
             <h2 className="text-xl font-bold text-destructive mb-2">Access / Permission Issue</h2>
             <p className="text-destructive mb-4">{permissionResult.message}</p>
-            <p className="text-xs text-muted-foreground mb-6 font-mono">Build: {BUILD_TAG}</p>
 
             <details className="bg-background border border-border rounded-lg p-4 mb-6">
               <summary className="cursor-pointer text-primary font-medium flex items-center gap-2">
