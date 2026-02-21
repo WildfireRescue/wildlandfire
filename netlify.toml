@@ -3,6 +3,15 @@
 [build]
   command = "npm ci && npm run build"
   publish = "dist"
+  
+# Required Environment Variables for build-time prerendering:
+# - VITE_SUPABASE_URL: Supabase project URL
+# - VITE_SUPABASE_ANON_KEY: Supabase anonymous key
+# 
+# The build process will:
+# 1. npm run prebuild: Generate sitemap and RSS
+# 2. npm run build (vite build): Build the SPA
+# 3. npm run postbuild: Prerender /blog and /blog/:slug routes for SEO
 
 # Build optimization
 [build.processing]

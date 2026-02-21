@@ -7,6 +7,7 @@
     "dev": "vite",
     "prebuild": "tsx src/lib/generateSitemap.ts && tsx src/lib/generateRSS.ts",
     "build": "vite build",
+    "postbuild": "tsx scripts/prerender-blog.ts",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -85,7 +86,8 @@
     "@types/react-dom": "^19.2.3",
     "@types/react-helmet-async": "^1.0.1",
     "terser": "^5.44.1",
-    "tsx": "^4.21.0"
+    "tsx": "^4.21.0",
+    "vite-plugin-prerender": "^1.0.8"
   },
   "peerDependencies": {
     "react": "18.3.1",
