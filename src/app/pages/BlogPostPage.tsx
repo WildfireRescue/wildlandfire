@@ -18,7 +18,7 @@ import { getPostBySlug } from '../../lib/supabaseBlog.ts';
 import { getArticleBySlug } from '../../lib/articles.ts';
 import HostedArticleTemplate from '../components/HostedArticleTemplate';
 import ExternalArticleTemplate from '../components/ExternalArticleTemplate';
-import { generateMetaTags, updateDocumentMeta, generateArticleStructuredData } from '../../lib/seoHelpers.ts';
+import { generateMetaTags, updateDocumentMeta, generateArticleStructuredData, generateOrganizationSchema, generateBreadcrumbListSchema, generateEnhancedArticleStructuredData } from '../../lib/seoHelpers.ts';
 import { safeImageSrc, safeMarkdownContent, coerceToString, PLACEHOLDER_IMAGE } from '../../lib/blogImages.ts';
 import { debugLog, debugError, debugTiming } from '../../lib/debug.ts';
 import { categorizeError, getUserErrorMessage, isRetryableError } from '../../lib/errorHandling.ts';
@@ -145,56 +145,61 @@ export function BlogPostPage() {
               title: articleTitle,
               description: articleDescription,
               canonical: article.canonical_url || `${window.location.origin}/blog/${slug}`,
-              robots: 'index,follow',
+              robots: article.robots_directives || 'index,follow,max-image-preview:large',
               ogType: 'article',
               ogTitle: article.og_title || articleTitle,
               ogDescription: article.og_description || articleDescription,
               ogImage: article.og_image,
+              ogImageWidth: article.og_image_width || 1200,
+              ogImageHeight: article.og_image_height || 630,
+              ogImageType: article.og_image_type || 'image/jpeg',
               ogUrl: `${window.location.origin}/blog/${slug}`,
               ogSiteName: 'The Wildland Fire Recovery Fund',
               twitterCard: 'summary_large_image',
               twitterTitle: article.og_title || articleTitle,
               twitterDescription: article.og_description || articleDescription,
               twitterImage: article.og_image,
+              twitterCreator: article.twitter_creator,
+              twitterSite: article.twitter_site || '@WildlandFireFnd',
               articlePublishedTime: article.published_at,
               articleModifiedTime: article.updated_at,
+              articleSection: article.category || 'Disaster Recovery',
+              articleTag: (article.tags && Array.isArray(article.tags)) ? article.tags : undefined,
             });
             
-            // Add JSON-LD BlogPosting structured data for articles
-            const articleStructuredData = {
-              '@context': 'https://schema.org',
-              '@type': 'BlogPosting',
-              headline: articleTitle,
-              description: articleDescription,
-              image: article.og_image ? [article.og_image] : undefined,
-              datePublished: article.published_at || new Date().toISOString(),
-              dateModified: article.updated_at || article.published_at || new Date().toISOString(),
-              author: {
-                '@type': 'Organization',
-                name: 'The Wildland Fire Recovery Fund',
-              },
-              publisher: {
-                '@type': 'Organization',
-                name: 'The Wildland Fire Recovery Fund',
-                logo: {
-                  '@type': 'ImageObject',
-                  url: `${window.location.origin}/Images/logo-512.png`,
-                },
-              },
-              mainEntityOfPage: {
-                '@type': 'WebPage',
-                '@id': `${window.location.origin}/blog/${slug}`,
-              },
-            };
-            
-            let scriptTag = document.getElementById('article-structured-data') as HTMLScriptElement;
-            if (!scriptTag) {
-              scriptTag = document.createElement('script');
-              scriptTag.id = 'article-structured-data';
-              scriptTag.type = 'application/ld+json';
-              document.head.appendChild(scriptTag);
+            // Add comprehensive JSON-LD structured data for external articles
+            // 1. Organization schema
+            let orgScriptTag = document.getElementById('org-structured-data') as HTMLScriptElement;
+            if (!orgScriptTag) {
+              orgScriptTag = document.createElement('script');
+              orgScriptTag.id = 'org-structured-data';
+              orgScriptTag.type = 'application/ld+json';
+              document.head.appendChild(orgScriptTag);
             }
-            scriptTag.textContent = JSON.stringify(articleStructuredData);
+            const orgSchema = generateOrganizationSchema();
+            orgScriptTag.textContent = JSON.stringify(orgSchema);
+            
+            // 2. BreadcrumbList schema
+            let breadcrumbScriptTag = document.getElementById('breadcrumb-structured-data') as HTMLScriptElement;
+            if (!breadcrumbScriptTag) {
+              breadcrumbScriptTag = document.createElement('script');
+              breadcrumbScriptTag.id = 'breadcrumb-structured-data';
+              breadcrumbScriptTag.type = 'application/ld+json';
+              document.head.appendChild(breadcrumbScriptTag);
+            }
+            const breadcrumbSchema = generateBreadcrumbListSchema(slug, articleTitle, window.location.origin, article.category || 'Disaster Recovery');
+            breadcrumbScriptTag.textContent = JSON.stringify(breadcrumbSchema);
+            
+            // 3. Enhanced BlogPosting schema with image dimensions
+            let articleScriptTag = document.getElementById('article-structured-data') as HTMLScriptElement;
+            if (!articleScriptTag) {
+              articleScriptTag = document.createElement('script');
+              articleScriptTag.id = 'article-structured-data';
+              articleScriptTag.type = 'application/ld+json';
+              document.head.appendChild(articleScriptTag);
+            }
+            const enhancedSchema = generateEnhancedArticleStructuredData(article, window.location.origin);
+            articleScriptTag.textContent = JSON.stringify(enhancedSchema);
             
             setLoading(false);
             endTiming();
@@ -236,8 +241,31 @@ export function BlogPostPage() {
         const metaTags = generateMetaTags(fetchedPost);
         updateDocumentMeta(metaTags, 'The Wildland Fire Recovery Fund');
         
-        // Add JSON-LD structured data
-        const structuredData = generateArticleStructuredData(fetchedPost);
+        // Add comprehensive JSON-LD structured data for legacy posts
+        // 1. Organization schema
+        let orgScriptTag = document.getElementById('org-structured-data') as HTMLScriptElement;
+        if (!orgScriptTag) {
+          orgScriptTag = document.createElement('script');
+          orgScriptTag.id = 'org-structured-data';
+          orgScriptTag.type = 'application/ld+json';
+          document.head.appendChild(orgScriptTag);
+        }
+        const orgSchema = generateOrganizationSchema();
+        orgScriptTag.textContent = JSON.stringify(orgSchema);
+        
+        // 2. BreadcrumbList schema
+        let breadcrumbScriptTag = document.getElementById('breadcrumb-structured-data') as HTMLScriptElement;
+        if (!breadcrumbScriptTag) {
+          breadcrumbScriptTag = document.createElement('script');
+          breadcrumbScriptTag.id = 'breadcrumb-structured-data';
+          breadcrumbScriptTag.type = 'application/ld+json';
+          document.head.appendChild(breadcrumbScriptTag);
+        }
+        const breadcrumbSchema = generateBreadcrumbListSchema(slug, fetchedPost.title, window.location.origin, fetchedPost.category || 'Disaster Recovery');
+        breadcrumbScriptTag.textContent = JSON.stringify(breadcrumbSchema);
+        
+        // 3. Enhanced BlogPosting schema
+        const structuredData = generateEnhancedArticleStructuredData(fetchedPost, window.location.origin);
         let scriptTag = document.getElementById('article-structured-data') as HTMLScriptElement;
         if (!scriptTag) {
           scriptTag = document.createElement('script');

@@ -19,6 +19,9 @@ export interface MetaTags {
   ogDescription: string;
   ogImage?: string;
   ogImageAlt?: string;
+  ogImageWidth?: number;
+  ogImageHeight?: number;
+  ogImageType?: string;
   ogUrl?: string;
   ogSiteName: string;
   
@@ -154,6 +157,15 @@ export function renderMetaTags(tags: MetaTags): string {
   
   if (tags.ogImage) {
     metaElements.push(`<meta property="og:image" content="${escapeHtml(tags.ogImage)}">`);
+    if (tags.ogImageWidth) {
+      metaElements.push(`<meta property="og:image:width" content="${tags.ogImageWidth}">`);
+    }
+    if (tags.ogImageHeight) {
+      metaElements.push(`<meta property="og:image:height" content="${tags.ogImageHeight}">`);
+    }
+    if (tags.ogImageType) {
+      metaElements.push(`<meta property="og:image:type" content="${tags.ogImageType}">`);
+    }
     if (tags.ogImageAlt) {
       metaElements.push(`<meta property="og:image:alt" content="${escapeHtml(tags.ogImageAlt)}">`);
     }
@@ -321,6 +333,9 @@ export function updateDocumentMeta(tags: MetaTags, siteName: string = 'The Wildl
   setMeta('meta[property="og:site_name"]', tags.ogSiteName);
   if (tags.ogImage) {
     setMeta('meta[property="og:image"]', tags.ogImage);
+    if (tags.ogImageWidth) setMeta('meta[property="og:image:width"]', String(tags.ogImageWidth));
+    if (tags.ogImageHeight) setMeta('meta[property="og:image:height"]', String(tags.ogImageHeight));
+    if (tags.ogImageType) setMeta('meta[property="og:image:type"]', tags.ogImageType);
     if (tags.ogImageAlt) setMeta('meta[property="og:image:alt"]', tags.ogImageAlt);
   }
   
@@ -341,4 +356,140 @@ export function updateDocumentMeta(tags: MetaTags, siteName: string = 'The Wildl
   if (tags.articleModifiedTime) {
     setMeta('meta[property="article:modified_time"]', tags.articleModifiedTime);
   }
+}
+/**
+ * Generate Organization schema for structured data
+ */
+export function generateOrganizationSchema(
+  organizationName: string = 'The Wildland Fire Recovery Fund',
+  organizationUrl: string = 'https://thewildlandfirerecoveryfund.org',
+  organizationLogo: string = 'https://thewildlandfirerecoveryfund.org/Images/logo-512.png'
+) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: organizationName,
+    url: organizationUrl,
+    logo: organizationLogo,
+    sameAs: [
+      'https://www.facebook.com/profile.php?id=61585125667396',
+      'https://twitter.com/WildlandFireFnd',
+      'https://instagram.com/wildfirerecoveryfund'
+    ],
+    contactPoint: {
+      '@type': 'ContactPoint',
+      contactType: 'Customer Service',
+      email: 'info@thewildlandfirerecoveryfund.org'
+    },
+    description: 'Supporting communities devastated by wildfires through direct financial relief and long-term recovery assistance.'
+  };
+}
+
+/**
+ * Generate BreadcrumbList schema for navigation SEO
+ */
+export function generateBreadcrumbListSchema(
+  slug: string,
+  articleTitle: string,
+  siteUrl: string = 'https://thewildlandfirerecoveryfund.org',
+  category: string = 'Disaster Recovery'
+) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: siteUrl
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Blog',
+        item: `${siteUrl}/blog`
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: category,
+        item: `${siteUrl}/blog/category/${category.toLowerCase().replace(/\s+/g, '-')}`
+      },
+      {
+        '@type': 'ListItem',
+        position: 4,
+        name: articleTitle,
+        item: `${siteUrl}/blog/${slug}`
+      }
+    ]
+  };
+}
+
+/**
+ * Enhanced BlogPosting schema with image dimensions and additional metadata
+ */
+export function generateEnhancedArticleStructuredData(
+  post: any,
+  siteUrl: string = 'https://thewildlandfirerecoveryfund.org',
+  organizationName: string = 'The Wildland Fire Recovery Fund',
+  organizationLogo: string = 'https://thewildlandfirerecoveryfund.org/Images/logo-512.png'
+) {
+  const postUrl = `${siteUrl}/blog/${post.slug}`;
+  const imageUrl = post.og_image || post.featured_image || post.og_image_url || post.featured_image_url;
+  const imageWidth = post.og_image_width || 1200;
+  const imageHeight = post.og_image_height || 630;
+  
+  const schema: any = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    '@id': `${postUrl}#article`,
+    headline: post.title || post.og_title,
+    description: post.og_description || post.description || post.subtitle || '',
+    datePublished: post.published_at || new Date().toISOString(),
+    dateModified: post.updated_at || post.published_at || new Date().toISOString(),
+    author: {
+      '@type': post.author_role ? 'Person' : 'Organization',
+      name: post.author || post.source_name || organizationName,
+      ...(post.author_role && { jobTitle: post.author_role })
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: organizationName,
+      url: siteUrl,
+      logo: {
+        '@type': 'ImageObject',
+        url: organizationLogo,
+        width: 512,
+        height: 512
+      }
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': postUrl
+    },
+    isAccessibleForFree: true
+  };
+
+  // Add image with dimensions if available
+  if (imageUrl) {
+    schema.image = {
+      '@type': 'ImageObject',
+      url: imageUrl,
+      width: imageWidth,
+      height: imageHeight
+    };
+  }
+
+  // Add article section/category
+  if (post.category) {
+    schema.articleSection = post.category;
+  }
+
+  // Add keywords/tags
+  if (post.tags && Array.isArray(post.tags) && post.tags.length > 0) {
+    schema.keywords = post.tags.join(', ');
+  }
+
+  return schema;
 }
