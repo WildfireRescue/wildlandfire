@@ -7,7 +7,7 @@ const impactAreas = [
     icon: Home,
     title: "Emergency Housing & Rebuilding",
     image: "https://images.unsplash.com/photo-1760273463901-199a180b2886?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxlbWVyZ2VuY3klMjBob3VzaW5nJTIwc2hlbHRlcnxlbnwxfHx8fDE3NjYxMTcyMTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
-    description: "When families lose everything, we provide immediate emergency housing assistance and support for rebuilding—covering essentials like temporary shelter, clothing, and household items.",
+    description: "When families lose everything, we provide immediate emergency housing assistance and support for rebuilding. Essentials like temporary shelter, clothing, and household items.",
     commitment: "Our commitment: Immediate emergency response"
   },
   {

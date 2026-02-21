@@ -6,7 +6,7 @@ import idahoMountainImage from '../../assets/fire33333.webp';
 const galleryImages = [
   {
     url: "https://images.unsplash.com/photo-1736976050816-bdacec2444a1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwYWxpc2FkZXMlMjBmaXJlJTIwbG9zJTIwYW5nZWxlc3xlbnwxfHx8fDE3NjY0NjQ5NjB8MA&ixlib=rb-4.1.0&q=80&w=1080",
-    caption: "The Palisades Fire—devastating Los Angeles communities",
+    caption: "The Palisades Fire: devastating Los Angeles communities",
     span: "col-span-2 row-span-2"
   },
   {
@@ -16,7 +16,7 @@ const galleryImages = [
   },
   {
     url: "https://images.unsplash.com/photo-1736636990289-d891ac0decc6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsb3MlMjBhbmdlbGVzJTIwd2lsZGZpcmUlMjBkZXN0cnVjdGlvbnxlbnwxfHx8fDE3NjY0NjQ5NjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
-    caption: "Los Angeles neighborhoods destroyed—families displaced",
+    caption: "Los Angeles neighborhoods destroyed: families displaced",
     span: "col-span-1 row-span-1"
   },
   {
@@ -26,12 +26,12 @@ const galleryImages = [
   },
   {
     url: "https://images.unsplash.com/photo-1671959784652-8096fd28b17c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpZGFobyUyMGZvcmVzdCUyMGZpcmV8ZW58MXx8fHwxNzY2NDY1MDQ1fDA&ixlib=rb-4.1.0&q=80&w=1080",
-    caption: "Idaho forests burning—devastating natural landscapes",
+    caption: "Idaho forests burning: devastating natural landscapes",
     span: "col-span-1 row-span-1"
   },
   {
     url: "https://images.unsplash.com/photo-1541959745973-a077c204173a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtYWxpYnUlMjB3aWxkZmlyZSUyMGFmdGVybWF0aHxlbnwxfHx8fDE3NjY0NjQ5NjJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
-    caption: "Malibu wildfire aftermath—entire California neighborhoods lost",
+    caption: "Malibu wildfire aftermath: entire California neighborhoods lost",
     span: "col-span-2 row-span-1"
   },
   {
@@ -54,7 +54,7 @@ export function PhotoGallery() {
         >
           <h2 className="text-4xl md:text-5xl mb-4">The Reality We're Responding To</h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Every photo shows why our mission matters—and the transformation we'll help create.
+            Every photo shows why our mission matters and the transformation we'll help create.
           </p>
         </motion.div>
 

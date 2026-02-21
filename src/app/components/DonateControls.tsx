@@ -37,7 +37,7 @@ export function DonateControls({
   }, [selected, customAmount, amount]);
 
   const ctaText = useMemo(() => {
-    const label = resolvedAmount > 0 ? `$${resolvedAmount}` : "$—";
+    const label = resolvedAmount > 0 ? `$${resolvedAmount}` : "$0";
     return monthly ? `Donate ${label} Monthly` : `Donate ${label} Now`;
   }, [resolvedAmount, monthly]);
 

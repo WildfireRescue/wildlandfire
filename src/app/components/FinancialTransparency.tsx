@@ -15,7 +15,7 @@ export function FinancialTransparency() {
           
           <div className="bg-card border border-border rounded-2xl p-8 mb-8">
             <p className="text-center text-muted-foreground mb-6 italic">
-              We haven't helped anyone yet—but here's our commitment for how every dollar will be spent:
+              We haven't helped anyone yet, but here's our commitment for how every dollar will be spent:
             </p>
             <div className="space-y-6">
               {[

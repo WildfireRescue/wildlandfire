@@ -129,7 +129,7 @@ export function Hero() {
             transition={{ duration: isMobile ? 0 : 0.6, delay: isMobile ? 0 : 0.6 }}
             className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed"
           >
-            We provide financial relief and support to firefighters and families affected by wildfires — so communities can begin to rebuild when the flames are gone.
+            We provide financial relief and support to firefighters and families affected by wildfires. When the flames are gone, we help communities begin to rebuild.
           </motion.p>
 
           {/* Tagline Below Buttons */}

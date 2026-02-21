@@ -74,7 +74,7 @@ export function WhatWeDo() {
               </p>
 
               <p>
-                Every dollar donated goes directly to those in need — whether it's helping a family secure temporary housing, supporting a child's education after losing their home, or honoring the memory of a fallen firefighter.
+                Every dollar donated goes directly to those in need. This supports families securing temporary housing, children's education after losing their homes, and honoring fallen firefighters.
               </p>
 
               <p>

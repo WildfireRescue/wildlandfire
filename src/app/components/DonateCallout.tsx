@@ -29,7 +29,7 @@ export function DonateCallout() {
             </h2>
 
             <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
-              Every dollar goes directly to families in crisis — providing emergency shelter, food, clothing, and the resources they need to rebuild their lives with dignity.
+              Every dollar goes directly to families in crisis. We provide emergency shelter, food, clothing, and the resources they need to rebuild their lives with dignity.
             </p>
 
             <div className="space-y-4 mb-8">

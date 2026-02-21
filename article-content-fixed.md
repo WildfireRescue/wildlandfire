@@ -1,6 +1,6 @@
 When the flames finally die down and the news cameras move on, many people believe the worst is over. But for families, firefighters, and children impacted by wildfires, **the hardest part often begins after the fire is gone**.
 
-Wildfire recovery is not a moment—it's a long, complex journey that can take years. And for too many communities, that journey happens quietly, without enough support, visibility, or resources.
+Wildfire recovery is not a moment. It's a long, complex journey that can take years. And for too many communities, that journey happens quietly, without enough support, visibility, or resources.
 
 ## The Hidden Reality After a Wildfire
 
@@ -14,7 +14,7 @@ Survivors often face:
 - Emotional trauma, grief, and survivor's guilt
 - Long-term health effects from smoke exposure
 
-For children, the impact can be even more severe—disrupted schooling, anxiety, sleep disorders, and lasting emotional scars.
+For children, the impact can be even more severe. Disrupted schooling, anxiety, sleep disorders, and lasting emotional scars are just the beginning.
 
 Yet once the emergency phase ends, **most funding and attention disappears**.
 
@@ -22,7 +22,7 @@ Yet once the emergency phase ends, **most funding and attention disappears**.
 
 ## Why Emergency Relief Isn't Enough
 
-Emergency aid is critical—but it's only the first step.
+Emergency aid is critical. But it's only the first step.
 
 **Short term relief typically covers:**
 
@@ -54,7 +54,7 @@ It looks like:
 - **Community rebuilding efforts** that restore dignity and stability
 - **Sustained advocacy** to ensure no one is forgotten
 
-Recovery is not about charity—it's about **continuity, dignity, and resilience**.
+Recovery is not about charity. It's about continuity, dignity, and resilience.
 
 ---
 
@@ -68,13 +68,13 @@ We focus on:
 - Children whose needs are often invisible
 - Firefighters and first responders who give everything and are expected to move on without support
 
-Our mission is simple but urgent: **to ensure recovery doesn't end when headlines do**.
+Our mission is simple but urgent. We ensure recovery doesn't end when headlines do.
 
 ---
 
 ## The Growing Need for Long Term Wildfire Support
 
-Wildfires are increasing in frequency, size, and intensity. Communities are being asked to recover again and again—with fewer resources each time.
+Wildfires are increasing in frequency, size, and intensity. Communities are being asked to recover again and again, with fewer resources each time.
 
 **Without sustained recovery efforts:**
 
@@ -83,7 +83,7 @@ Wildfires are increasing in frequency, size, and intensity. Communities are bein
 - First responders burn out and leave the profession
 - Communities struggle to fully rebuild
 
-Long term recovery is not optional—it's essential.
+Long term recovery is not optional. It's essential.
 
 ---
 
@@ -98,7 +98,7 @@ Recovery is possible when people come together.
 - Advocating for sustained recovery funding
 - Donating to ensure families, children, and firefighters aren't forgotten
 
-Every act of support helps rebuild not just homes—but lives.
+Every act of support helps rebuild not just homes, but lives.
 
 ---
 
@@ -108,6 +108,6 @@ Wildfires may be unavoidable. Abandoning communities afterward is not.
 
 Recovery is about presence. About staying. About remembering.
 
-At The Wildland Fire Recovery Fund, we are committed to walking alongside those impacted—**for as long as it takes**.
+At The Wildland Fire Recovery Fund, we are committed to walking alongside those impacted for as long as it takes.
 
 Because rebuilding after the fire isn't just about structures. It's about people.

@@ -6,7 +6,7 @@ export function DonationImpactCards() {
     {
       tag: 'RELIEF FOR COMMUNITIES',
       title: 'On-site help for displaced families.',
-      description: 'We provide relief and supplies on-site to displaced and evacuated families during wildland fire operations — along with immediate relief funds to help communities rebuild and recover.',
+      description: 'We provide relief and supplies on-site to displaced and evacuated families during wildland fire operations. Along with immediate relief funds, we help communities rebuild and recover.',
       icon: Home,
       gradient: 'from-primary/20 to-primary/5'
     },

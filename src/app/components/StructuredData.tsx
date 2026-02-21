@@ -86,7 +86,7 @@ export function StructuredData() {
       "url": "https://www.thewildlandfirerecoveryfund.org",
       "description": "Supporting wildfire survivors with emergency housing, mental health resources, and firefighter assistance through transparent, rapid-response aid.",
       "donationUrl": "https://www.thewildlandfirerecoveryfund.org/#donate",
-      "missionCoveragePrioritiesPolicy": "We provide rapid emergency response to wildfire survivors, with 75% of donations going directly to survivors. We proactively respond to fire scenes—survivors don't need to apply.",
+      "missionCoveragePrioritiesPolicy": "We provide rapid emergency response to wildfire survivors, with 75% of donations going directly to survivors. We proactively respond to fire scenes so survivors don't need to apply.",
       "nonprofitStatus": "501(c)(3)"
     };
 
@@ -168,7 +168,7 @@ export function StructuredData() {
           "name": "How quickly do you respond to wildfire emergencies?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Our goal is to provide emergency assistance within 48 hours of a wildfire incident. We proactively respond to fire scenes—survivors don't need to apply for help."
+            "text": "Our goal is to provide emergency assistance within 48 hours of a wildfire incident. We proactively respond to fire scenes so survivors don't need to apply for help."
           }
         },
         {

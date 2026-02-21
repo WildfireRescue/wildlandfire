@@ -42,7 +42,7 @@ export function WhoWeAre() {
               </p>
 
               <p>
-                Our mission is to walk alongside them in that process — offering immediate financial assistance, essential resources, and ongoing support so that no one feels forgotten once the news cameras leave.
+                Our mission is to walk alongside them in that process. We offer immediate financial assistance, essential resources, and ongoing support so that no one feels forgotten once the news cameras leave.
               </p>
             </div>
 

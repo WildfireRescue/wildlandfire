@@ -34,7 +34,7 @@ export function WhyDonateMatters() {
               {
                 icon: CheckCircle,
                 title: "Full Transparency",
-                description: "We're building this organization the right way from day one. Every dollar is tracked and accounted for with complete transparency—you'll always know where your money goes."
+                description: "We're building this organization the right way from day one. Every dollar is tracked and accounted for with complete transparency. You'll always know where your money goes."
               }
             ].map((reason, idx) => {
               const Icon = reason.icon;

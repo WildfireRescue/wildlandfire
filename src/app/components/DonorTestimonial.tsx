@@ -13,7 +13,7 @@ export function DonorTestimonial() {
         >
           <div className="text-5xl mb-4">💡</div>
           <p className="text-xl md:text-2xl mb-4 leading-relaxed">
-            Imagine being one of our first donors—the ones who believed in this vision from day one. 
+            Imagine being one of our first donors. You could be one of the believers in this vision from day one. 
             Your donation today won't just help survivors rebuild; it'll be part of our founding story 
             as we grow into the most trusted name in wildfire recovery.
           </p>

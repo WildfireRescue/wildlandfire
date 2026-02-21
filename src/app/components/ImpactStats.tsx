@@ -5,7 +5,7 @@ const stats = [
   {
     icon: Heart,
     label: 'Direct Impact',
-    description: 'Your donations fund real recovery—housing, counseling, and rebuilding'
+    description: 'Your donations fund real recovery through housing, counseling, and rebuilding'
   },
   {
     icon: Users,

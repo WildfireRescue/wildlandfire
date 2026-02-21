@@ -37,7 +37,7 @@ export function ImpactQuote() {
                 transition={{ duration: 0.6, delay: 0.3 }}
                 className="text-3xl md:text-4xl lg:text-5xl mb-6 leading-tight"
               >
-                Communities rise from the ashes — but never alone.
+                Communities rise from the ashes, but never alone.
               </motion.h2>
 
               {/* Subtext in italic */}

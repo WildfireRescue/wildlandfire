@@ -5,7 +5,7 @@ const emotionalMessages = [
   {
     icon: Home,
     message: "Every home lost leaves a family searching for hope",
-    subtext: "Your donation rebuilds more than buildings—it rebuilds lives",
+    subtext: "Your donation rebuilds more than buildings. It rebuilds lives",
     color: "from-blue-500/10 to-blue-600/10",
     iconColor: "text-blue-400"
   },

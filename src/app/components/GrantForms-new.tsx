@@ -68,7 +68,7 @@ export function GrantForms() {
                 <div>
                   <p className="font-semibold text-blue-400 mb-1">No Application Required</p>
                   <p className="text-sm text-muted-foreground">
-                    If you've lost your home to wildfire, help is already on the way. We deploy to major fires—finding survivors and delivering immediate relief.
+                    If you've lost your home to wildfire, help is already on the way. We deploy to major fires and get resources to survivors immediately.
                   </p>
                 </div>
               </div>
@@ -85,7 +85,7 @@ export function GrantForms() {
                       </div>
                       <div>
                         <p className="font-semibold mb-1">We Respond</p>
-                        <p className="text-sm text-muted-foreground">Our team deploys to major wildfire scenes within our coverage area—no application needed</p>
+                        <p className="text-sm text-muted-foreground">Our team deploys to major wildfire scenes within our coverage area. No application needed.</p>
                       </div>
                     </div>
                   </div>

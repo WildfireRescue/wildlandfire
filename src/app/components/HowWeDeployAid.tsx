@@ -23,7 +23,7 @@ export function HowWeDeployAid() {
               {
                 step: '1',
                 title: 'We Respond',
-                description: 'Our team deploys to major wildfire scenes within our coverage area—no application needed'
+                description: 'Our team deploys to major wildfire scenes within our coverage area. No application needed.'
               },
               {
                 step: '2',

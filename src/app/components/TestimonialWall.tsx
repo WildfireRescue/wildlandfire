@@ -10,12 +10,12 @@ const commitments = [
   {
     icon: Clock,
     title: "Speed When It Matters",
-    quote: "In disaster recovery, hours matter. Our goal is rapid emergency response—getting critical resources to survivors before bureaucracy gets in the way.",
+    quote: "In disaster recovery, hours matter. Our goal is rapid emergency response. We get critical resources to survivors before bureaucracy can slow us down.",
   },
   {
     icon: Heart,
     title: "Dignity, Not Charity",
-    quote: "Survivors don't need pity—they need support to rebuild with dignity. We meet people where they are and empower them to rise again.",
+    quote: "Survivors don't need pity. They need support to rebuild with dignity. We meet people where they are and empower them to rise again.",
   },
   {
     icon: TrendingUp,

@@ -36,7 +36,7 @@ export function OurMissionSection() {
             className="bg-card border border-border rounded-2xl p-8 md:p-10 space-y-6"
           >
             <p className="text-lg leading-relaxed text-foreground">
-              Our mission is to stand beside wildfire survivors in their darkest moments — providing immediate relief, essential financial support, and a path forward when the flames have taken everything.
+              Our mission is to stand beside wildfire survivors in their darkest moments. We provide immediate relief, essential financial support, and a path forward when the flames have taken everything.
             </p>
 
             <p className="text-lg leading-relaxed text-foreground">
