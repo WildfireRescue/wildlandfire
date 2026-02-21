@@ -24,6 +24,9 @@ export interface BlogPost {
   featured_image_url: string | null;
   featured_image_alt_text: string | null;
   og_image_url: string | null;
+  og_image_width: number;
+  og_image_height: number;
+  og_image_type: string;
   og_title: string | null;
   og_description: string | null;
   twitter_card: string;
@@ -119,6 +122,9 @@ export interface BlogPostFormData {
   featured_image_url: string;
   featured_image_alt_text: string;
   og_image_url: string;
+  og_image_width: number;
+  og_image_height: number;
+  og_image_type: string;
   og_title: string;
   og_description: string;
   twitter_card: string;

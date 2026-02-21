@@ -47,6 +47,9 @@ export function BlogEditorPage() {
   const [featuredImageUrl, setFeaturedImageUrl] = useState("");
   const [featuredImageAltText, setFeaturedImageAltText] = useState("");
   const [ogImageUrl, setOgImageUrl] = useState("");
+  const [ogImageWidth, setOgImageWidth] = useState("1200");
+  const [ogImageHeight, setOgImageHeight] = useState("630");
+  const [ogImageType, setOgImageType] = useState("image/jpeg");
   const [ogTitle, setOgTitle] = useState("");
   const [ogDescription, setOgDescription] = useState("");
   const [twitterCard, setTwitterCard] = useState("summary_large_image");
@@ -233,6 +236,9 @@ export function BlogEditorPage() {
         featured_image_url: featuredImageUrl || null,
         featured_image_alt_text: featuredImageAltText || null,
         og_image_url: ogImageUrl || null,
+        og_image_width: parseInt(ogImageWidth) || 1200,
+        og_image_height: parseInt(ogImageHeight) || 630,
+        og_image_type: ogImageType || "image/jpeg",
         og_title: ogTitle || null,
         og_description: ogDescription || null,
         twitter_card: twitterCard,
