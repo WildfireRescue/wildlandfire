@@ -27,6 +27,11 @@
 [context.branch-deploy]
   environment = { NODE_ENV = "development" }
 
+# Edge Functions for SEO
+[[edge_functions]]
+  path = "/blog/*"
+  function = "blog-seo"
+
 # Security Headers
 [[headers]]
   for = "/*"
