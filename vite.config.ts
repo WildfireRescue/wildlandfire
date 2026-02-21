@@ -4,6 +4,19 @@ import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import compression from 'vite-plugin-compression'
 
+/**
+ * Vite Configuration
+ * Production SPA builds with blog prerendering support
+ * 
+ * Build Pipeline:
+ * 1. prebuild: Generate sitemap & RSS feed
+ * 2. vite build: Bundle SPA + create dist/index.html template
+ * 3. postbuild: Use JSom + Supabase to prerender /blog and /blog/:slug
+ * 
+ * Result: Static HTML files for blog routes (SEO-friendly)
+ *         SPA for all other routes (fast, interactive)
+ */
+
 export default defineConfig({
   plugins: [
     // The React and Tailwind plugins are both required for Make, even if
@@ -136,3 +149,42 @@ export default defineConfig({
     exclude: [],
   },
 })
+
+/**
+ * PRERENDERING STRATEGY
+ * 
+ * The vite.config.ts builds a traditional SPA where every route returns index.html.
+ * After the build completes, the postbuild script (npm run postbuild) takes over:
+ * 
+ * What postbuild does:
+ * 1. Reads the compiled dist/index.html (SPA shell)
+ * 2. Fetches all published blog posts from Supabase
+ * 3. For each blog post, uses JSDOM to inject SEO meta tags:
+ *    - <title> from meta_title_final
+ *    - meta description from meta_description_final
+ *    - og:image/width/height/type tags
+ *    - twitter:card tags
+ *    - canonical URL
+ *    - robots directives
+ *    - JSON-LD BlogPosting schema with mainEntityOfPage
+ * 4. Writes static HTML files:
+ *    - dist/blog/index.html (blog listing page)
+ *    - dist/blog/[slug]/index.html (individual blog posts)
+ * 
+ * Result:
+ * - Search engines crawl static HTML with correct meta tags ✓
+ * - Social media scrapers see correct OG/Twitter tags ✓
+ * - All other routes still use SPA (fast, interactive) ✓
+ * 
+ * Environment Variables Required:
+ * - VITE_SUPABASE_URL: Your Supabase project URL
+ * - VITE_SUPABASE_ANON_KEY: Supabase anonymous/public anon key
+ * 
+ * These should be set in:
+ * - Development: .env.local
+ * - Netlify Production: Site settings → Environment variables
+ * 
+ * See: POSTS_SEO_INTEGRATION.md for data model details
+ * See: netlify.toml for build configuration
+ */
+

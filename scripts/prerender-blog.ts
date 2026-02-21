@@ -133,39 +133,62 @@ function normalizeArticle(article: Article): BlogPost {
 
 async function fetchPublishedPosts(): Promise<BlogPost[]> {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    console.warn('⚠️  Missing Supabase environment variables. Skipping blog prerendering.');
+    console.error('❌ ERROR: Missing Supabase environment variables!');
+    console.error('   VITE_SUPABASE_URL: ' + (SUPABASE_URL ? '✓ Set' : '✗ Not set'));
+    console.error('   VITE_SUPABASE_ANON_KEY: ' + (SUPABASE_ANON_KEY ? '✓ Set' : '✗ Not set'));
+    console.error('\n   For development, add to .env.local:');
+    console.error('   VITE_SUPABASE_URL=your-project-url');
+    console.error('   VITE_SUPABASE_ANON_KEY=your-anon-key');
+    console.error('\n   For Netlify, add to Site settings → Environment variables');
+    console.error('\n   Skipping blog prerendering without Supabase.\n');
     return [];
   }
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   try {
-    // Fetch from posts_seo_view if available, fallback to posts table
-    console.log('📥 Fetching published posts...');
+    // Fetch from posts and articles tables
+    console.log('📥 Fetching published posts from Supabase...');
     const [postsRes, articlesRes] = await Promise.all([
       supabase
         .from('posts')
         .select('*')
         .eq('status', 'published')
-        .eq('noindex', false),
+        .eq('noindex', false)
+        .catch((err) => {
+          console.warn('   ⚠️  posts table fetch warning:', err.message);
+          return { data: [] };
+        }),
       supabase
         .from('articles')
         .select('*')
-        .eq('status', 'published'),
+        .eq('status', 'published')
+        .catch((err) => {
+          console.warn('   ⚠️  articles table fetch warning:', err.message);
+          return { data: [] };
+        }),
     ]);
 
     const posts: BlogPost[] = (postsRes.data || []).map((p: any) => normalizePost(p));
     const articles: BlogPost[] = (articlesRes.data || []).map((a: any) => normalizeArticle(a));
 
     const allPosts = [...posts, ...articles];
+    const uniquePosts = Array.from(
+      new Map(allPosts.map((p) => [p.slug, p])).values()
+    );
 
-    console.log(`✓ Found ${allPosts.length} published posts and articles`);
-    return allPosts;
+    console.log(`✓ Found ${uniquePosts.length} unique published posts and articles`);
+    return uniquePosts;
   } catch (error: any) {
-    console.error('❌ Error fetching posts:', error.message);
+    console.error('❌ Error fetching posts from Supabase:');
+    console.error('   ' + error.message);
+    console.error('\n   This might be due to:');
+    console.error('   - Invalid Supabase credentials');
+    console.error('   - Network connectivity issues');
+    console.error('   - RLS policies blocking anonymous access');
+    console.error('\n   Skipping blog prerendering.\n');
     return [];
   }
-}
 
 function injectSEOTags(html: string, post: BlogPost, baseUrl: string = SITE_ORIGIN): string {
   const doc = new JSDOM(html).window.document;
@@ -250,13 +273,19 @@ function injectSEOTags(html: string, post: BlogPost, baseUrl: string = SITE_ORIG
     tag.setAttribute('content', content);
   }
 
-  // JSON-LD BlogPosting schema
+  // JSON-LD BlogPosting schema with mainEntityOfPage for better SEO
+  const postUrl = `${baseUrl}/blog/${post.slug}`;
   const blogPostingSchema = {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
     headline: post.title || post.meta_title_final,
     description: post.meta_description_final,
-    image: post.og_image_url || `${baseUrl}/Images/logo-128.png`,
+    image: post.og_image_url ? {
+      '@type': 'ImageObject',
+      url: post.og_image_url,
+      width: post.og_image_width || 1200,
+      height: post.og_image_height || 630,
+    } : `${baseUrl}/Images/logo-128.png`,
     datePublished: post.published_at,
     dateModified: post.updated_at || post.published_at,
     author: post.author_name ? {
@@ -280,7 +309,13 @@ function injectSEOTags(html: string, post: BlogPost, baseUrl: string = SITE_ORIG
       url: baseUrl,
       name: 'The Wildland Fire Recovery Fund',
     },
-    url: `${baseUrl}/blog/${post.slug}`,
+    url: postUrl,
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': postUrl,
+    },
+    articleSection: post.category || 'Disaster Recovery',
+    keywords: post.tags?.join(', ') || '',
     articleBody: post.excerpt || post.meta_description_final,
   };
 
@@ -299,22 +334,29 @@ function injectSEOTags(html: string, post: BlogPost, baseUrl: string = SITE_ORIG
 async function prerenderBlogRoutes() {
   console.log('\n🚀 Starting blog prerendering...\n');
 
+  // Validate dist directory
   if (!fs.existsSync(DIST_DIR)) {
-    console.error(`❌ Error: ${DIST_DIR} directory not found. Run "npm run build" first.`);
+    console.error(`❌ ERROR: ${DIST_DIR} directory not found!`);
+    console.error('   Run "npm run build" first to generate the SPA.');
     process.exit(1);
   }
 
   const indexHtmlPath = path.join(DIST_DIR, 'index.html');
   if (!fs.existsSync(indexHtmlPath)) {
-    console.error(`❌ Error: ${indexHtmlPath} not found.`);
+    console.error(`❌ ERROR: ${indexHtmlPath} not found!`);
+    console.error('   The Vite build may have failed. Check build output.');
     process.exit(1);
   }
+
+  console.log(`✓ Found SPA template at ${indexHtmlPath}`);
 
   const baseHtml = fs.readFileSync(indexHtmlPath, 'utf-8');
   const posts = await fetchPublishedPosts();
 
   if (posts.length === 0) {
-    console.warn('⚠️  No posts found. Blog prerendering skipped.');
+    console.warn('\n⚠️  No posts found to prerender.');
+    console.warn('   Prerendering will be skipped.');
+    console.warn('   The SPA will still work at /blog/:slug (client-side rendering)\n');
     return;
   }
 
@@ -326,8 +368,10 @@ async function prerenderBlogRoutes() {
 
   let successCount = 0;
   let errorCount = 0;
+  const failures: string[] = [];
 
   // Prerender each blog post
+  console.log(`\n📝 Prerendering ${posts.length} blog post pages...\n`);
   for (const post of posts) {
     try {
       const seoHtml = injectSEOTags(baseHtml, post);
@@ -342,18 +386,22 @@ async function prerenderBlogRoutes() {
       const indexPath = path.join(postDir, 'index.html');
       fs.writeFileSync(indexPath, seoHtml, 'utf-8');
 
-      console.log(`✓ Prerendered: /blog/${post.slug}`);
+      console.log(`✓ /blog/${post.slug}`);
       successCount++;
     } catch (error: any) {
-      console.error(`✗ Error prerendering ${post.slug}:`, error.message);
+      const errorMsg = `${post.slug}: ${error.message}`;
+      console.error(`✗ /blog/${post.slug} - ${error.message}`);
+      failures.push(errorMsg);
       errorCount++;
     }
   }
 
   // Prerender /blog index page
+  console.log('\n📝 Prerendering /blog index page...\n');
   try {
     const indexHtml = injectSEOTags(baseHtml, {
       slug: '',
+      id: '',
       title: 'Blog',
       meta_title_final: 'Blog | The Wildland Fire Recovery Fund',
       meta_description_final: 'Read our latest resources on wildfire recovery, community support, and fire preparedness.',
@@ -362,16 +410,37 @@ async function prerenderBlogRoutes() {
       canonical_url_final: `${SITE_ORIGIN}/blog`,
       robots_final: 'index,follow,max-image-preview:large',
       twitter_card_final: 'summary_large_image',
-    });
+    } as any);
     fs.writeFileSync(path.join(blogDir, 'index.html'), indexHtml, 'utf-8');
-    console.log('✓ Prerendered: /blog');
+    console.log('✓ /blog');
     successCount++;
   } catch (error: any) {
-    console.error('✗ Error prerendering /blog:', error.message);
+    console.error('✗ /blog - ' + error.message);
     errorCount++;
   }
 
-  console.log(`\n✅ Prerendering complete: ${successCount} pages succeeded, ${errorCount} failed\n`);
+  // Summary
+  console.log('\n' + '='.repeat(60));
+  console.log('✅ Blog prerendering complete!');
+  console.log('='.repeat(60));
+  console.log(`   Success: ${successCount} pages`);
+  console.log(`   Errors:  ${errorCount} pages`);
+  
+  if (failures.length > 0) {
+    console.log('\nFailed pages:');
+    failures.forEach((f) => console.log(`  - ${f}`));
+  }
+
+  console.log('\n📍 Static blog files written to:');
+  console.log(`   ${blogDir}/index.html              (blog index)`);
+  console.log(`   ${blogDir}/<slug>/index.html        (individual posts)`);
+  console.log('\n💡 These static files will be served by Netlify for crawlers.');
+  console.log('   Client-side navigation still works via the SPA.\n');
+
+  // Exit with error if any prerendering failed
+  if (errorCount > 0) {
+    process.exit(1);
+  }
 }
 
 prerenderBlogRoutes().catch((error) => {
