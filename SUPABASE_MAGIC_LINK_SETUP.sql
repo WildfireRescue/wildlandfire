@@ -77,7 +77,8 @@ BEGIN
     'admin@thewildlandfirerecoveryfund.org',
     'editor@thewildlandfirerecoveryfund.org',
     'reports@goldie.agency',
-    'help@goldie.agency'
+    'help@goldie.agency',
+    'ca_mortar@yahoo.com'
   );
 END;
 $$;

@@ -402,7 +402,6 @@ export function BlogEditorPage() {
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold">Blog Editor</h1>
           <div className="flex items-center gap-3">
-            <span className="text-xs text-muted-foreground font-mono">{BUILD_TAG}</span>
             <Button variant="outline" size="sm" onClick={signOut}>
               <LogOut size={16} className="mr-2" /> Sign Out
             </Button>
