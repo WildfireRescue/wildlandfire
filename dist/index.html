@@ -2,7 +2,35 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device width, initial scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Block SearchAtlas/OTTO script from loading -->
+    <script>
+      // Prevent SearchAtlas from initializing
+      window.__searchAtlasBlocked = true;
+      
+      // Override fetch to block SearchAtlas API calls
+      const originalFetch = window.fetch;
+      window.fetch = function(...args) {
+        const [resource] = args;
+        if (typeof resource === 'string' && resource.includes('searchatlas.com')) {
+          console.warn('[Blocked] SearchAtlas request:', resource);
+          return Promise.reject(new Error('SearchAtlas blocked'));
+        }
+        return originalFetch.apply(this, args);
+      };
+      
+      // Block XMLHttpRequest to SearchAtlas
+      const originalOpen = XMLHttpRequest.prototype.open;
+      XMLHttpRequest.prototype.open = function(method, url, ...rest) {
+        if (typeof url === 'string' && url.includes('searchatlas.com')) {
+          console.warn('[Blocked] SearchAtlas XHR:', url);
+          this._searchAtlasBlocked = true;
+          return;
+        }
+        return originalOpen.apply(this, [method, url, ...rest]);
+      };
+    </script>
 
     <!-- Preconnect to external domains for faster loading -->
     <link rel="preconnect" href="https://images.unsplash.com" crossorigin>

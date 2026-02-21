@@ -35,7 +35,7 @@
     X-Frame-Options = "SAMEORIGIN"
     X-XSS-Protection = "1; mode=block"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    Content-Security-Policy = "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval' www.googletagmanager.com www.google-analytics.com; img-src 'self' https: data:; script-src 'self' https: 'unsafe-inline' 'unsafe-eval' www.googletagmanager.com www.google-analytics.com"
+    Content-Security-Policy = "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval' www.googletagmanager.com www.google-analytics.com; img-src 'self' https: data:; script-src 'self' https: 'unsafe-inline' 'unsafe-eval' www.googletagmanager.com www.google-analytics.com; frame-src 'self'; connect-src 'self' https: 'unsafe-inline' 'unsafe-eval' www.googletagmanager.com www.google-analytics.com; style-src 'self' 'unsafe-inline' https:; block-all-mixed-content"
     Permissions-Policy = "geolocation=(), microphone=(), camera=()"
     # Enable early hints for faster loading
     Link = "</Images/logo-128.png>; rel=preload; as=image"
