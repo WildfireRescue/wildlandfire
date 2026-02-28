@@ -4,34 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- Block SearchAtlas/OTTO script from loading -->
-    <script>
-      // Prevent SearchAtlas from initializing
-      window.__searchAtlasBlocked = true;
-      
-      // Override fetch to block SearchAtlas API calls
-      const originalFetch = window.fetch;
-      window.fetch = function(...args) {
-        const [resource] = args;
-        if (typeof resource === 'string' && resource.includes('searchatlas.com')) {
-          console.warn('[Blocked] SearchAtlas request:', resource);
-          return Promise.reject(new Error('SearchAtlas blocked'));
-        }
-        return originalFetch.apply(this, args);
-      };
-      
-      // Block XMLHttpRequest to SearchAtlas
-      const originalOpen = XMLHttpRequest.prototype.open;
-      XMLHttpRequest.prototype.open = function(method, url, ...rest) {
-        if (typeof url === 'string' && url.includes('searchatlas.com')) {
-          console.warn('[Blocked] SearchAtlas XHR:', url);
-          this._searchAtlasBlocked = true;
-          return;
-        }
-        return originalOpen.apply(this, [method, url, ...rest]);
-      };
-    </script>
-
     <!-- Preconnect to external domains for faster loading -->
     <link rel="preconnect" href="https://images.unsplash.com" crossorigin>
     <link rel="dns prefetch" href="https://images.unsplash.com">
@@ -143,14 +115,14 @@
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <script type="module" crossorigin src="/js/index.CiqCSjEt.js"></script>
-    <link rel="modulepreload" crossorigin href="/js/react-core.BDbDfCbx.js">
-    <link rel="modulepreload" crossorigin href="/js/vendor.Bvfl5zcO.js">
-    <link rel="modulepreload" crossorigin href="/js/motion.DFBk7ZYo.js">
-    <link rel="modulepreload" crossorigin href="/js/ui.B0987Ha5.js">
-    <link rel="modulepreload" crossorigin href="/js/router.BtNdllsK.js">
-    <link rel="modulepreload" crossorigin href="/js/db.MBp3YQOE.js">
-    <link rel="stylesheet" crossorigin href="/assets/index.Dbr4meV_.css">
+    <script type="module" crossorigin src="/js/index.CFvxw9jX.js"></script>
+    <link rel="modulepreload" crossorigin href="/js/vendor.9oooaHwA.js">
+    <link rel="modulepreload" crossorigin href="/js/react-core.CdIQVt5S.js">
+    <link rel="modulepreload" crossorigin href="/js/motion.DJNQW1lM.js">
+    <link rel="modulepreload" crossorigin href="/js/ui.p74EKDGx.js">
+    <link rel="modulepreload" crossorigin href="/js/router.BaE4QyWD.js">
+    <link rel="modulepreload" crossorigin href="/js/db.CVC35RSd.js">
+    <link rel="stylesheet" crossorigin href="/assets/index.DJi1EPtL.css">
   </head>
 
   <body>

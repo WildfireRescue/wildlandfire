@@ -1,16 +1,8 @@
 import React from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import Heading from '@tiptap/extension-heading';
-import Bold from '@tiptap/extension-bold';
-import Italic from '@tiptap/extension-italic';
-import BulletList from '@tiptap/extension-bullet-list';
-import OrderedList from '@tiptap/extension-ordered-list';
-import ListItem from '@tiptap/extension-list-item';
 import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
-import HardBreak from '@tiptap/extension-hard-break';
-import Text from '@tiptap/extension-text';
 import { 
   Bold as BoldIcon, 
   Italic as ItalicIcon, 
@@ -29,26 +21,24 @@ import { uploadArticleImage } from '../../lib/articleImage';
 interface RichTextEditorProps {
   value: string;
   onChange: (content: string) => void;
-  placeholder?: string;
 }
 
 export default function RichTextEditor({ value, onChange }: RichTextEditorProps) {
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        heading: false,
-        hardBreak: false,
+        bulletList: { HTMLAttributes: { class: 'list-disc list-inside' } },
+        orderedList: { HTMLAttributes: { class: 'list-decimal list-inside' } },
       }),
-      Heading.configure({ levels: [1, 2, 3] }),
-      Bold,
-      Italic,
-      BulletList.configure({ HTMLAttributes: { class: 'list-disc list-inside' } }),
-      OrderedList.configure({ HTMLAttributes: { class: 'list-decimal list-inside' } }),
-      ListItem,
-      Link.configure({ openOnClick: false, autolink: true }),
-      Image.configure({ allowBase64: true, HTMLAttributes: { class: 'max-w-full h-auto rounded' } }),
-      HardBreak,
-      Text,
+      Link.configure({ 
+        openOnClick: false, 
+        autolink: true,
+        HTMLAttributes: { class: 'text-primary underline' }
+      }),
+      Image.configure({ 
+        allowBase64: true, 
+        HTMLAttributes: { class: 'max-w-full h-auto rounded' } 
+      }),
     ],
     content: value,
     onUpdate: ({ editor: editorInstance }) => {
@@ -80,7 +70,13 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
     editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
   };
 
-  if (!editor) return null;
+  if (!editor) {
+    return (
+      <div className="border border-border rounded-lg p-4 bg-muted/50 text-muted-foreground">
+        Loading editor...
+      </div>
+    );
+  }
 
   return (
     <div className="border border-border rounded-lg overflow-hidden">
