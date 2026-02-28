@@ -6,6 +6,9 @@ import { Footer } from "./components/Footer";
 import { StructuredData } from "./components/StructuredData";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { AuthProvider } from "../contexts/AuthContext";
+import { BlogEditorPage } from "./pages/admin/BlogEditorPage";
+
+console.log("[App] Module loading...");
 
 // Lazy load pages that aren't immediately needed
 const AboutPage = lazy(() => import("./pages/AboutPage").then((m) => ({ default: m.AboutPage })));
@@ -18,9 +21,6 @@ const BlogIndexPage = lazy(() => import("./pages/BlogIndexPage").then((m) => ({ 
 const BlogPostPage = lazy(() => import("./pages/BlogPostPage").then((m) => ({ default: m.BlogPostPage })));
 const BlogCategoryPage = lazy(() =>
   import("./pages/BlogCategoryPage").then((m) => ({ default: m.BlogCategoryPage }))
-);
-const BlogEditorPage = lazy(() =>
-  import("./pages/admin/BlogEditorPage").then((m) => ({ default: m.BlogEditorPage }))
 );
 
 // ✅ simplest possible lazy import for default-exported component

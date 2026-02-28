@@ -19,7 +19,8 @@ import RichTextEditor from "../../components/RichTextEditor";
 const BUILD_TAG = "BLOG_EDITOR_NOHANG_2026-02-20_0940";
 
 export function BlogEditorPage() {
-  console.log("[BlogEditorPage] RENDER", BUILD_TAG);
+  console.log("[BlogEditorPage] MOUNT - Component is loading!", BUILD_TAG);
+  console.log("[BlogEditorPage] Current URL:", window.location.pathname);
 
   const [permissionResult, setPermissionResult] = useState<PermissionCheckResult | null>(null);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
