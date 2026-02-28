@@ -2,8 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { supabase } from "../../../lib/supabase";
 import { Button } from "../../components/ui/button";
-import { Mail, LogOut, Save, Eye, AlertCircle, Info } from "lucide-react";
-import { createPost, getCategories } from "../../../lib/supabaseBlog";
+import { Mail, LogOut, Save, Eye, AlertCircle, Info, Edit3, X, Menu } from "lucide-react";
+import { createPost, getCategories, updatePost } from "../../../lib/supabaseBlog";
 import { generateSlug, calculateReadingTime } from "../../../lib/blogHelpers";
 import { withTimeout, TimeoutError } from "../../../lib/promiseUtils";
 import {
@@ -11,7 +11,10 @@ import {
   getPermissionInstructions,
   type PermissionCheckResult,
 } from "../../../lib/permissions";
-import type { BlogCategory } from "../../../lib/blogTypes";
+import type { BlogCategory, BlogPost } from "../../../lib/blogTypes";
+import RichTextEditor from "../../components/RichTextEditor";
+import FeaturedImageUpload from "../../components/FeaturedImageUpload";
+import ArticleList from "../../components/ArticleList";
 
 const BUILD_TAG = "BLOG_EDITOR_NOHANG_2026-02-20_0940";
 
@@ -77,6 +80,11 @@ export function BlogEditorPage() {
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
   const [saveErr, setSaveErr] = useState<string | null>(null);
+
+  // Split view state
+  const [showArticleList, setShowArticleList] = useState(true);
+  const [isEditingArticle, setIsEditingArticle] = useState(false);
+  const [editingArticleId, setEditingArticleId] = useState<string | null>(null);
 
   const autoSlug = useMemo(() => generateSlug(title), [title]);
   const slugTouched = useRef(false);
@@ -203,6 +211,91 @@ export function BlogEditorPage() {
     window.location.href = "/";
   }
 
+  // Load article into editor form
+  function loadArticleToEdit(article: BlogPost) {
+    setTitle(article.title || "");
+    setSlug(article.slug || "");
+    setExcerpt(article.excerpt || "");
+    setContent(article.content_markdown || article.content_html || "");
+    setMetaTitle(article.meta_title || "");
+    setMetaDescription(article.meta_description || "");
+    setCanonicalUrl(article.canonical_url || "");
+    setFocusKeyword(article.focus_keyword || "");
+    setSecondaryKeywords(
+      Array.isArray(article.secondary_keywords)
+        ? (article.secondary_keywords as string[]).join(", ")
+        : ""
+    );
+    setCoverImageUrl(article.cover_image_url || "");
+    setFeaturedImageUrl(article.featured_image_url || "");
+    setFeaturedImageAltText(article.featured_image_alt_text || "");
+    setOgImageUrl(article.og_image_url || "");
+    setOgTitle(article.og_title || "");
+    setOgDescription(article.og_description || "");
+    setCategory(article.category || "");
+    setTagsInput(Array.isArray(article.tags) ? (article.tags as string[]).join(", ") : "");
+    setStatus((article.status as "draft" | "scheduled" | "published") || "draft");
+    setScheduledFor(article.scheduled_for || "");
+    setFeatured(article.featured || false);
+    setAllowIndexing(article.allow_indexing !== false);
+    setAllowFollow(article.allow_follow !== false);
+    setRobotsDirectives(article.robots_directives || "");
+    setSitemapPriority(String(article.sitemap_priority || 0.8));
+    setAuthorName(article.author_name || "");
+    setAuthorRole(article.author_role || "");
+    setAuthorBio(article.author_bio || "");
+    setReviewedBy(article.reviewed_by || "");
+    setFactChecked(article.fact_checked || false);
+
+    setIsEditingArticle(true);
+    setEditingArticleId(article.id);
+    slugTouched.current = true;
+  }
+
+  // New/reset form
+  function resetForm() {
+    setTitle("");
+    setSlug("");
+    setExcerpt("");
+    setContent("");
+    setMetaTitle("");
+    setMetaDescription("");
+    setCanonicalUrl("");
+    setFocusKeyword("");
+    setSecondaryKeywords("");
+    setCoverImageUrl("");
+    setFeaturedImageUrl("");
+    setFeaturedImageAltText("");
+    setOgImageUrl("");
+    setOgTitle("");
+    setOgDescription("");
+    setCategory("");
+    setTagsInput("");
+    setStatus("draft");
+    setScheduledFor("");
+    setFeatured(false);
+    setAllowIndexing(true);
+    setAllowFollow(true);
+    setRobotsDirectives("");
+    setSitemapPriority("0.8");
+    setAuthorName("");
+    setAuthorRole("");
+    setAuthorBio("");
+    setReviewedBy("");
+    setFactChecked(false);
+    setSaveMsg(null);
+    setSaveErr(null);
+
+    setIsEditingArticle(false);
+    setEditingArticleId(null);
+    slugTouched.current = false;
+  }
+
+  async function signOut() {
+    await supabase.auth.signOut();
+    window.location.href = "/";
+  }
+
   async function savePost() {
     setSaving(true);
     setSaveMsg(null);
@@ -269,16 +362,29 @@ export function BlogEditorPage() {
         published_at: status === "published" ? new Date().toISOString() : null,
       };
 
-      const { post, error } = await withTimeout(
-        createPost(postData),
-        15000,
-        "Save timed out after 15 seconds."
-      );
+      let error;
+      
+      if (isEditingArticle && editingArticleId) {
+        // Update existing article
+        const { post, error: updateErr } = await withTimeout(
+          updatePost(finalSlug, postData),
+          15000,
+          "Update timed out after 15 seconds."
+        );
+        error = updateErr;
+        if (error) throw new Error(error.message || "Update failed");
+      } else {
+        // Create new article
+        const { post, error: createErr } = await withTimeout(
+          createPost(postData),
+          15000,
+          "Save timed out after 15 seconds."
+        );
+        error = createErr;
+        if (error) throw new Error(error.message || "Save failed");
+      }
 
-      if (error) throw new Error(error.message || "Save failed");
-      if (!post) throw new Error("No post returned");
-
-      setSaveMsg("✅ Saved draft!");
+      setSaveMsg(`✅ ${isEditingArticle ? "Updated" : "Saved"} draft!`);
       setTimeout(() => setSaveMsg(null), 3000);
     } catch (e: any) {
       const msg = e instanceof TimeoutError ? e.message : e?.message ?? "Save failed";
@@ -401,47 +507,78 @@ export function BlogEditorPage() {
   // ✅ Logged IN and has access
   return (
     <div className="min-h-screen pt-28 pb-20 bg-background">
-      <div className="container mx-auto px-4 max-w-4xl">
+      <div className="container mx-auto px-4 h-full max-w-7xl">
+        {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold">Blog Editor</h1>
           <div className="flex items-center gap-3">
+            <Button
+              variant={showArticleList ? "default" : "outline"}
+              size="sm"
+              onClick={() => setShowArticleList(!showArticleList)}
+            >
+              <Menu size={16} className="mr-2" />
+              {showArticleList ? "Hide" : "Show"} Articles
+            </Button>
+            {isEditingArticle && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  resetForm();
+                  setShowArticleList(true);
+                }}
+              >
+                <X size={16} className="mr-2" /> New Article
+              </Button>
+            )}
             <Button variant="outline" size="sm" onClick={signOut}>
               <LogOut size={16} className="mr-2" /> Sign Out
             </Button>
           </div>
         </div>
 
-        <div className="bg-card border border-border rounded-xl p-8 space-y-8">
-          {/* CORE FIELDS */}
-          <div>
-            <h2 className="text-lg font-bold mb-4 text-primary">Core Content</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Title *</label>
-                <input
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Post title..."
-                  className="w-full px-4 py-3 bg-input-background border border-border rounded-lg"
-                />
-              </div>
+        {/* Split View Container */}
+        <div className="flex gap-6 h-[calc(100vh-200px)]">
+          {/* Left: Article List */}
+          {showArticleList && (
+            <div className="w-80 flex-shrink-0 bg-card border border-border rounded-xl p-6 overflow-y-auto">
+              <ArticleList onSelectArticle={loadArticleToEdit} />
+            </div>
+          )}
 
-              <div>
-                <label className="block text-sm font-medium mb-2">Slug *</label>
-                <input
-                  value={slug}
-                  onChange={(e) => {
-                    setSlug(e.target.value);
-                    slugTouched.current = true;
-                  }}
-                  placeholder={autoSlug}
-                  className="w-full px-4 py-3 bg-input-background border border-border rounded-lg font-mono text-sm"
-                />
-                <p className="text-xs text-muted-foreground mt-1">Auto: {autoSlug}</p>
-              </div>
+          {/* Right: Editor Form */}
+          <div className={`flex-1 bg-card border border-border rounded-xl p-8 space-y-8 overflow-y-auto ${!showArticleList ? "w-full" : ""}`}>
+            {/* CORE FIELDS */}
+            <div>
+              <h2 className="text-lg font-bold mb-4 text-primary">Core Content</h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Title *</label>
+                  <input
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Post title..."
+                    className="w-full px-4 py-3 bg-input-background border border-border rounded-lg"
+                  />
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-2">Excerpt</label>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Slug *</label>
+                  <input
+                    value={slug}
+                    onChange={(e) => {
+                      setSlug(e.target.value);
+                      slugTouched.current = true;
+                    }}
+                    placeholder={autoSlug}
+                    className="w-full px-4 py-3 bg-input-background border border-border rounded-lg font-mono text-sm"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">Auto: {autoSlug}</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Excerpt</label>
                 <textarea
                   value={excerpt}
                   onChange={(e) => setExcerpt(e.target.value)}
@@ -452,13 +589,11 @@ export function BlogEditorPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Content (Markdown) *</label>
-                <textarea
+                <label className="block text-sm font-medium mb-2">Content (WYSIWYG) *</label>
+                <RichTextEditor
                   value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  placeholder="Post content in markdown..."
-                  rows={14}
-                  className="w-full px-4 py-3 bg-input-background border border-border rounded-lg font-mono text-sm"
+                  onChange={(html) => setContent(html)}
+                  placeholder="Write your article content here..."
                 />
               </div>
             </div>
@@ -524,6 +659,18 @@ export function BlogEditorPage() {
           {/* IMAGES & SOCIAL */}
           <div>
             <h2 className="text-lg font-bold mb-4 text-primary">Images & Social</h2>
+            
+            {/* Featured Image Upload Component */}
+            <div className="mb-8">
+              <FeaturedImageUpload
+                value={featuredImageUrl}
+                onChange={setFeaturedImageUrl}
+                onAltChange={setFeaturedImageAltText}
+                altText={featuredImageAltText}
+              />
+            </div>
+
+            {/* Additional image fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-2">Cover Image URL</label>
@@ -531,26 +678,6 @@ export function BlogEditorPage() {
                   value={coverImageUrl}
                   onChange={(e) => setCoverImageUrl(e.target.value)}
                   placeholder="https://..."
-                  className="w-full px-4 py-2 bg-input-background border border-border rounded-lg text-sm"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Featured Image URL</label>
-                <input
-                  value={featuredImageUrl}
-                  onChange={(e) => setFeaturedImageUrl(e.target.value)}
-                  placeholder="https://..."
-                  className="w-full px-4 py-2 bg-input-background border border-border rounded-lg text-sm"
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium mb-2">Featured Image Alt Text</label>
-                <input
-                  value={featuredImageAltText}
-                  onChange={(e) => setFeaturedImageAltText(e.target.value)}
-                  placeholder="Description of the image..."
                   className="w-full px-4 py-2 bg-input-background border border-border rounded-lg text-sm"
                 />
               </div>
@@ -785,11 +912,12 @@ export function BlogEditorPage() {
           <div className="flex gap-3 pt-4">
             <Button onClick={savePost} disabled={saving} className="flex-1">
               <Save size={18} className="mr-2" />
-              {saving ? "Saving…" : "Save Draft"}
+              {saving ? "Saving…" : isEditingArticle ? "Update Draft" : "Save Draft"}
             </Button>
             <Button variant="outline" onClick={() => (window.location.href = "/blog")}>
               <Eye size={18} className="mr-2" /> View Blog
             </Button>
+          </div>
           </div>
         </div>
       </div>
