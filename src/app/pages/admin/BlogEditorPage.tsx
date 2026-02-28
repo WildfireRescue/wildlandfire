@@ -291,11 +291,6 @@ export function BlogEditorPage() {
     slugTouched.current = false;
   }
 
-  async function signOut() {
-    await supabase.auth.signOut();
-    window.location.href = "/";
-  }
-
   async function savePost() {
     setSaving(true);
     setSaveMsg(null);
