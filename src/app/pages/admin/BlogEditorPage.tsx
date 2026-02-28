@@ -12,9 +12,9 @@ import {
   type PermissionCheckResult,
 } from "../../../lib/permissions";
 import type { BlogCategory, BlogPost } from "../../../lib/blogTypes";
-import RichTextEditor from "../../components/RichTextEditor";
 import FeaturedImageUpload from "../../components/FeaturedImageUpload";
 import ArticleList from "../../components/ArticleList";
+import RichTextEditor from "../../components/RichTextEditor";
 
 const BUILD_TAG = "BLOG_EDITOR_NOHANG_2026-02-20_0940";
 
@@ -593,7 +593,6 @@ export function BlogEditorPage() {
                 <RichTextEditor
                   value={content}
                   onChange={(html) => setContent(html)}
-                  placeholder="Write your article content here..."
                 />
               </div>
             </div>

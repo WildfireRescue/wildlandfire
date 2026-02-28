@@ -1,6 +1,4 @@
-import React, { useMemo } from 'react';
-import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
+import React, { useRef, useEffect } from 'react';
 import { 
   Bold as BoldIcon, 
   Italic as ItalicIcon, 
@@ -17,45 +15,69 @@ interface RichTextEditorProps {
 }
 
 export default function RichTextEditor({ value, onChange }: RichTextEditorProps) {
-  // Memoize editor config to prevent unnecessary re-initialization
-  const editorConfig = useMemo(() => ({
-    extensions: [StarterKit],
-    content: value,
-  }), [value]);
+  const editorRef = useRef<HTMLDivElement>(null);
+  const isInitialMount = useRef(true);
 
-  const editor = useEditor({
-    ...editorConfig,
-    onCreate: () => {
-      // Initialize with current value
-    },
-    onUpdate: ({ editor: editorInstance }) => {
-      onChange(editorInstance.getHTML());
-    },
-  });
+  useEffect(() => {
+    if (editorRef.current && isInitialMount.current && value) {
+      editorRef.current.innerHTML = value;
+      isInitialMount.current = false;
+    }
+  }, [value]);
 
-  const handleLinkInsert = () => {
-    if (!editor) return;
-    const url = prompt('Enter link URL:');
-    if (!url) return;
-    editor.chain().focus().setLink({ href: url }).run();
+  const handleInput = () => {
+    if (editorRef.current) {
+      onChange(editorRef.current.innerHTML);
+    }
   };
 
-  if (!editor) {
-    return (
-      <div className="border border-border rounded-lg p-4 bg-muted/50 text-muted-foreground min-h-80 flex items-center justify-center">
-        Initializing editor...
-      </div>
-    );
-  }
+  const applyFormat = (command: string, value?: string) => {
+    document.execCommand(command, false, value);
+    editorRef.current?.focus();
+  };
+
+  const handleHeading = () => {
+    applyFormat('formatBlock', '<h2>');
+  };
+
+  const handleBold = () => {
+    applyFormat('bold');
+  };
+
+  const handleItalic = () => {
+    applyFormat('italic');
+  };
+
+  const handleBulletList = () => {
+    applyFormat('insertUnorderedList');
+  };
+
+  const handleOrderedList = () => {
+    applyFormat('insertOrderedList');
+  };
+
+  const handleLink = () => {
+    const url = prompt('Enter link URL:');
+    if (url) {
+      applyFormat('createLink', url);
+    }
+  };
+
+  const handleUndo = () => {
+    applyFormat('undo');
+  };
+
+  const handleRedo = () => {
+    applyFormat('redo');
+  };
 
   return (
     <div className="border border-border rounded-lg overflow-hidden">
       {/* Toolbar */}
       <div className="bg-muted/30 border-b border-border p-3 flex flex-wrap gap-1">
-        {/* Heading */}
         <button
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-          className={`p-2 rounded hover:bg-muted/50 transition ${editor.isActive('heading', { level: 2 }) ? 'bg-primary text-white' : ''}`}
+          onClick={handleHeading}
+          className="p-2 rounded hover:bg-muted/50 transition"
           title="Heading"
         >
           <Heading2 size={18} />
@@ -63,17 +85,16 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
 
         <div className="w-px bg-border mx-1" />
 
-        {/* Formatting */}
         <button
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          className={`p-2 rounded hover:bg-muted/50 transition ${editor.isActive('bold') ? 'bg-primary text-white' : ''}`}
+          onClick={handleBold}
+          className="p-2 rounded hover:bg-muted/50 transition"
           title="Bold"
         >
           <BoldIcon size={18} />
         </button>
         <button
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={`p-2 rounded hover:bg-muted/50 transition ${editor.isActive('italic') ? 'bg-primary text-white' : ''}`}
+          onClick={handleItalic}
+          className="p-2 rounded hover:bg-muted/50 transition"
           title="Italic"
         >
           <ItalicIcon size={18} />
@@ -81,17 +102,16 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
 
         <div className="w-px bg-border mx-1" />
 
-        {/* Lists */}
         <button
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={`p-2 rounded hover:bg-muted/50 transition ${editor.isActive('bulletList') ? 'bg-primary text-white' : ''}`}
+          onClick={handleBulletList}
+          className="p-2 rounded hover:bg-muted/50 transition"
           title="Bullet List"
         >
           <List size={18} />
         </button>
         <button
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          className={`p-2 rounded hover:bg-muted/50 transition ${editor.isActive('orderedList') ? 'bg-primary text-white' : ''}`}
+          onClick={handleOrderedList}
+          className="p-2 rounded hover:bg-muted/50 transition"
           title="Numbered List"
         >
           <ListOrdered size={18} />
@@ -99,9 +119,8 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
 
         <div className="w-px bg-border mx-1" />
 
-        {/* Link */}
         <button
-          onClick={handleLinkInsert}
+          onClick={handleLink}
           className="p-2 rounded hover:bg-muted/50 transition"
           title="Insert Link"
         >
@@ -110,16 +129,15 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
 
         <div className="w-px bg-border mx-1" />
 
-        {/* Undo/Redo */}
         <button
-          onClick={() => editor.chain().focus().undo().run()}
+          onClick={handleUndo}
           className="p-2 rounded hover:bg-muted/50 transition"
           title="Undo"
         >
           <UndoIcon size={18} />
         </button>
         <button
-          onClick={() => editor.chain().focus().redo().run()}
+          onClick={handleRedo}
           className="p-2 rounded hover:bg-muted/50 transition"
           title="Redo"
         >
@@ -127,10 +145,14 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
         </button>
       </div>
 
-      {/* Editor Content */}
-      <EditorContent
-        editor={editor}
-        className="prose prose-sm dark:prose-invert max-w-none p-4 min-h-80 focus:outline-none overflow-y-auto"
+      {/* Editor Content (contentEditable) */}
+      <div
+        ref={editorRef}
+        contentEditable
+        suppressContentEditableWarning
+        onInput={handleInput}
+        className="prose prose-sm dark:prose-invert max-w-none p-4 min-h-80 focus:outline-none overflow-y-auto bg-background text-foreground border-none"
+        style={{ wordWrap: 'break-word', whiteSpace: 'pre-wrap' }}
       />
     </div>
   );
