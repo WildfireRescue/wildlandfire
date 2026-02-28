@@ -189,6 +189,7 @@ async function fetchPublishedPosts(): Promise<BlogPost[]> {
     console.error('\n   Skipping blog prerendering.\n');
     return [];
   }
+}
 
 function injectSEOTags(html: string, post: BlogPost, baseUrl: string = SITE_ORIGIN): string {
   const doc = new JSDOM(html).window.document;
