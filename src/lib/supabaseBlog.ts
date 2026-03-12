@@ -7,6 +7,215 @@ import { supabase } from './supabase';
 import type { BlogPost, BlogCategory, UserProfile, PaginationOptions, BlogListFilters } from './blogTypes';
 import { isAdminEmail } from './permissions';
 
+export interface AuthorDefaults {
+  author_id: string | null;
+  author_email: string;
+  author_name: string;
+  author_role: string;
+  author_bio: string;
+}
+
+const ORG_AUTHOR_FALLBACK = 'The Wildland Fire Recovery Fund';
+const ROLE_FALLBACK = 'Contributor';
+const BIO_FALLBACK = `Contributor at ${ORG_AUTHOR_FALLBACK}.`;
+
+let hasLoggedMissingScheduledPublisher = false;
+
+function pickFirstNonEmptyString(...values: unknown[]): string | null {
+  for (const value of values) {
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (trimmed.length > 0) return trimmed;
+    }
+  }
+  return null;
+}
+
+function readProfileString(record: Record<string, unknown> | null, keys: string[]): string | null {
+  if (!record) return null;
+  for (const key of keys) {
+    const value = record[key];
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (trimmed.length > 0) return trimmed;
+    }
+  }
+  return null;
+}
+
+function titleCaseWords(value: string): string {
+  return value
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+}
+
+function deriveNameFromEmail(email: string | null | undefined): string | null {
+  if (!email) return null;
+  const localPart = email.split('@')[0]?.trim();
+  if (!localPart) return null;
+  const cleaned = localPart.replace(/[._-]+/g, ' ');
+  return titleCaseWords(cleaned);
+}
+
+function humanizeProfileRole(role: string | null): string | null {
+  if (!role) return null;
+  const normalized = role.trim().toLowerCase();
+  if (!normalized) return null;
+  if (normalized === 'admin') return 'Administrator';
+  if (normalized === 'editor') return 'Editor';
+  if (normalized === 'user' || normalized === 'viewer') return ROLE_FALLBACK;
+  return titleCaseWords(normalized.replace(/[_-]+/g, ' '));
+}
+
+/**
+ * Convert scheduled posts whose time has arrived into published posts.
+ * This is non-blocking for callers and safely no-ops when the RPC is not deployed yet.
+ */
+export async function publishDueScheduledPosts() {
+  try {
+    const { data, error } = await supabase.rpc('publish_due_scheduled_posts');
+    if (error) {
+      return { updatedCount: 0, error };
+    }
+
+    const updatedCount = typeof data === 'number' ? data : Number(data ?? 0);
+    return {
+      updatedCount: Number.isFinite(updatedCount) ? updatedCount : 0,
+      error: null,
+    };
+  } catch (e: any) {
+    return {
+      updatedCount: 0,
+      error: { message: e?.message || 'Unexpected error in scheduled post publisher', code: 'UNEXPECTED' },
+    };
+  }
+}
+
+async function publishDueScheduledPostsNonBlocking() {
+  const { updatedCount, error } = await publishDueScheduledPosts();
+
+  if (error) {
+    const message = error?.message || '';
+    const isMissingFn = error?.code === '42883' || message.includes('publish_due_scheduled_posts');
+
+    if (isMissingFn) {
+      if (!hasLoggedMissingScheduledPublisher) {
+        console.info('[publishDueScheduledPosts] RPC not available yet. Apply migration 014 to enable scheduling automation.');
+        hasLoggedMissingScheduledPublisher = true;
+      }
+      return;
+    }
+
+    console.warn('[publishDueScheduledPosts] Non-blocking publish check failed:', error);
+    return;
+  }
+
+  if (updatedCount > 0) {
+    console.log('[publishDueScheduledPosts] Published scheduled posts:', updatedCount);
+  }
+}
+
+/**
+ * Resolve author defaults from current authenticated user + optional profile row.
+ * Never throws; always returns sensible fallbacks.
+ */
+export async function getCurrentUserAuthorDefaults() {
+  try {
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    const user = userData.user;
+
+    if (userError || !user) {
+      return {
+        defaults: {
+          author_id: null,
+          author_email: 'unknown',
+          author_name: ORG_AUTHOR_FALLBACK,
+          author_role: ROLE_FALLBACK,
+          author_bio: BIO_FALLBACK,
+        } as AuthorDefaults,
+        error: userError || null,
+      };
+    }
+
+    const userMeta = (user.user_metadata || {}) as Record<string, unknown>;
+    const appMeta = (user.app_metadata || {}) as Record<string, unknown>;
+
+    let profileRecord: Record<string, unknown> | null = null;
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    if (!profileError && profileData && typeof profileData === 'object') {
+      profileRecord = profileData as Record<string, unknown>;
+    } else if (profileError && profileError.code !== 'PGRST116') {
+      console.warn('[getCurrentUserAuthorDefaults] Profile fetch failed (non-blocking):', profileError.message);
+    }
+
+    const profileRole = pickFirstNonEmptyString(
+      readProfileString(profileRecord, ['author_role', 'role_title', 'job_title', 'title']),
+      humanizeProfileRole(readProfileString(profileRecord, ['role'])),
+      humanizeProfileRole(pickFirstNonEmptyString(appMeta.role, userMeta.role))
+    );
+
+    const authorName = pickFirstNonEmptyString(
+      readProfileString(profileRecord, ['author_name', 'full_name', 'display_name', 'name']),
+      pickFirstNonEmptyString(
+        userMeta.author_name,
+        userMeta.full_name,
+        userMeta.display_name,
+        userMeta.name,
+        userMeta.preferred_username
+      ),
+      deriveNameFromEmail(user.email),
+      ORG_AUTHOR_FALLBACK
+    );
+
+    const authorRole = pickFirstNonEmptyString(
+      profileRole,
+      pickFirstNonEmptyString(
+        userMeta.author_role,
+        userMeta.title,
+        userMeta.job_title,
+        userMeta.position
+      ),
+      ROLE_FALLBACK
+    );
+
+    const authorBio = pickFirstNonEmptyString(
+      readProfileString(profileRecord, ['author_bio', 'bio', 'about', 'description']),
+      pickFirstNonEmptyString(userMeta.author_bio, userMeta.bio, userMeta.about, userMeta.description),
+      BIO_FALLBACK
+    );
+
+    return {
+      defaults: {
+        author_id: user.id,
+        author_email: user.email || 'unknown',
+        author_name: authorName || ORG_AUTHOR_FALLBACK,
+        author_role: authorRole || ROLE_FALLBACK,
+        author_bio: authorBio || BIO_FALLBACK,
+      } as AuthorDefaults,
+      error: null,
+    };
+  } catch (e: any) {
+    console.warn('[getCurrentUserAuthorDefaults] Unexpected error (non-blocking):', e?.message || e);
+    return {
+      defaults: {
+        author_id: null,
+        author_email: 'unknown',
+        author_name: ORG_AUTHOR_FALLBACK,
+        author_role: ROLE_FALLBACK,
+        author_bio: BIO_FALLBACK,
+      } as AuthorDefaults,
+      error: null,
+    };
+  }
+}
+
 // =====================================================
 // POSTS
 // =====================================================
@@ -16,6 +225,8 @@ import { isAdminEmail } from './permissions';
  */
 export async function getPublishedPosts(options: PaginationOptions = { page: 1, perPage: 12 }) {
   try {
+    await publishDueScheduledPostsNonBlocking();
+
     const { page, perPage } = options;
     const from = (page - 1) * perPage;
     const to = from + perPage - 1;
@@ -156,6 +367,10 @@ export async function getAllPosts(filters?: BlogListFilters, options: Pagination
 export async function getPostBySlug(slug: string, includeUnpublished: boolean = false) {
   try {
     if (!includeUnpublished) {
+      await publishDueScheduledPostsNonBlocking();
+    }
+
+    if (!includeUnpublished) {
       const { data, error } = await supabase
         .from('posts')
         .select('*')
@@ -198,6 +413,8 @@ export async function getPostBySlug(slug: string, includeUnpublished: boolean = 
  */
 export async function getFeaturedPosts(limit: number = 3) {
   try {
+    await publishDueScheduledPostsNonBlocking();
+
     console.log('[getFeaturedPosts] Fetching featured posts:', { limit });
 
     const { data, error } = await supabase
@@ -227,6 +444,8 @@ export async function getFeaturedPosts(limit: number = 3) {
  */
 export async function getPostsByCategory(category: string, options: PaginationOptions = { page: 1, perPage: 12 }) {
   try {
+    await publishDueScheduledPostsNonBlocking();
+
     const { page, perPage } = options;
 
     console.log('[getPostsByCategory] Fetching posts:', { category, page, perPage });
@@ -334,6 +553,8 @@ export async function getPostsByCategory(category: string, options: PaginationOp
  * Fetch posts by tag
  */
 export async function getPostsByTag(tag: string, options: PaginationOptions = { page: 1, perPage: 12 }) {
+  await publishDueScheduledPostsNonBlocking();
+
   const { page, perPage } = options;
   const from = (page - 1) * perPage;
   const to = from + perPage - 1;
@@ -355,6 +576,8 @@ export async function getPostsByTag(tag: string, options: PaginationOptions = { 
  */
 export async function getRelatedPosts(category: string | null, currentSlug: string, limit: number = 3) {
   if (!category) return { posts: null, error: null };
+
+  await publishDueScheduledPostsNonBlocking();
 
   const { data, error } = await supabase
     .from('posts')

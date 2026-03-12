@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import { supabase } from "../../../lib/supabase";
 import { Button } from "../../components/ui/button";
 import { Mail, LogOut, Save, Eye, AlertCircle, Info, Edit3, X, Menu } from "lucide-react";
-import { createPost, getCategories, updatePost } from "../../../lib/supabaseBlog";
+import { createPost, getCategories, getCurrentUserAuthorDefaults, updatePost } from "../../../lib/supabaseBlog";
 import { generateSlug, calculateReadingTime } from "../../../lib/blogHelpers";
 import { withTimeout, TimeoutError } from "../../../lib/promiseUtils";
 import {
@@ -89,6 +89,7 @@ export function BlogEditorPage() {
 
   const autoSlug = useMemo(() => generateSlug(title), [title]);
   const slugTouched = useRef(false);
+  const hasHydratedAuthorDefaults = useRef(false);
 
   useEffect(() => {
     if (!slugTouched.current) setSlug(autoSlug);
@@ -96,6 +97,36 @@ export function BlogEditorPage() {
 
   function getEmailRedirectTo() {
     return `${window.location.origin}/auth-callback`;
+  }
+
+  function toDateTimeLocalValue(value: string | null | undefined): string {
+    if (!value) return "";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "";
+
+    const pad = (input: number) => String(input).padStart(2, "0");
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  }
+
+  function toIsoStringFromDateTimeLocal(value: string): string | null {
+    if (!value) return null;
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return null;
+    return date.toISOString();
+  }
+
+  async function hydrateAuthorDefaults(force = false) {
+    const { defaults } = await getCurrentUserAuthorDefaults();
+
+    if (force || !authorName.trim()) {
+      setAuthorName(defaults.author_name);
+    }
+    if (force || !authorRole.trim()) {
+      setAuthorRole(defaults.author_role);
+    }
+    if (force || !authorBio.trim()) {
+      setAuthorBio(defaults.author_bio);
+    }
   }
 
   // ✅ NO-HANG permission boot
@@ -185,6 +216,12 @@ export function BlogEditorPage() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!permissionResult?.hasAccess || hasHydratedAuthorDefaults.current) return;
+    hasHydratedAuthorDefaults.current = true;
+    void hydrateAuthorDefaults(false);
+  }, [permissionResult?.hasAccess]);
+
   async function sendMagicLink() {
     setLoginError(null);
     setLoginSent(false);
@@ -236,7 +273,7 @@ export function BlogEditorPage() {
     setCategory(article.category || "");
     setTagsInput(Array.isArray(article.tags) ? (article.tags as string[]).join(", ") : "");
     setStatus((article.status as "draft" | "scheduled" | "published") || "draft");
-    setScheduledFor(article.scheduled_for || "");
+    setScheduledFor(toDateTimeLocalValue(article.scheduled_for));
     setFeatured(article.featured || false);
     setAllowIndexing(article.allow_indexing !== false);
     setAllowFollow(article.allow_follow !== false);
@@ -290,9 +327,10 @@ export function BlogEditorPage() {
     setIsEditingArticle(false);
     setEditingArticleId(null);
     slugTouched.current = false;
+    void hydrateAuthorDefaults(true);
   }
 
-  async function savePost() {
+  async function savePost(targetStatus?: "draft" | "scheduled" | "published") {
     setSaving(true);
     setSaveMsg(null);
     setSaveErr(null);
@@ -303,6 +341,24 @@ export function BlogEditorPage() {
 
       const finalSlug = slug || autoSlug;
       const readingTime = calculateReadingTime(content);
+      const statusToSave = targetStatus || status;
+
+      if (statusToSave === "scheduled") {
+        if (!scheduledFor) throw new Error("Please choose a scheduled date and time.");
+
+        const scheduledDate = new Date(scheduledFor);
+        if (Number.isNaN(scheduledDate.getTime())) {
+          throw new Error("Scheduled date/time is invalid.");
+        }
+        if (scheduledDate.getTime() <= Date.now()) {
+          throw new Error("Scheduled date/time must be in the future.");
+        }
+      }
+
+      const scheduledForIso = statusToSave === "scheduled" ? toIsoStringFromDateTimeLocal(scheduledFor) : null;
+      if (statusToSave === "scheduled" && !scheduledForIso) {
+        throw new Error("Scheduled date/time could not be parsed.");
+      }
 
       const authorEmail = permissionResult?.user?.email || "unknown";
 
@@ -337,8 +393,8 @@ export function BlogEditorPage() {
         tags: tagsInput ? tagsInput.split(",").map((t) => t.trim()).filter(Boolean) : [],
         
         // Publishing
-        status: status as "draft" | "scheduled" | "published",
-        scheduled_for: status === "scheduled" && scheduledFor ? scheduledFor : null,
+        status: statusToSave,
+        scheduled_for: scheduledForIso,
         featured: featured,
         allow_indexing: allowIndexing,
         allow_follow: allowFollow,
@@ -346,6 +402,7 @@ export function BlogEditorPage() {
         sitemap_priority: parseFloat(sitemapPriority) || 0.8,
         
         // E-E-A-T / Author
+        author_id: permissionResult?.user?.id || null,
         author_email: authorEmail,
         author_name: authorName || null,
         author_role: authorRole || null,
@@ -355,7 +412,7 @@ export function BlogEditorPage() {
         
         // Metadata
         reading_time_minutes: readingTime,
-        published_at: status === "published" ? new Date().toISOString() : null,
+        published_at: statusToSave === "published" ? new Date().toISOString() : null,
       };
 
       let error;
@@ -380,7 +437,15 @@ export function BlogEditorPage() {
         if (error) throw new Error(error.message || "Save failed");
       }
 
-      setSaveMsg(`✅ ${isEditingArticle ? "Updated" : "Saved"} draft!`);
+      setStatus(statusToSave);
+
+      const actionLabel = statusToSave === "published"
+        ? (isEditingArticle ? "Updated and published" : "Published")
+        : statusToSave === "scheduled"
+          ? (isEditingArticle ? "Updated schedule" : "Scheduled")
+          : (isEditingArticle ? "Updated draft" : "Saved draft");
+
+      setSaveMsg(`✅ ${actionLabel}!`);
       setTimeout(() => setSaveMsg(null), 3000);
     } catch (e: any) {
       const msg = e instanceof TimeoutError ? e.message : e?.message ?? "Save failed";
@@ -905,9 +970,21 @@ export function BlogEditorPage() {
           {saveErr && <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">{saveErr}</div>}
 
           <div className="flex gap-3 pt-4">
-            <Button onClick={savePost} disabled={saving} className="flex-1">
+            <Button onClick={() => savePost("draft")} disabled={saving} variant="outline" className="flex-1">
               <Save size={18} className="mr-2" />
-              {saving ? "Saving…" : isEditingArticle ? "Update Draft" : "Save Draft"}
+              {saving ? "Saving…" : "Save Draft"}
+            </Button>
+            <Button onClick={() => savePost()} disabled={saving} className="flex-1">
+              <Save size={18} className="mr-2" />
+              {saving
+                ? "Saving…"
+                : status === "published"
+                  ? "Publish Now"
+                  : status === "scheduled"
+                    ? "Schedule Post"
+                    : isEditingArticle
+                      ? "Update Post"
+                      : "Save Post"}
             </Button>
             <Button variant="outline" onClick={() => (window.location.href = "/blog")}>
               <Eye size={18} className="mr-2" /> View Blog

@@ -41,6 +41,10 @@
   path = "/blog/*"
   function = "blog-seo"
 
+[[scheduled.functions]]
+  name = "publish-scheduled-posts"
+  cron = "*/5 * * * *"
+
 # Security Headers
 [[headers]]
   for = "/*"

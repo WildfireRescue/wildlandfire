@@ -152,12 +152,24 @@ Run through validators:
 #### Test 7: Test Scheduled Posts
 1. Create new post
 2. Set Status: "Scheduled"
-3. Set "Scheduled For" to future date/time
+3. Set "Scheduled For" to 5-10 minutes in the future
 4. Save post
 5. Check that post doesn't appear on blog index
+6. Wait for schedule time + up to 5 minutes (cron window)
+7. Verify post appears on blog index automatically
 
-**✅ Pass:** Post saved but not visible  
-**❌ Fail:** Check status filtering in queries
+Optional manual trigger:
+- Open `/.netlify/functions/publish-scheduled-posts` and confirm `updatedCount` in response
+- If `PUBLISH_SCHEDULE_SECRET` is set, include header `x-publish-secret: <your-secret>`
+
+Quick curl checks:
+- Without secret protection:
+   - curl https://your-site-domain/.netlify/functions/publish-scheduled-posts
+- With secret protection enabled:
+   - curl -H "x-publish-secret: <your-secret>" https://your-site-domain/.netlify/functions/publish-scheduled-posts
+
+**✅ Pass:** Post is hidden before schedule and auto-publishes after schedule  
+**❌ Fail:** Check migration `014_publish_due_scheduled_posts.sql`, Netlify env vars, and scheduled function config
 
 ### Step 4: Performance Check
 

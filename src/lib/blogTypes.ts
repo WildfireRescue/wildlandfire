@@ -88,6 +88,10 @@ export interface UserProfile {
   id: string; // This is the auth.users.id
   email: string;
   role: 'user' | 'editor' | 'admin';
+  full_name?: string | null;
+  display_name?: string | null;
+  title?: string | null;
+  bio?: string | null;
   created_at: string;
   updated_at: string;
 }

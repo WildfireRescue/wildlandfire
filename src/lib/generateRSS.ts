@@ -42,6 +42,11 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 async function generateRSS() {
   try {
     console.log('🔄 Fetching published blog posts for RSS feed...');
+
+    const { error: publishError } = await supabase.rpc('publish_due_scheduled_posts');
+    if (publishError && publishError.code !== '42883') {
+      console.warn('⚠️  Scheduled publish pre-check failed (continuing):', publishError.message);
+    }
     
     // Fetch recent published posts
     const { data: posts, error } = await supabase

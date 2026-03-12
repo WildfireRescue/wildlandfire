@@ -3,6 +3,7 @@ import { Search, Edit2, Trash2, Loader2, AlertCircle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import type { BlogPost } from '../../lib/blogTypes';
 import { Button } from './ui/button';
+import { publishDueScheduledPosts } from '../../lib/supabaseBlog';
 
 interface ArticleListProps {
   onSelectArticle: (article: BlogPost) => void;
@@ -23,6 +24,8 @@ export default function ArticleList({ onSelectArticle }: ArticleListProps) {
     setError(null);
 
     try {
+      await publishDueScheduledPosts();
+
       let query = supabase
         .from('posts')
         .select('*')

@@ -48,6 +48,28 @@ Required environment variables:
 - `SUPABASE_SERVICE_ROLE_KEY` - Supabase service role key (server only)
 - `STRIPE_SECRET_KEY` - Stripe secret key (server only)
 
+### Scheduled Blog Publishing
+
+Scheduled posts are automatically published by the Netlify Scheduled Function `publish-scheduled-posts` every 5 minutes.
+
+Requirements:
+- Supabase migration `014_publish_due_scheduled_posts.sql` must be applied
+- `SUPABASE_URL` (or `VITE_SUPABASE_URL`) must be set in Netlify
+- `SUPABASE_SERVICE_ROLE_KEY` must be set in Netlify
+- Optional: set `PUBLISH_SCHEDULE_SECRET` (or `CRON_SHARED_SECRET`) to protect manual endpoint access
+
+Manual check endpoint after deploy:
+- `/.netlify/functions/publish-scheduled-posts`
+
+If manual protection is enabled, call it with a secret header:
+- `x-publish-secret: <your-secret>`
+
+Quick curl checks:
+- Without secret protection:
+   - `curl https://your-site-domain/.netlify/functions/publish-scheduled-posts`
+- With secret protection enabled:
+   - `curl -H "x-publish-secret: <your-secret>" https://your-site-domain/.netlify/functions/publish-scheduled-posts`
+
 ## 💳 Donation System
 
 Fully functional Stripe integration with:
