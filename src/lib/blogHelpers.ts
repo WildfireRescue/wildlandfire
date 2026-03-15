@@ -9,7 +9,11 @@ import type { Heading } from './blogTypes';
  */
 export function calculateReadingTime(markdown: string): number {
   const wordsPerMinute = 200;
-  const words = markdown.trim().split(/\s+/).length;
+  const plainText = markdown
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const words = plainText ? plainText.split(/\s+/).length : 0;
   const minutes = Math.ceil(words / wordsPerMinute);
   return Math.max(1, minutes); // Minimum 1 minute
 }
@@ -30,19 +34,87 @@ export function generateSlug(title: string): string {
  * Extract headings from markdown for Table of Contents
  */
 export function extractHeadings(markdown: string): Heading[] {
-  const headingRegex = /^(#{1,6})\s+(.+)$/gm;
   const headings: Heading[] = [];
-  let match;
+  const idCounts = new Map<string, number>();
 
-  while ((match = headingRegex.exec(markdown)) !== null) {
-    const level = match[1].length;
-    const text = match[2].trim();
-    const id = generateSlug(text);
-    
-    headings.push({ id, text, level });
+  const buildUniqueId = (text: string, level: number) => {
+    const baseId = generateSlug(text) || `section-${level}`;
+    const nextCount = (idCounts.get(baseId) || 0) + 1;
+    idCounts.set(baseId, nextCount);
+    return nextCount === 1 ? baseId : `${baseId}-${nextCount}`;
+  };
+
+  const htmlHeadingRegex = /<h([1-6])\b[^>]*>([\s\S]*?)<\/h\1>/gi;
+  let htmlMatch;
+  while ((htmlMatch = htmlHeadingRegex.exec(markdown)) !== null) {
+    const level = Number(htmlMatch[1]);
+    const text = htmlMatch[2]
+      .replace(/<[^>]*>/g, ' ')
+      .replace(/&nbsp;/gi, ' ')
+      .replace(/&amp;/gi, '&')
+      .replace(/&lt;/gi, '<')
+      .replace(/&gt;/gi, '>')
+      .replace(/&quot;/gi, '"')
+      .replace(/&#39;/gi, "'")
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    if (!text) continue;
+
+    headings.push({
+      id: buildUniqueId(text, level),
+      text,
+      level,
+    });
+  }
+
+  if (headings.length > 0) {
+    return headings;
+  }
+
+  const headingRegex = /^(#{1,6})\s+(.+)$/gm;
+  let markdownMatch;
+
+  while ((markdownMatch = headingRegex.exec(markdown)) !== null) {
+    const level = markdownMatch[1].length;
+    const text = markdownMatch[2].trim();
+
+    headings.push({
+      id: buildUniqueId(text, level),
+      text,
+      level,
+    });
   }
 
   return headings;
+}
+
+/**
+ * Adds deterministic id attributes to HTML headings for TOC anchor links.
+ */
+export function injectHeadingIdsInHtml(html: string): string {
+  if (!html) return html;
+
+  const idCounts = new Map<string, number>();
+
+  return html.replace(/<h([1-6])\b([^>]*)>([\s\S]*?)<\/h\1>/gi, (_, level, attrs, innerHtml) => {
+    if (/\sid\s*=\s*['"][^'"]+['"]/i.test(attrs)) {
+      return `<h${level}${attrs}>${innerHtml}</h${level}>`;
+    }
+
+    const text = String(innerHtml)
+      .replace(/<[^>]*>/g, ' ')
+      .replace(/&nbsp;/gi, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    const baseId = generateSlug(text) || `section-${level}`;
+    const nextCount = (idCounts.get(baseId) || 0) + 1;
+    idCounts.set(baseId, nextCount);
+    const resolvedId = nextCount === 1 ? baseId : `${baseId}-${nextCount}`;
+
+    return `<h${level}${attrs} id="${resolvedId}">${innerHtml}</h${level}>`;
+  });
 }
 
 /**

@@ -4,6 +4,7 @@ import { motion } from 'motion/react';
 import { ArrowLeft } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import DOMPurify from 'dompurify';
 import { Button } from '../components/ui/button';
 import { BlogPostMeta } from '../components/blog/BlogPostMeta';
 import { BlogBreadcrumbs } from '../components/blog/BlogBreadcrumbs';
@@ -20,6 +21,7 @@ import HostedArticleTemplate from '../components/HostedArticleTemplate';
 import ExternalArticleTemplate from '../components/ExternalArticleTemplate';
 import { generateMetaTags, updateDocumentMeta, generateArticleStructuredData, generateOrganizationSchema, generateBreadcrumbListSchema, generateEnhancedArticleStructuredData } from '../../lib/seoHelpers.ts';
 import { safeImageSrc, safeMarkdownContent, coerceToString, PLACEHOLDER_IMAGE } from '../../lib/blogImages.ts';
+import { injectHeadingIdsInHtml } from '../../lib/blogHelpers.ts';
 import { debugLog, debugError, debugTiming } from '../../lib/debug.ts';
 import { categorizeError, getUserErrorMessage, isRetryableError } from '../../lib/errorHandling.ts';
 import type { BlogPost } from '../../lib/blogTypes';
@@ -476,6 +478,14 @@ export function BlogPostPage() {
     return <HostedArticleTemplate article={article} />;
   }
 
+  const markdownContent = safeMarkdownContent(post.content_markdown);
+  const hasHtmlContent = typeof post.content_html === 'string' && post.content_html.trim().length > 0;
+  const htmlWithHeadingIds = hasHtmlContent ? injectHeadingIdsInHtml(post.content_html || '') : '';
+  const sanitizedHtml = hasHtmlContent
+    ? DOMPurify.sanitize(htmlWithHeadingIds, { USE_PROFILES: { html: true } })
+    : '';
+  const tocContent = hasHtmlContent ? htmlWithHeadingIds : markdownContent;
+
   return (
     <>
       {/* SEO Meta Tags */}
@@ -564,7 +574,7 @@ export function BlogPostPage() {
             transition={{ delay: 0.3 }}
             className="mb-12 max-w-3xl mx-auto"
           >
-            <BlogTableOfContents content={safeMarkdownContent(post.content_markdown)} />
+            <BlogTableOfContents content={tocContent} />
           </motion.div>
 
           {/* Article Content - Centered, Optimal Reading Width */}
@@ -575,14 +585,18 @@ export function BlogPostPage() {
             className="blog-content max-w-3xl mx-auto"
           >
             <div className="prose prose-invert prose-lg max-w-none">
-              <ReactMarkdown 
-                remarkPlugins={[remarkGfm]}
-                components={{
-                  p: ({ children }) => <p className="mb-6 leading-relaxed">{children}</p>,
-                }}
-              >
-                {safeMarkdownContent(post.content_markdown)}
-              </ReactMarkdown>
+              {hasHtmlContent ? (
+                <div dangerouslySetInnerHTML={{ __html: sanitizedHtml }} />
+              ) : (
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    p: ({ children }) => <p className="mb-6 leading-relaxed">{children}</p>,
+                  }}
+                >
+                  {markdownContent}
+                </ReactMarkdown>
+              )}
             </div>
           </motion.article>
 

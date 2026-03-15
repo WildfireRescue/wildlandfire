@@ -1,13 +1,17 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { 
   Bold as BoldIcon, 
   Italic as ItalicIcon, 
-  Heading2,
   List,
   ListOrdered,
+  ImagePlus,
+  Loader2,
+  Minus,
+  RemoveFormatting,
   Undo2 as UndoIcon,
   Redo2 as RedoIcon
 } from 'lucide-react';
+import { uploadArticleImage } from '../../lib/articleImage';
 
 interface RichTextEditorProps {
   value: string;
@@ -16,12 +20,13 @@ interface RichTextEditorProps {
 
 export default function RichTextEditor({ value, onChange }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
-  const isInitialMount = useRef(true);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imageError, setImageError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (editorRef.current && isInitialMount.current && value) {
+    if (editorRef.current && editorRef.current.innerHTML !== value) {
       editorRef.current.innerHTML = value;
-      isInitialMount.current = false;
     }
   }, [value]);
 
@@ -34,10 +39,11 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
   const applyFormat = (command: string, value?: string) => {
     document.execCommand(command, false, value);
     editorRef.current?.focus();
+    handleInput();
   };
 
-  const handleHeading = () => {
-    applyFormat('formatBlock', '<h2>');
+  const handleBlockFormat = (format: 'p' | 'h2' | 'h3' | 'blockquote' | 'pre') => {
+    applyFormat('formatBlock', `<${format}>`);
   };
 
   const handleBold = () => {
@@ -71,17 +77,66 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
     applyFormat('redo');
   };
 
+  const handleHorizontalRule = () => {
+    applyFormat('insertHorizontalRule');
+  };
+
+  const handleClearFormatting = () => {
+    applyFormat('removeFormat');
+  };
+
+  const handleImageButton = () => {
+    imageInputRef.current?.click();
+  };
+
+  const handleImageSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    setImageError(null);
+
+    try {
+      const result = await uploadArticleImage(file);
+      if ('error' in result) {
+        setImageError(result.error);
+        return;
+      }
+
+      const sanitizedUrl = result.publicUrl.replace(/"/g, '&quot;');
+      const sanitizedAlt = file.name.replace(/"/g, '&quot;');
+      applyFormat('insertHTML', `<img src="${sanitizedUrl}" alt="${sanitizedAlt}" />`);
+      handleInput();
+    } catch (error: any) {
+      setImageError(error?.message || 'Image upload failed');
+    } finally {
+      setUploadingImage(false);
+      event.target.value = '';
+    }
+  };
+
   return (
     <div className="border border-border rounded-lg overflow-hidden bg-white">
       {/* Toolbar */}
       <div className="bg-white border-b border-border p-3 flex flex-wrap gap-1 text-slate-700">
-        <button
-          onClick={handleHeading}
-          className="p-2 rounded hover:bg-slate-100 transition"
-          title="Heading"
+        <select
+          defaultValue=""
+          onChange={(e) => {
+            const next = e.target.value as 'p' | 'h2' | 'h3' | 'blockquote' | 'pre' | '';
+            if (!next) return;
+            handleBlockFormat(next);
+            e.target.value = '';
+          }}
+          className="px-2 py-1 rounded border border-border bg-white text-xs"
+          title="Block style"
         >
-          <Heading2 size={18} />
-        </button>
+          <option value="">Style</option>
+          <option value="p">Paragraph</option>
+          <option value="h2">Heading 2</option>
+          <option value="h3">Heading 3</option>
+          <option value="blockquote">Quote</option>
+          <option value="pre">Code Block</option>
+        </select>
 
         <div className="w-px bg-border mx-1" />
 
@@ -127,6 +182,41 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
           🔗
         </button>
 
+        <button
+          onClick={handleHorizontalRule}
+          className="p-2 rounded hover:bg-slate-100 transition"
+          title="Horizontal Rule"
+        >
+          <Minus size={18} />
+        </button>
+
+        <button
+          onClick={handleImageButton}
+          disabled={uploadingImage}
+          className="p-2 rounded hover:bg-slate-100 transition disabled:opacity-50"
+          title="Upload Image"
+        >
+          {uploadingImage ? <Loader2 size={18} className="animate-spin" /> : <ImagePlus size={18} />}
+        </button>
+
+        <input
+          ref={imageInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleImageSelect}
+          className="hidden"
+        />
+
+        <div className="w-px bg-border mx-1" />
+
+        <button
+          onClick={handleClearFormatting}
+          className="p-2 rounded hover:bg-slate-100 transition"
+          title="Clear Formatting"
+        >
+          <RemoveFormatting size={18} />
+        </button>
+
         <div className="w-px bg-border mx-1" />
 
         <button
@@ -144,6 +234,12 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
           <RedoIcon size={18} />
         </button>
       </div>
+
+      {imageError && (
+        <div className="px-4 py-2 text-sm text-destructive bg-destructive/10 border-b border-destructive/20">
+          {imageError}
+        </div>
+      )}
 
       {/* Editor Content (contentEditable) */}
       <div

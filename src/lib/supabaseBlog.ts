@@ -603,32 +603,87 @@ export async function createPost(postData: Partial<BlogPost>) {
       status: postData.status 
     });
 
-    const { data, error } = await supabase
-      .from('posts')
-      .insert([postData])
-      .select()
-      .single();
-
-    if (error) {
-      console.error('[createPost] Supabase error:', {
-        message: error.message,
-        code: error.code,
-        details: error.details,
-        hint: error.hint
-      });
-      return { post: null, error };
-    }
-
-    if (!data) {
-      console.error('[createPost] No data returned after insert');
-      return { 
-        post: null, 
-        error: { message: 'No data returned from database', code: 'NO_DATA' } 
+    const baseSlug = (postData.slug || '').trim();
+    if (!baseSlug) {
+      return {
+        post: null,
+        error: { message: 'Slug is required', code: 'VALIDATION' },
       };
     }
 
-    console.log('[createPost] Success:', { id: data.id, slug: data.slug });
-    return { post: data as BlogPost, error: null };
+    const maxSlugAttempts = 25;
+    let resolvedSlug = baseSlug;
+    let insertError: any = null;
+
+    const isDuplicateSlugError = (error: any) => {
+      const message = String(error?.message || '').toLowerCase();
+      return error?.code === '23505' && (message.includes('posts_slug_key') || message.includes('slug'));
+    };
+
+    for (let attempt = 0; attempt < maxSlugAttempts; attempt++) {
+      const candidateSlug = attempt === 0 ? baseSlug : `${baseSlug}-${attempt + 1}`;
+      const payload = { ...postData, slug: candidateSlug };
+      const { error } = await supabase
+        .from('posts')
+        .insert([payload]);
+
+      if (!error) {
+        resolvedSlug = candidateSlug;
+        insertError = null;
+        break;
+      }
+
+      if (baseSlug && isDuplicateSlugError(error)) {
+        insertError = error;
+        continue;
+      }
+
+      insertError = error;
+      break;
+    }
+
+    if (insertError) {
+      const slugError = baseSlug && isDuplicateSlugError(insertError)
+        ? {
+            ...insertError,
+            message: 'Unable to create a unique slug automatically. Please choose a different slug.',
+          }
+        : insertError;
+
+      console.error('[createPost] Supabase error:', {
+        message: slugError.message,
+        code: slugError.code,
+        details: slugError.details,
+        hint: slugError.hint
+      });
+      return { post: null, error: slugError };
+    }
+
+    let post: BlogPost | null = null;
+    if (resolvedSlug) {
+      const { data: selectedPost, error: selectError } = await supabase
+        .from('posts')
+        .select('*')
+        .eq('slug', resolvedSlug)
+        .maybeSingle();
+
+      if (selectError) {
+        console.warn('[createPost] Insert succeeded but follow-up select failed (non-blocking):', selectError.message);
+      } else if (selectedPost) {
+        post = selectedPost as BlogPost;
+      }
+    }
+
+    if (!post) {
+      post = {
+        ...(postData as BlogPost),
+        slug: resolvedSlug,
+        id: '',
+      };
+    }
+
+    console.log('[createPost] Success:', { slug: post.slug });
+    return { post, error: null };
   } catch (e: any) {
     console.error('[createPost] Unexpected error:', e);
     return { 
@@ -642,14 +697,68 @@ export async function createPost(postData: Partial<BlogPost>) {
  * Update existing post
  */
 export async function updatePost(slug: string, postData: Partial<BlogPost>) {
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from('posts')
     .update(postData)
-    .eq('slug', slug)
-    .select()
-    .single();
+    .eq('slug', slug);
 
-  return { post: data as BlogPost | null, error };
+  if (error) {
+    return { post: null, error };
+  }
+
+  const { data: selectedPost, error: selectError } = await supabase
+    .from('posts')
+    .select('*')
+    .eq('slug', slug)
+    .maybeSingle();
+
+  if (selectError) {
+    console.warn('[updatePost] Update succeeded but follow-up select failed (non-blocking):', selectError.message);
+    return {
+      post: {
+        ...(postData as BlogPost),
+        id: '',
+        slug,
+      },
+      error: null,
+    };
+  }
+
+  return { post: selectedPost as BlogPost | null, error: null };
+}
+
+/**
+ * Update existing post by id (preferred when slug can be edited)
+ */
+export async function updatePostById(id: string, postData: Partial<BlogPost>) {
+  const { error } = await supabase
+    .from('posts')
+    .update(postData)
+    .eq('id', id);
+
+  if (error) {
+    return { post: null, error };
+  }
+
+  const { data: selectedPost, error: selectError } = await supabase
+    .from('posts')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle();
+
+  if (selectError) {
+    console.warn('[updatePostById] Update succeeded but follow-up select failed (non-blocking):', selectError.message);
+    return {
+      post: {
+        ...(postData as BlogPost),
+        id,
+        slug: postData.slug || '',
+      },
+      error: null,
+    };
+  }
+
+  return { post: selectedPost as BlogPost | null, error: null };
 }
 
 /**

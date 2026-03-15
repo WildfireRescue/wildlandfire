@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import { supabase } from "../../../lib/supabase";
 import { Button } from "../../components/ui/button";
 import { Mail, LogOut, Save, Eye, AlertCircle, Info, Edit3, X, Menu } from "lucide-react";
-import { createPost, getCategories, getCurrentUserAuthorDefaults, updatePost } from "../../../lib/supabaseBlog";
+import { createPost, getCategories, getCurrentUserAuthorDefaults, updatePostById } from "../../../lib/supabaseBlog";
 import { generateSlug, calculateReadingTime } from "../../../lib/blogHelpers";
 import { withTimeout, TimeoutError } from "../../../lib/promiseUtils";
 import {
@@ -254,7 +254,7 @@ export function BlogEditorPage() {
     setTitle(article.title || "");
     setSlug(article.slug || "");
     setExcerpt(article.excerpt || "");
-    setContent(article.content_markdown || article.content_html || "");
+    setContent(article.content_html || article.content_markdown || "");
     setMetaTitle(article.meta_title || "");
     setMetaDescription(article.meta_description || "");
     setCanonicalUrl(article.canonical_url || "");
@@ -361,6 +361,7 @@ export function BlogEditorPage() {
       }
 
       const authorEmail = permissionResult?.user?.email || "unknown";
+      const looksLikeHtml = /<\/?[a-z][\s\S]*>/i.test(content.trim());
 
       const postData = {
         // Core
@@ -368,6 +369,7 @@ export function BlogEditorPage() {
         slug: finalSlug,
         excerpt: excerpt.trim() || null,
         content_markdown: content.trim(),
+        content_html: looksLikeHtml ? content.trim() : null,
         
         // SEO & Metadata
         meta_title: metaTitle || null,
@@ -416,14 +418,17 @@ export function BlogEditorPage() {
       };
 
       let error;
+      let savedPost: BlogPost | null = null;
+      let slugAdjustedTo: string | null = null;
       
       if (isEditingArticle && editingArticleId) {
         // Update existing article
         const { post, error: updateErr } = await withTimeout(
-          updatePost(finalSlug, postData),
+          updatePostById(editingArticleId, postData),
           15000,
           "Update timed out after 15 seconds."
         );
+        savedPost = post;
         error = updateErr;
         if (error) throw new Error(error.message || "Update failed");
       } else {
@@ -433,8 +438,15 @@ export function BlogEditorPage() {
           15000,
           "Save timed out after 15 seconds."
         );
+        savedPost = post;
         error = createErr;
         if (error) throw new Error(error.message || "Save failed");
+
+        if (savedPost?.slug && savedPost.slug !== finalSlug) {
+          slugAdjustedTo = savedPost.slug;
+          setSlug(savedPost.slug);
+          slugTouched.current = true;
+        }
       }
 
       setStatus(statusToSave);
@@ -445,11 +457,30 @@ export function BlogEditorPage() {
           ? (isEditingArticle ? "Updated schedule" : "Scheduled")
           : (isEditingArticle ? "Updated draft" : "Saved draft");
 
-      setSaveMsg(`✅ ${actionLabel}!`);
+      setSaveMsg(
+        slugAdjustedTo
+          ? `✅ ${actionLabel}! Slug adjusted to ${slugAdjustedTo}.`
+          : `✅ ${actionLabel}!`
+      );
       setTimeout(() => setSaveMsg(null), 3000);
     } catch (e: any) {
-      const msg = e instanceof TimeoutError ? e.message : e?.message ?? "Save failed";
-      setSaveErr(msg);
+      const rawMsg = e instanceof TimeoutError ? e.message : e?.message ?? "Save failed";
+      const lowerMsg = rawMsg.toLowerCase();
+
+      if (rawMsg.includes('infinite recursion detected in policy for relation "profiles"')) {
+        setSaveErr(
+          "Database RLS policy recursion on profiles is blocking saves. Apply the Supabase admin-auth RLS fix so post policies use a security-definer check instead of querying profiles directly."
+        );
+      } else if (
+        rawMsg.includes('posts_slug_key') ||
+        (lowerMsg.includes('duplicate key value violates unique constraint') && lowerMsg.includes('slug'))
+      ) {
+        setSaveErr(
+          "That URL slug is already used by another post. Change the slug (for example add -2) or open the existing post from the article list and update it."
+        );
+      } else {
+        setSaveErr(rawMsg);
+      }
     } finally {
       setSaving(false);
     }
