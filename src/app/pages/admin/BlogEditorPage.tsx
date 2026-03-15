@@ -362,6 +362,11 @@ export function BlogEditorPage() {
 
       const authorEmail = permissionResult?.user?.email || "unknown";
       const looksLikeHtml = /<\/?[a-z][\s\S]*>/i.test(content.trim());
+      const normalizedMetaDescription = metaDescription.trim();
+
+      if (normalizedMetaDescription.length > 160) {
+        throw new Error("Meta description must be 160 characters or fewer.");
+      }
 
       const postData = {
         // Core
@@ -373,7 +378,7 @@ export function BlogEditorPage() {
         
         // SEO & Metadata
         meta_title: metaTitle || null,
-        meta_description: metaDescription || null,
+        meta_description: normalizedMetaDescription || null,
         canonical_url: canonicalUrl || null,
         focus_keyword: focusKeyword || null,
         secondary_keywords: secondaryKeywords ? secondaryKeywords.split(",").map((k) => k.trim()).filter(Boolean) : [],
@@ -721,8 +726,12 @@ export function BlogEditorPage() {
                   onChange={(e) => setMetaDescription(e.target.value)}
                   placeholder="Description for search engines (160 chars)..."
                   rows={2}
+                  maxLength={160}
                   className="w-full px-4 py-2 bg-input-background border border-border rounded-lg text-sm"
                 />
+                <p className="text-xs text-muted-foreground mt-1">
+                  {metaDescription.length}/160 characters
+                </p>
               </div>
 
               <div className="md:col-span-2">

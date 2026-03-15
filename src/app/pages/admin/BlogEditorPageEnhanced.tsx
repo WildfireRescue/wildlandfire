@@ -284,7 +284,7 @@ export function BlogEditorPageEnhanced() {
       }
       
       if (metaDescription && metaDescription.length > 160) {
-        console.warn('Meta description exceeds 160 characters');
+        throw new Error('Meta description must be 160 characters or fewer.');
       }
 
       const readingTime = calculateReadingTime(content);
@@ -299,7 +299,7 @@ export function BlogEditorPageEnhanced() {
         
         // SEO & Metadata
         meta_title: metaTitle.trim() || null,
-        meta_description: metaDescription.trim() || null,
+        meta_description: metaDescription.trim().slice(0, 160) || null,
         canonical_url: canonicalUrl.trim() || null,
         focus_keyword: focusKeyword.trim() || null,
         secondary_keywords: secondaryKeywords 
