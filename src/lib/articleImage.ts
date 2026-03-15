@@ -9,7 +9,23 @@ export async function uploadArticleImage(file: File): Promise<{ publicUrl: strin
       .from('article-images')
       .upload(path, file, { cacheControl: '3600', upsert: false });
 
-    if (error) return { error: error.message };
+    if (error) {
+      const msg = String(error.message || 'Upload failed');
+      const lower = msg.toLowerCase();
+      if (lower.includes('row-level security') || lower.includes('violates row-level security')) {
+        return {
+          error: 'Upload blocked by Supabase storage policy. Apply migration 017_storage_article_images_policies.sql and ensure you are logged in with an allowlisted editor/admin email.',
+        };
+      }
+
+      if (lower.includes('bucket') && lower.includes('not found')) {
+        return {
+          error: 'Storage bucket article-images does not exist. Apply migration 017_storage_article_images_policies.sql.',
+        };
+      }
+
+      return { error: msg };
+    }
 
     const { data: publicData } = supabase.storage.from('article-images').getPublicUrl(data.path);
     return { publicUrl: publicData.publicUrl };
