@@ -118,7 +118,7 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
   return (
     <div className="border border-border rounded-lg overflow-hidden bg-white">
       {/* Toolbar */}
-      <div className="bg-white border-b border-border p-3 flex flex-wrap gap-1 text-slate-700">
+      <div className="bg-white border-b border-border p-3 flex flex-wrap gap-1 text-slate-700 sticky top-0 z-10 shadow-sm">
         <select
           defaultValue=""
           onChange={(e) => {

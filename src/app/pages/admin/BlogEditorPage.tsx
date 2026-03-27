@@ -1014,18 +1014,17 @@ export function BlogEditorPage() {
               <Save size={18} className="mr-2" />
               {saving ? "Saving…" : "Save Draft"}
             </Button>
-            <Button onClick={() => savePost()} disabled={saving} className="flex-1">
-              <Save size={18} className="mr-2" />
-              {saving
-                ? "Saving…"
-                : status === "published"
-                  ? "Publish Now"
-                  : status === "scheduled"
-                    ? "Schedule Post"
-                    : isEditingArticle
-                      ? "Update Post"
-                      : "Save Post"}
-            </Button>
+            {status === "scheduled" ? (
+              <Button onClick={() => savePost("scheduled")} disabled={saving} className="flex-1">
+                <Save size={18} className="mr-2" />
+                {saving ? "Saving…" : "Schedule Post"}
+              </Button>
+            ) : (
+              <Button onClick={() => savePost("published")} disabled={saving} className="flex-1 bg-green-600 hover:bg-green-700 text-white">
+                <Save size={18} className="mr-2" />
+                {saving ? "Publishing…" : isEditingArticle && status === "published" ? "Update & Publish" : "Publish"}
+              </Button>
+            )}
             <Button variant="outline" onClick={() => (window.location.href = "/blog")}>
               <Eye size={18} className="mr-2" /> View Blog
             </Button>
