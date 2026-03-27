@@ -28,7 +28,7 @@
   compress = true
 
 [context.production]
-  environment = { NODE_ENV = "production" }
+  environment = { NODE_ENV = "production", VITE_SITE_URL = "https://poetic-jalebi-31ae7d.netlify.app" }
 
 [context.deploy-preview]
   environment = { NODE_ENV = "development" }
