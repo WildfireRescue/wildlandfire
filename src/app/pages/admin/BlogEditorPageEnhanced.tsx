@@ -258,11 +258,12 @@ export function BlogEditorPageEnhanced() {
     setSources(updated);
   }
 
-  async function savePost() {
+  async function savePost(targetStatus?: 'draft' | 'scheduled' | 'published') {
     // Clear previous messages and set saving state
     setSaving(true);
     setSaveMsg(null);
     setSaveErr(null);
+    const statusToSave = targetStatus || status;
     
     // Track if timeout warning was shown
     let timeoutWarningShown = false;
@@ -318,9 +319,9 @@ export function BlogEditorPageEnhanced() {
         // Publishing & Discovery
         category: category || null,
         tags: tags ? tags.split(',').map(t => t.trim()).filter(Boolean) : [],
-        status,
-        published_at: status === 'published' ? new Date().toISOString() : null,
-        scheduled_for: status === 'scheduled' && scheduledFor ? new Date(scheduledFor).toISOString() : null,
+        status: statusToSave,
+        published_at: statusToSave === 'published' ? new Date().toISOString() : null,
+        scheduled_for: statusToSave === 'scheduled' && scheduledFor ? new Date(scheduledFor).toISOString() : null,
         featured,
         allow_indexing: allowIndexing,
         allow_follow: allowFollow,
@@ -395,8 +396,14 @@ export function BlogEditorPageEnhanced() {
       }
 
       console.log('[BlogEditorEnhanced] Post saved successfully:', post.id);
-      setSaveMsg(`✅ Post saved successfully! ${status === 'published' ? 'Post is now live.' : 'Saved as draft.'}`);
-      
+      const actionLabel = statusToSave === 'published'
+        ? 'Published! Post is now live.'
+        : statusToSave === 'scheduled'
+          ? 'Scheduled for publication.'
+          : 'Saved as draft.';
+      setSaveMsg(`✅ ${actionLabel}`);
+      setStatus(statusToSave);
+
       // Reset form after successful save
       setTimeout(() => {
         resetForm();
@@ -1251,13 +1258,34 @@ export function BlogEditorPageEnhanced() {
             {/* Actions */}
             <div className="flex gap-4">
               <Button
-                onClick={savePost}
+                onClick={() => savePost('draft')}
                 disabled={saving}
+                variant="outline"
                 className="flex-1"
               >
                 <Save size={18} className="mr-2" />
-                {saving ? 'Saving...' : 'Save Post'}
+                {saving ? 'Saving…' : 'Save Draft'}
               </Button>
+
+              {status === 'scheduled' ? (
+                <Button
+                  onClick={() => savePost('scheduled')}
+                  disabled={saving}
+                  className="flex-1"
+                >
+                  <Save size={18} className="mr-2" />
+                  {saving ? 'Scheduling…' : 'Schedule Post'}
+                </Button>
+              ) : (
+                <Button
+                  onClick={() => savePost('published')}
+                  disabled={saving}
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                >
+                  <Save size={18} className="mr-2" />
+                  {saving ? 'Publishing…' : 'Publish'}
+                </Button>
+              )}
 
               <Button
                 variant="outline"
