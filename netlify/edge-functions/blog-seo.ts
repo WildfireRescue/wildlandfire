@@ -35,8 +35,8 @@ export default async (request: Request, context: any) => {
     .replace(/\/$/, "")
     .split("?")[0]; // Remove query params
 
-  // Skip if no slug or it's a special route
-  if (!slug || slug === "" || slug.startsWith("_")) {
+  // Skip if no slug or it's a special route (editor, category pages, etc.)
+  if (!slug || slug === "" || slug.startsWith("_") || slug === "editor" || slug.startsWith("category")) {
     return;
   }
 
