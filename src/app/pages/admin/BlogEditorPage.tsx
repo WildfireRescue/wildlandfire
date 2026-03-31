@@ -419,7 +419,9 @@ export function BlogEditorPage() {
         
         // Metadata
         reading_time_minutes: readingTime,
-        published_at: statusToSave === "published" ? new Date().toISOString() : null,
+        published_at: statusToSave === "published"
+          ? (isEditingArticle && status === "published" ? undefined : new Date().toISOString())
+          : null,
       };
 
       let error;

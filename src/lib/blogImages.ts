@@ -47,9 +47,11 @@ export function resolveCoverImageSrc(cover: unknown): string | null {
     }
     
     // Full URL (http/https) - including Supabase storage URLs
+    // Upgrade http:// to https:// to prevent mixed content warnings
     if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
-      console.log('[resolveCoverImageSrc] Full URL detected:', trimmed);
-      return trimmed;
+      const secureUrl = trimmed.startsWith('http://') ? trimmed.replace('http://', 'https://') : trimmed;
+      console.log('[resolveCoverImageSrc] Full URL detected:', secureUrl);
+      return secureUrl;
     }
     
     // Supabase Storage URL pattern (already resolved)
