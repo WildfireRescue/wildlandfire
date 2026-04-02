@@ -116,7 +116,7 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
   };
 
   return (
-    <div className="border border-border rounded-lg bg-card">
+    <div className="border border-border rounded-lg overflow-hidden bg-white">
       {/* Toolbar — sticky just under the fixed site nav */}
       <div
         className="bg-card border-b border-border rounded-t-lg p-2 flex flex-wrap gap-0.5 text-foreground sticky z-40 shadow-sm"
@@ -252,7 +252,7 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
         spellCheck
         onInput={handleInput}
         data-placeholder="Start writing your article…"
-        className="prose prose-sm prose-invert max-w-none p-5 min-h-[28rem] focus:outline-none bg-card text-foreground border-none rounded-b-lg empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground empty:before:pointer-events-none"
+        className="prose prose-sm max-w-none p-5 min-h-[28rem] focus:outline-none bg-white text-slate-900 border-none rounded-b-lg empty:before:content-[attr(data-placeholder)] empty:before:text-slate-400 empty:before:pointer-events-none"
         style={{ wordWrap: 'break-word', whiteSpace: 'pre-wrap' }}
       />
     </div>
