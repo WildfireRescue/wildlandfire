@@ -19,6 +19,14 @@ const ORG_AUTHOR_FALLBACK = 'The Wildland Fire Recovery Fund';
 const ROLE_FALLBACK = 'Contributor';
 const BIO_FALLBACK = `Contributor at ${ORG_AUTHOR_FALLBACK}.`;
 
+// Emails that represent the org itself rather than an individual — always display as the org name
+const ORG_EMAILS = new Set([
+  'help@goldie.agency',
+  'reports@goldie.agency',
+  'admin@thewildlandfirerecoveryfund.org',
+  'editor@thewildlandfirerecoveryfund.org',
+]);
+
 let hasLoggedMissingScheduledPublisher = false;
 
 function pickFirstNonEmptyString(...values: unknown[]): string | null {
@@ -162,15 +170,16 @@ export async function getCurrentUserAuthorDefaults() {
     );
 
     const authorName = pickFirstNonEmptyString(
-      readProfileString(profileRecord, ['author_name', 'full_name', 'display_name', 'name']),
-      pickFirstNonEmptyString(
+      // If this is a known org/agency email, skip deriving a name from it and go straight to org fallback
+      ORG_EMAILS.has((user.email || '').toLowerCase()) ? null : readProfileString(profileRecord, ['author_name', 'full_name', 'display_name', 'name']),
+      ORG_EMAILS.has((user.email || '').toLowerCase()) ? null : pickFirstNonEmptyString(
         userMeta.author_name,
         userMeta.full_name,
         userMeta.display_name,
         userMeta.name,
         userMeta.preferred_username
       ),
-      deriveNameFromEmail(user.email),
+      ORG_EMAILS.has((user.email || '').toLowerCase()) ? null : deriveNameFromEmail(user.email),
       ORG_AUTHOR_FALLBACK
     );
 
