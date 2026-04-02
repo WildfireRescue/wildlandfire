@@ -116,9 +116,9 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
   };
 
   return (
-    <div className="border border-border rounded-lg overflow-hidden bg-white">
+    <div className="border border-border rounded-lg bg-white">
       {/* Toolbar */}
-      <div className="bg-white border-b border-border p-3 flex flex-wrap gap-1 text-slate-700 sticky top-0 z-10 shadow-sm">
+      <div className="bg-white border-b border-border p-3 flex flex-wrap gap-1 text-slate-700 sticky top-0 z-50 shadow-md">
         <select
           defaultValue=""
           onChange={(e) => {
@@ -249,7 +249,7 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
         spellCheck
         onInput={handleInput}
         data-placeholder="Start writing your article..."
-        className="prose prose-sm max-w-none p-4 min-h-80 focus:outline-none overflow-y-auto bg-white text-slate-900 border-none empty:before:content-[attr(data-placeholder)] empty:before:text-slate-400 empty:before:pointer-events-none"
+        className="prose prose-sm max-w-none p-4 min-h-80 focus:outline-none bg-white text-slate-900 border-none empty:before:content-[attr(data-placeholder)] empty:before:text-slate-400 empty:before:pointer-events-none"
         style={{ wordWrap: 'break-word', whiteSpace: 'pre-wrap' }}
       />
     </div>

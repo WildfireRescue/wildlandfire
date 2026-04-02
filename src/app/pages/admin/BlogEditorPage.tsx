@@ -228,12 +228,22 @@ export function BlogEditorPage() {
     setLoginBusy(true);
 
     try {
-      const email = loginEmail.trim().toLowerCase();
-      if (!email) return setLoginError("Please enter an email address.");
-      if (!email.includes("@") || !email.includes(".")) return setLoginError("Enter a valid email.");
+      // Comprehensive email sanitization: remove Unicode whitespace, trim, lowercase
+      const cleanEmail = loginEmail
+        .replace(/[\s\u00A0\u1680\u2000-\u200B\u202F\u205F\u3000]/g, "") // Remove all Unicode whitespace
+        .trim()
+        .toLowerCase();
+
+      // DEBUG: Log raw and clean email to detect hidden characters
+      console.log("raw email:", JSON.stringify(loginEmail));
+      console.log("clean email:", JSON.stringify(cleanEmail));
+      console.log("length:", cleanEmail.length);
+
+      if (!cleanEmail) return setLoginError("Please enter an email address.");
+      if (!cleanEmail.includes("@") || !cleanEmail.includes(".")) return setLoginError("Enter a valid email.");
 
       const { error } = await supabase.auth.signInWithOtp({
-        email,
+        email: cleanEmail,
         options: { emailRedirectTo: getEmailRedirectTo(), shouldCreateUser: false },
       });
 
@@ -539,7 +549,7 @@ export function BlogEditorPage() {
                 value={loginEmail}
                 onChange={(e) => setLoginEmail(e.target.value)}
                 placeholder="your@email.com"
-                className="w-full px-4 py-3 bg-input-background border border-border rounded-lg"
+                className="w-full px-4 py-3 bg-input-background border border-border rounded-lg text-base"
                 disabled={loginBusy}
               />
 
