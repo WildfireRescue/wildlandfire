@@ -91,6 +91,16 @@ export function BlogEditorPage() {
   const slugTouched = useRef(false);
   const hasHydratedAuthorDefaults = useRef(false);
 
+  // Track original article values when editing, to fix published_at stamping
+  const originalPublishedAtRef = useRef<string | null>(null);
+  const originalStatusRef = useRef<'draft' | 'scheduled' | 'published'>('draft');
+
+  // Track unsaved changes so switching drafts warns before discarding edits
+  const isDirtyRef = useRef(false);
+
+  const editorPanelRef = useRef<HTMLDivElement>(null);
+  const [listRefreshKey, setListRefreshKey] = useState(0);
+
   useEffect(() => {
     if (!slugTouched.current) setSlug(autoSlug);
   }, [autoSlug]);
@@ -261,6 +271,19 @@ export function BlogEditorPage() {
 
   // Load article into editor form
   function loadArticleToEdit(article: BlogPost) {
+    // Guard against silently discarding unsaved edits
+    if (isDirtyRef.current) {
+      const ok = window.confirm(
+        `You have unsaved changes.\n\nOpen “${article.title || 'this draft'}” anyway? Your current changes will be lost.`
+      );
+      if (!ok) return;
+    }
+
+    // Capture originals before any state updates
+    originalPublishedAtRef.current = article.published_at || null;
+    originalStatusRef.current = (article.status as 'draft' | 'scheduled' | 'published') || 'draft';
+    isDirtyRef.current = false;
+
     setTitle(article.title || "");
     setSlug(article.slug || "");
     setExcerpt(article.excerpt || "");
@@ -298,10 +321,17 @@ export function BlogEditorPage() {
     setIsEditingArticle(true);
     setEditingArticleId(article.id);
     slugTouched.current = true;
+
+    // Scroll page to top so the context banner is immediately visible
+    setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 50);
   }
 
   // New/reset form
   function resetForm() {
+    originalPublishedAtRef.current = null;
+    originalStatusRef.current = 'draft';
+    isDirtyRef.current = false;
+
     setTitle("");
     setSlug("");
     setExcerpt("");
@@ -429,7 +459,22 @@ export function BlogEditorPage() {
         
         // Metadata
         reading_time_minutes: readingTime,
-        published_at: statusToSave === "published" ? new Date().toISOString() : null,
+        published_at: (() => {
+          if (statusToSave !== "published") {
+            // Saving as draft or scheduled — preserve original published_at if there was one
+            return originalPublishedAtRef.current;
+          }
+          if (!isEditingArticle) {
+            // Brand new post being published for the first time
+            return new Date().toISOString();
+          }
+          if (originalStatusRef.current !== "published" || !originalPublishedAtRef.current) {
+            // Post is transitioning to published for the first time → stamp now
+            return new Date().toISOString();
+          }
+          // Post was already published → preserve its original published_at
+          return originalPublishedAtRef.current;
+        })(),
       };
 
       let error;
@@ -466,6 +511,15 @@ export function BlogEditorPage() {
 
       setStatus(statusToSave);
 
+      // Update tracking refs so subsequent saves use correct published_at
+      originalStatusRef.current = statusToSave;
+      if (statusToSave === "published" && !originalPublishedAtRef.current) {
+        originalPublishedAtRef.current = postData.published_at as string | null;
+      }
+      isDirtyRef.current = false;
+      // Refresh the article list sidebar
+      setListRefreshKey((k) => k + 1);
+
       const actionLabel = statusToSave === "published"
         ? (isEditingArticle ? "Updated and published" : "Published")
         : statusToSave === "scheduled"
@@ -496,6 +550,38 @@ export function BlogEditorPage() {
       } else {
         setSaveErr(rawMsg);
       }
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  /** Quick-publish a post directly from the article list without loading it into the editor form. */
+  async function handleQuickPublish(article: BlogPost) {
+    setSaving(true);
+    setSaveErr(null);
+    try {
+      const isFirstPublish = article.status !== "published" || !article.published_at;
+      const updateData: Partial<BlogPost> = {
+        status: "published",
+        published_at: isFirstPublish ? new Date().toISOString() : article.published_at,
+      };
+      const { error } = await updatePostById(article.id, updateData);
+      if (error) throw new Error(error.message || "Publish failed");
+
+      setSaveMsg(`✅ Published “${article.title}”!`);
+      setTimeout(() => setSaveMsg(null), 4000);
+      setListRefreshKey((k) => k + 1);
+
+      // If this article was already open in the editor, sync its status
+      if (isEditingArticle && editingArticleId === article.id) {
+        setStatus("published");
+        originalStatusRef.current = "published";
+        if (!originalPublishedAtRef.current) {
+          originalPublishedAtRef.current = updateData.published_at as string;
+        }
+      }
+    } catch (e: any) {
+      setSaveErr(e.message || "Quick publish failed");
     } finally {
       setSaving(false);
     }
@@ -614,7 +700,7 @@ export function BlogEditorPage() {
   // ✅ Logged IN and has access
   return (
     <div className="min-h-screen pt-28 pb-20 bg-background">
-      <div className="container mx-auto px-4 h-full max-w-7xl">
+      <div className="container mx-auto px-4 max-w-7xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold">Blog Editor</h1>
@@ -632,6 +718,9 @@ export function BlogEditorPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => {
+                  if (isDirtyRef.current) {
+                    if (!window.confirm('You have unsaved changes. Start a new post anyway? Your changes will be lost.')) return;
+                  }
                   resetForm();
                   setShowArticleList(true);
                 }}
@@ -645,17 +734,53 @@ export function BlogEditorPage() {
           </div>
         </div>
 
-        {/* Split View Container */}
-        <div className="flex gap-6 h-[calc(100vh-200px)]">
-          {/* Left: Article List */}
+        {/* Split View Container — page scrolls; sidebar is sticky, editor is full flow */}
+        <div className="flex gap-6 items-start">
+          {/* Left: Article List — sticky sidebar so it stays in view while editing */}
           {showArticleList && (
-            <div className="w-80 flex-shrink-0 bg-card border border-border rounded-xl p-6 overflow-y-auto">
-              <ArticleList onSelectArticle={loadArticleToEdit} />
+            <div className="w-80 flex-shrink-0 bg-card border border-border rounded-xl p-4 sticky overflow-y-auto"
+              style={{ top: 'var(--nav-height, 5.5rem)', maxHeight: 'calc(100vh - var(--nav-height, 5.5rem) - 1.5rem)' }}
+            >
+              <ArticleList
+                onSelectArticle={loadArticleToEdit}
+                onPublishArticle={handleQuickPublish}
+                refreshTrigger={listRefreshKey}
+                currentEditingId={editingArticleId}
+              />
             </div>
           )}
 
-          {/* Right: Editor Form */}
-          <div className={`flex-1 bg-card border border-border rounded-xl p-8 space-y-8 overflow-y-auto ${!showArticleList ? "w-full" : ""}`}>
+          {/* Right: Editor Form — grows to content, page handles all scrolling */}
+          <div ref={editorPanelRef} className={`flex-1 bg-card border border-border rounded-xl p-8 space-y-8 ${!showArticleList ? "w-full" : ""}`}>
+
+            {/* Editing Context Banner */}
+            {isEditingArticle && (
+              <div className="bg-amber-50 border border-amber-200 dark:bg-amber-950/30 dark:border-amber-800 rounded-lg px-4 py-3 flex items-center gap-3 -mb-2">
+                <Edit3 size={15} className="text-amber-600 dark:text-amber-400 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <span className="text-xs text-amber-700 dark:text-amber-400">Editing: </span>
+                  <span className="text-sm font-semibold text-amber-900 dark:text-amber-200 truncate">{title || "Untitled"}</span>
+                </div>
+                <span className={`text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0 ${
+                  status === 'published' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                  : status === 'scheduled' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                  : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                }`}>{status}</span>
+                <button
+                  onClick={() => {
+                    if (isDirtyRef.current) {
+                      if (!window.confirm('You have unsaved changes. Start a new post anyway? Your changes will be lost.')) return;
+                    }
+                    resetForm();
+                    setShowArticleList(true);
+                  }}
+                  className="text-xs text-amber-600 dark:text-amber-400 hover:text-amber-900 dark:hover:text-amber-200 underline ml-1 flex-shrink-0"
+                >
+                  New post
+                </button>
+              </div>
+            )}
+
             {/* CORE FIELDS */}
             <div>
               <h2 className="text-lg font-bold mb-4 text-primary">Core Content</h2>
@@ -664,7 +789,7 @@ export function BlogEditorPage() {
                   <label className="block text-sm font-medium mb-2">Title *</label>
                   <input
                     value={title}
-                    onChange={(e) => setTitle(e.target.value)}
+                    onChange={(e) => { setTitle(e.target.value); isDirtyRef.current = true; }}
                     placeholder="Post title..."
                     className="w-full px-4 py-3 bg-input-background border border-border rounded-lg"
                   />
@@ -699,7 +824,7 @@ export function BlogEditorPage() {
                 <label className="block text-sm font-medium mb-2">Content (WYSIWYG) *</label>
                 <RichTextEditor
                   value={content}
-                  onChange={(html) => setContent(html)}
+                  onChange={(html) => { setContent(html); isDirtyRef.current = true; }}
                 />
               </div>
             </div>

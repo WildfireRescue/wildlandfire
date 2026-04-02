@@ -116,9 +116,12 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
   };
 
   return (
-    <div className="border border-border rounded-lg bg-white">
-      {/* Toolbar */}
-      <div className="bg-white border-b border-border p-3 flex flex-wrap gap-1 text-slate-700 sticky top-0 z-50 shadow-md">
+    <div className="border border-border rounded-lg bg-card">
+      {/* Toolbar — sticky just under the fixed site nav */}
+      <div
+        className="bg-card border-b border-border rounded-t-lg p-2 flex flex-wrap gap-0.5 text-foreground sticky z-40 shadow-sm"
+        style={{ top: 'var(--nav-height, 5.5rem)' }}
+      >
         <select
           defaultValue=""
           onChange={(e) => {
@@ -127,7 +130,7 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
             handleBlockFormat(next);
             e.target.value = '';
           }}
-          className="px-2 py-1 rounded border border-border bg-white text-xs"
+          className="px-2 py-1 rounded border border-border bg-input-background text-foreground text-xs"
           title="Block style"
         >
           <option value="">Style</option>
@@ -142,41 +145,41 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
 
         <button
           onClick={handleBold}
-          className="p-2 rounded hover:bg-slate-100 transition"
+          className="p-2 rounded hover:bg-muted/50 transition"
           title="Bold"
         >
-          <BoldIcon size={18} />
+          <BoldIcon size={16} />
         </button>
         <button
           onClick={handleItalic}
-          className="p-2 rounded hover:bg-slate-100 transition"
+          className="p-2 rounded hover:bg-muted/50 transition"
           title="Italic"
         >
-          <ItalicIcon size={18} />
+          <ItalicIcon size={16} />
         </button>
 
         <div className="w-px bg-border mx-1" />
 
         <button
           onClick={handleBulletList}
-          className="p-2 rounded hover:bg-slate-100 transition"
+          className="p-2 rounded hover:bg-muted/50 transition"
           title="Bullet List"
         >
-          <List size={18} />
+          <List size={16} />
         </button>
         <button
           onClick={handleOrderedList}
-          className="p-2 rounded hover:bg-slate-100 transition"
+          className="p-2 rounded hover:bg-muted/50 transition"
           title="Numbered List"
         >
-          <ListOrdered size={18} />
+          <ListOrdered size={16} />
         </button>
 
         <div className="w-px bg-border mx-1" />
 
         <button
           onClick={handleLink}
-          className="p-2 rounded hover:bg-slate-100 transition"
+          className="p-2 rounded hover:bg-muted/50 transition text-sm"
           title="Insert Link"
         >
           🔗
@@ -184,19 +187,19 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
 
         <button
           onClick={handleHorizontalRule}
-          className="p-2 rounded hover:bg-slate-100 transition"
+          className="p-2 rounded hover:bg-muted/50 transition"
           title="Horizontal Rule"
         >
-          <Minus size={18} />
+          <Minus size={16} />
         </button>
 
         <button
           onClick={handleImageButton}
           disabled={uploadingImage}
-          className="p-2 rounded hover:bg-slate-100 transition disabled:opacity-50"
+          className="p-2 rounded hover:bg-muted/50 transition disabled:opacity-50"
           title="Upload Image"
         >
-          {uploadingImage ? <Loader2 size={18} className="animate-spin" /> : <ImagePlus size={18} />}
+          {uploadingImage ? <Loader2 size={16} className="animate-spin" /> : <ImagePlus size={16} />}
         </button>
 
         <input
@@ -211,27 +214,27 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
 
         <button
           onClick={handleClearFormatting}
-          className="p-2 rounded hover:bg-slate-100 transition"
+          className="p-2 rounded hover:bg-muted/50 transition"
           title="Clear Formatting"
         >
-          <RemoveFormatting size={18} />
+          <RemoveFormatting size={16} />
         </button>
 
         <div className="w-px bg-border mx-1" />
 
         <button
           onClick={handleUndo}
-          className="p-2 rounded hover:bg-slate-100 transition"
+          className="p-2 rounded hover:bg-muted/50 transition"
           title="Undo"
         >
-          <UndoIcon size={18} />
+          <UndoIcon size={16} />
         </button>
         <button
           onClick={handleRedo}
-          className="p-2 rounded hover:bg-slate-100 transition"
+          className="p-2 rounded hover:bg-muted/50 transition"
           title="Redo"
         >
-          <RedoIcon size={18} />
+          <RedoIcon size={16} />
         </button>
       </div>
 
@@ -241,15 +244,15 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
         </div>
       )}
 
-      {/* Editor Content (contentEditable) */}
+      {/* Editor Content */}
       <div
         ref={editorRef}
         contentEditable
         suppressContentEditableWarning
         spellCheck
         onInput={handleInput}
-        data-placeholder="Start writing your article..."
-        className="prose prose-sm max-w-none p-4 min-h-80 focus:outline-none bg-white text-slate-900 border-none empty:before:content-[attr(data-placeholder)] empty:before:text-slate-400 empty:before:pointer-events-none"
+        data-placeholder="Start writing your article…"
+        className="prose prose-sm prose-invert max-w-none p-5 min-h-[28rem] focus:outline-none bg-card text-foreground border-none rounded-b-lg empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground empty:before:pointer-events-none"
         style={{ wordWrap: 'break-word', whiteSpace: 'pre-wrap' }}
       />
     </div>

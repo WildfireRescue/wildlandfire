@@ -32,6 +32,8 @@
   --chart-4: #84cc16;
   --chart-5: #ea580c;
   --radius: 0.375rem;
+  /* Navigation bar height: py-4 (2rem total) + h-14 logo (3.5rem) = 5.5rem = 88px */
+  --nav-height: 5.5rem;
   --sidebar: #2a2420;
   --sidebar-foreground: #f5f1ed;
   --sidebar-primary: #ff8c42;
