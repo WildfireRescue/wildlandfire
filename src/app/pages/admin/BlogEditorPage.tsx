@@ -244,7 +244,7 @@ export function BlogEditorPage() {
 
       const { error } = await supabase.auth.signInWithOtp({
         email: cleanEmail,
-        options: { emailRedirectTo: getEmailRedirectTo(), shouldCreateUser: false },
+        options: { emailRedirectTo: getEmailRedirectTo(), shouldCreateUser: true },
       });
 
       if (error) return setLoginError(error.message);

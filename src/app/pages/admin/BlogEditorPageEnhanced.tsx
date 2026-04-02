@@ -218,7 +218,7 @@ export function BlogEditorPageEnhanced() {
         email,
         options: {
           emailRedirectTo: getEmailRedirectTo(),
-          shouldCreateUser: false,
+          shouldCreateUser: true,
         },
       });
 
