@@ -116,10 +116,10 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
   };
 
   return (
-    <div className="border border-border rounded-lg overflow-hidden bg-white">
+    <div className="border border-border rounded-lg bg-white">
       {/* Toolbar — sticky just under the fixed site nav */}
       <div
-        className="bg-card border-b border-border rounded-t-lg p-2 flex flex-wrap gap-0.5 text-foreground sticky z-40 shadow-sm"
+        className="bg-white border-b border-slate-200 rounded-t-lg p-2 flex flex-wrap gap-0.5 text-slate-700 sticky z-40"
         style={{ top: 'var(--nav-height, 5.5rem)' }}
       >
         <select
@@ -130,7 +130,7 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
             handleBlockFormat(next);
             e.target.value = '';
           }}
-          className="px-2 py-1 rounded border border-border bg-input-background text-foreground text-xs"
+          className="px-2 py-1 rounded border border-slate-200 bg-white text-slate-700 text-xs"
           title="Block style"
         >
           <option value="">Style</option>
@@ -145,14 +145,14 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
 
         <button
           onClick={handleBold}
-          className="p-2 rounded hover:bg-muted/50 transition"
+          className="p-2 rounded hover:bg-slate-100 transition"
           title="Bold"
         >
           <BoldIcon size={16} />
         </button>
         <button
           onClick={handleItalic}
-          className="p-2 rounded hover:bg-muted/50 transition"
+          className="p-2 rounded hover:bg-slate-100 transition"
           title="Italic"
         >
           <ItalicIcon size={16} />
@@ -162,14 +162,14 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
 
         <button
           onClick={handleBulletList}
-          className="p-2 rounded hover:bg-muted/50 transition"
+          className="p-2 rounded hover:bg-slate-100 transition"
           title="Bullet List"
         >
           <List size={16} />
         </button>
         <button
           onClick={handleOrderedList}
-          className="p-2 rounded hover:bg-muted/50 transition"
+          className="p-2 rounded hover:bg-slate-100 transition"
           title="Numbered List"
         >
           <ListOrdered size={16} />
@@ -179,7 +179,7 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
 
         <button
           onClick={handleLink}
-          className="p-2 rounded hover:bg-muted/50 transition text-sm"
+          className="p-2 rounded hover:bg-slate-100 transition text-sm"
           title="Insert Link"
         >
           🔗
@@ -187,7 +187,7 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
 
         <button
           onClick={handleHorizontalRule}
-          className="p-2 rounded hover:bg-muted/50 transition"
+          className="p-2 rounded hover:bg-slate-100 transition"
           title="Horizontal Rule"
         >
           <Minus size={16} />
@@ -196,7 +196,7 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
         <button
           onClick={handleImageButton}
           disabled={uploadingImage}
-          className="p-2 rounded hover:bg-muted/50 transition disabled:opacity-50"
+          className="p-2 rounded hover:bg-slate-100 transition disabled:opacity-50"
           title="Upload Image"
         >
           {uploadingImage ? <Loader2 size={16} className="animate-spin" /> : <ImagePlus size={16} />}
@@ -214,7 +214,7 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
 
         <button
           onClick={handleClearFormatting}
-          className="p-2 rounded hover:bg-muted/50 transition"
+          className="p-2 rounded hover:bg-slate-100 transition"
           title="Clear Formatting"
         >
           <RemoveFormatting size={16} />
@@ -224,14 +224,14 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
 
         <button
           onClick={handleUndo}
-          className="p-2 rounded hover:bg-muted/50 transition"
+          className="p-2 rounded hover:bg-slate-100 transition"
           title="Undo"
         >
           <UndoIcon size={16} />
         </button>
         <button
           onClick={handleRedo}
-          className="p-2 rounded hover:bg-muted/50 transition"
+          className="p-2 rounded hover:bg-slate-100 transition"
           title="Redo"
         >
           <RedoIcon size={16} />
