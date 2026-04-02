@@ -424,7 +424,8 @@ export function BlogEditorPage() {
         secondary_keywords: secondaryKeywords ? secondaryKeywords.split(",").map((k) => k.trim()).filter(Boolean) : [],
         
         // Images & Social
-        cover_image_url: coverImageUrl || null,
+        // Use cover_image_url if set, otherwise fall back to featured_image_url so the blog card always has an image
+        cover_image_url: coverImageUrl || featuredImageUrl || null,
         featured_image_url: featuredImageUrl || null,
         featured_image_alt_text: featuredImageAltText || null,
         og_image_url: ogImageUrl || null,

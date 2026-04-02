@@ -482,7 +482,11 @@ export function BlogPostPage() {
   const hasHtmlContent = typeof post.content_html === 'string' && post.content_html.trim().length > 0;
   const htmlWithHeadingIds = hasHtmlContent ? injectHeadingIdsInHtml(post.content_html || '') : '';
   const sanitizedHtml = hasHtmlContent
-    ? DOMPurify.sanitize(htmlWithHeadingIds, { USE_PROFILES: { html: true } })
+    ? DOMPurify.sanitize(htmlWithHeadingIds, {
+        USE_PROFILES: { html: true },
+        // Strip inline style/color/bgcolor so prose-invert controls all colors on the dark theme
+        FORBID_ATTR: ['style', 'color', 'bgcolor', 'background'],
+      })
     : '';
   const tocContent = hasHtmlContent ? htmlWithHeadingIds : markdownContent;
 

@@ -21,8 +21,11 @@ interface BlogPostCardProps {
 export function BlogPostCard({ post, index = 0, featured = false }: BlogPostCardProps) {
   const blogUrl = `/blog/${safeSlug(post.slug)}`;
 
-  // Resolve cover image with fallback
-  const coverImageSrc = safeImageSrc(post.cover_image_url, PLACEHOLDER_IMAGE);
+  // Resolve cover image — fall back through featured_image_url → og_image_url
+  const coverImageSrc = safeImageSrc(
+    post.cover_image_url || post.featured_image_url || post.og_image_url,
+    PLACEHOLDER_IMAGE
+  );
 
   if (featured) {
     return (
