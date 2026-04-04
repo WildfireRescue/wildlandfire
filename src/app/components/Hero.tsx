@@ -75,10 +75,10 @@ export function Hero() {
         <AnimatePresence mode="wait">
           <motion.div
             key={currentImageIndex}
-            initial={currentImageIndex === 0 || isMobile ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 1.1 }}
+            initial={currentImageIndex === 0 ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 1.1 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={isMobile ? {} : { opacity: 0 }}
-            transition={{ duration: currentImageIndex === 0 || isMobile ? 0 : 1.5, ease: "easeInOut" }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: currentImageIndex === 0 ? 0 : 1.5, ease: "easeInOut" }}
             className="absolute inset-0"
           >
             <img
