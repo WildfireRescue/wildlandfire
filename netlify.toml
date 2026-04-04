@@ -134,6 +134,24 @@
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
 
+# Blog listing pages: short-live CDN cache with long stale-while-revalidate window.
+# Netlify CDN will serve cached HTML instantly, then refresh in the background.
+# A deploy (triggered on publish) clears this cache immediately.
+[[headers]]
+  for = "/blog"
+  [headers.values]
+    Cache-Control = "public, s-maxage=3600, stale-while-revalidate=86400"
+
+[[headers]]
+  for = "/blog/"
+  [headers.values]
+    Cache-Control = "public, s-maxage=3600, stale-while-revalidate=86400"
+
+[[headers]]
+  for = "/blog/*"
+  [headers.values]
+    Cache-Control = "public, s-maxage=3600, stale-while-revalidate=86400"
+
 # Force HTTPS and remove www
 [[redirects]]
   from = "http://thewildlandfirerecoveryfund.org/*"

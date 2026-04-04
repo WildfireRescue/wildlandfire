@@ -18,6 +18,30 @@ import RichTextEditor from "../../components/RichTextEditor";
 
 const BUILD_TAG = "BLOG_EDITOR_NOHANG_2026-02-20_0940";
 
+/**
+ * Calls the trigger-rebuild Netlify function after a publish action.
+ * Fire-and-forget: errors are swallowed so they never block the editor.
+ * Requires NETLIFY_BUILD_HOOK_URL + REBUILD_SECRET env vars to be set in Netlify.
+ */
+function triggerRebuildNonBlocking() {
+  const rebuildSecret = import.meta.env.VITE_REBUILD_SECRET;
+  fetch('/.netlify/functions/trigger-rebuild', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(rebuildSecret ? { Authorization: `Bearer ${rebuildSecret}` } : {}),
+    },
+  }).then((res) => {
+    if (res.ok) {
+      console.log('[BlogEditor] Site rebuild triggered.');
+    } else {
+      console.warn('[BlogEditor] Rebuild trigger returned', res.status);
+    }
+  }).catch((err) => {
+    console.warn('[BlogEditor] Rebuild trigger failed (non-blocking):', err?.message);
+  });
+}
+
 export function BlogEditorPage() {
   console.log("[BlogEditorPage] MOUNT - Component is loading!", BUILD_TAG);
   console.log("[BlogEditorPage] Current URL:", window.location.pathname);
@@ -533,6 +557,11 @@ export function BlogEditorPage() {
           : `✅ ${actionLabel}!`
       );
       setTimeout(() => setSaveMsg(null), 3000);
+
+      // Fire-and-forget site rebuild so /blog/* static pages are regenerated
+      if (statusToSave === 'published') {
+        triggerRebuildNonBlocking();
+      }
     } catch (e: any) {
       const rawMsg = e instanceof TimeoutError ? e.message : e?.message ?? "Save failed";
       const lowerMsg = rawMsg.toLowerCase();
@@ -572,6 +601,7 @@ export function BlogEditorPage() {
       setSaveMsg(`✅ Published “${article.title}”!`);
       setTimeout(() => setSaveMsg(null), 4000);
       setListRefreshKey((k) => k + 1);
+      triggerRebuildNonBlocking();
 
       // If this article was already open in the editor, sync its status
       if (isEditingArticle && editingArticleId === article.id) {

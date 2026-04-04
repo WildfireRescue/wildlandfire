@@ -147,23 +147,47 @@ async function fetchPublishedPosts(): Promise<BlogPost[]> {
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   try {
-    // Fetch from posts and articles tables
+    // Fetch only SEO meta fields — the prerenderer only injects <head> tags,
+    // not article body content. Skipping content_markdown/content_html/faq_json
+    // avoids reading megabytes of content from the DB at build time.
+    const POST_SEO_SELECT = [
+      'id', 'slug', 'title', 'excerpt',
+      'meta_title', 'meta_description',
+      'og_title', 'og_description', 'og_image_url',
+      'og_image_width', 'og_image_height', 'og_image_type',
+      'canonical_url', 'robots_directives', 'allow_indexing', 'allow_follow',
+      'twitter_card', 'published_at', 'updated_at',
+      'author_name', 'author_bio', 'author_role',
+      'category', 'tags', 'reading_time_minutes',
+      'featured_image_url', 'featured_image_alt',
+      'focus_keyword', 'fact_checked', 'reviewed_by',
+    ].join(',');
+
+    const ARTICLE_SEO_SELECT = [
+      'id', 'slug', 'title',
+      'og_title', 'og_description', 'og_image',
+      'og_image_width', 'og_image_height', 'og_image_type',
+      'canonical_url', 'external_url', 'robots_directives',
+      'twitter_card', 'published_at', 'updated_at',
+      'author', 'source_name', 'category', 'tags', 'reading_time',
+    ].join(',');
+
     console.log('📥 Fetching published posts from Supabase...');
     const [postsRes, articlesRes] = await Promise.all([
       supabase
         .from('posts')
-        .select('*')
+        .select(POST_SEO_SELECT)
         .eq('status', 'published')
         .eq('noindex', false)
-        .catch((err) => {
+        .catch((err: any) => {
           console.warn('   ⚠️  posts table fetch warning:', err.message);
           return { data: [] };
         }),
       supabase
         .from('articles')
-        .select('*')
+        .select(ARTICLE_SEO_SELECT)
         .eq('status', 'published')
-        .catch((err) => {
+        .catch((err: any) => {
           console.warn('   ⚠️  articles table fetch warning:', err.message);
           return { data: [] };
         }),

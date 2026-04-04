@@ -63,116 +63,79 @@ export function BlogIndexPage() {
     };
   }, []);
 
-  // Fetch featured posts (only on first page)
+  // Fetch featured posts and paginated posts in a single parallel load.
+  // Previously these were two separate useEffects (firing sequentially);
+  // now they run together to halve the number of render/loading phases.
   useEffect(() => {
     let mounted = true;
-    
-    if (currentPage === 1 && !selectedCategory) {
-      async function loadFeatured() {
-        try {
-          console.log('[BlogIndex] Loading featured posts...');
-          
-          const featuredPromise = getFeaturedPosts(1);
-          const { posts: featured, error } = await withTimeout(
-            featuredPromise,
-            10000,
-            'Failed to load featured posts: Request timed out'
-          );
-          
-          if (!mounted) return; // Component unmounted
-          
-          if (error) {
-            console.error('[BlogIndex] Error loading featured posts:', error);
-            setFeaturedPosts([]);
-            return;
-          }
-          
-          setFeaturedPosts(featured || []);
-        } catch (e: any) {
-          if (!mounted) return;
-          console.error('[BlogIndex] Failed to load featured posts:', e);
-          setFeaturedPosts([]);
-        }
-      }
-      loadFeatured();
-    } else {
-      setFeaturedPosts([]);
-    }
-    
-    return () => {
-      mounted = false;
-    };
-  }, [currentPage, selectedCategory]);
 
-  // Fetch posts
-  useEffect(() => {
-    let mounted = true;
-    
-    async function loadPosts() {
+    async function loadPostsAndFeatured() {
       setLoading(true);
       setError(null);
 
+      const isFirstPage = currentPage === 1 && !selectedCategory;
+
       try {
-        console.log('[BlogIndex] Loading posts...', { page: currentPage, perPage });
-        
-        const postsPromise = getPublishedPosts({
-          page: currentPage,
-          perPage
-        });
-        
-        const { posts: fetchedPosts, total, error: fetchError } = await withTimeout(
-          postsPromise,
-          15000,
-          'Failed to load posts: Request timed out. Please check your connection and try again.'
-        );
+        console.log('[BlogIndex] Loading posts + featured in parallel...', { page: currentPage, isFirstPage });
 
-        if (!mounted) return; // Component unmounted
+        const [postsResult, featuredResult] = await Promise.all([
+          withTimeout(
+            getPublishedPosts({ page: currentPage, perPage }),
+            15000,
+            'Failed to load posts: Request timed out. Please check your connection and try again.'
+          ),
+          isFirstPage
+            ? withTimeout(
+                getFeaturedPosts(1),
+                10000,
+                'Failed to load featured posts: Request timed out.'
+              )
+            : Promise.resolve({ posts: [] as BlogPost[], error: null, total: 0 }),
+        ]);
 
-        if (fetchError) {
-          console.error('[BlogIndex] Supabase error:', fetchError);
-          
-          let errorMessage = 'Failed to load posts';
-          
-          if (fetchError.message) {
-            errorMessage = fetchError.message;
-          }
-          
-          // Handle specific error codes
-          if (fetchError.code === 'PGRST116') {
-            errorMessage = 'No posts found. Please check back later!';
-          } else if (fetchError.code === '42501') {
-            errorMessage = 'Database permission error. Please contact support.';
-          } else if (fetchError.code === '500') {
-            errorMessage = 'Server error. Our team has been notified. Please try again later.';
-          }
-          
+        if (!mounted) return;
+
+        // Handle posts result
+        if (postsResult.error) {
+          let errorMessage = postsResult.error.message || 'Failed to load posts';
+          if (postsResult.error.code === 'PGRST116') errorMessage = 'No posts found. Please check back later!';
+          else if (postsResult.error.code === '42501') errorMessage = 'Database permission error. Please contact support.';
+          else if (postsResult.error.code === '500') errorMessage = 'Server error. Our team has been notified. Please try again later.';
           throw new Error(errorMessage);
         }
 
-        setPosts(fetchedPosts || []);
-        setTotalPages(Math.ceil((total || 0) / perPage));
-        
-        console.log('[BlogIndex] Posts loaded successfully:', {
-          count: fetchedPosts?.length || 0,
-          total,
-          totalPages: Math.ceil((total || 0) / perPage)
-        });
-        
+        setPosts(postsResult.posts || []);
+        setTotalPages(Math.ceil((postsResult.total || 0) / perPage));
+
+        console.log('[BlogIndex] Posts loaded:', { count: postsResult.posts?.length || 0, total: postsResult.total });
+
+        // Handle featured result
+        if (isFirstPage) {
+          if (featuredResult.error) {
+            console.error('[BlogIndex] Error loading featured posts:', featuredResult.error);
+            setFeaturedPosts([]);
+          } else {
+            setFeaturedPosts(featuredResult.posts || []);
+          }
+        } else {
+          setFeaturedPosts([]);
+        }
+
       } catch (err: any) {
-        if (!mounted) return; // Component unmounted
-        
-        console.error('[BlogIndex] Load posts error:', err);
-        
+        if (!mounted) return;
+
+        console.error('[BlogIndex] Load error:', err);
+
         let errorMessage = 'Failed to load posts';
-        
         if (err instanceof TimeoutError) {
           errorMessage = err.message;
         } else if (err?.message) {
           errorMessage = err.message;
         }
-        
+
         setError(errorMessage);
         setPosts([]);
+        setFeaturedPosts([]);
       } finally {
         if (mounted) {
           setLoading(false);
@@ -180,12 +143,12 @@ export function BlogIndexPage() {
       }
     }
 
-    loadPosts();
-    
+    loadPostsAndFeatured();
+
     return () => {
       mounted = false;
     };
-  }, [currentPage]);
+  }, [currentPage, selectedCategory]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -314,9 +277,11 @@ export function BlogIndexPage() {
           {!loading && !error && posts.length > 0 && (
             <>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {posts.map((post, index) => (
-                  <BlogPostCard key={post.id} post={post} index={index} />
-                ))}
+                {posts
+                  .filter(post => !featuredPosts.some(fp => fp.id === post.id))
+                  .map((post, index) => (
+                    <BlogPostCard key={post.id} post={post} index={index} />
+                  ))}
               </div>
 
               {/* Pagination */}

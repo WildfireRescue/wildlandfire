@@ -29,6 +29,31 @@ const ORG_EMAILS = new Set([
 
 let hasLoggedMissingScheduledPublisher = false;
 
+// Columns fetched for blog listing cards — never pull full content/body for list views.
+// This eliminates the single biggest source of unnecessary Disk IO: reading
+// content_markdown, content_html, faq_json, and sources on every public page view.
+const POST_CARD_SELECT = [
+  'id', 'slug', 'title', 'excerpt',
+  'cover_image_url', 'featured_image_url', 'featured_image_alt_text',
+  'og_image_url', 'og_title', 'og_description',
+  'meta_title', 'meta_description',
+  'category', 'tags', 'status', 'published_at',
+  'featured', 'allow_indexing', 'allow_follow', 'noindex',
+  'author_name', 'author_role',
+  'reading_time_minutes', 'view_count',
+  'robots_directives', 'sitemap_priority',
+  'created_at', 'updated_at',
+].join(',');
+
+// Narrow select for articles table (different schema from posts)
+const ARTICLE_CARD_SELECT = [
+  'id', 'slug', 'title', 'subtitle',
+  'og_image', 'featured_image', 'og_title', 'og_description',
+  'author', 'source_name', 'reading_time',
+  'status', 'published_at', 'external_url',
+  'created_at', 'updated_at',
+].join(',');
+
 function pickFirstNonEmptyString(...values: unknown[]): string | null {
   for (const value of values) {
     if (typeof value === 'string') {
@@ -234,7 +259,9 @@ export async function getCurrentUserAuthorDefaults() {
  */
 export async function getPublishedPosts(options: PaginationOptions = { page: 1, perPage: 12 }) {
   try {
-    await publishDueScheduledPostsNonBlocking();
+    // NOTE: publishDueScheduledPostsNonBlocking() is intentionally NOT called here.
+    // The Netlify scheduled function (publish-scheduled-posts) runs every 5 min.
+    // Calling an RPC on every public page view was a significant source of unnecessary Disk IO.
 
     const { page, perPage } = options;
     const from = (page - 1) * perPage;
@@ -242,16 +269,18 @@ export async function getPublishedPosts(options: PaginationOptions = { page: 1, 
 
     console.log('[getPublishedPosts] Fetching posts:', { page, perPage, from, to });
     // Fetch legacy posts (hosted) and new articles (hosted + external) and merge them
+    // Exclude featured posts from the grid — they are shown separately via getFeaturedPosts/featured hero card
     const [postsRes, articlesRes] = await Promise.all([
       supabase
         .from('posts')
-        .select('*')
+        .select(POST_CARD_SELECT)
         .eq('status', 'published')
         .eq('noindex', false)
+        .or('featured.eq.false,featured.is.null')
         .order('published_at', { ascending: false }),
       supabase
         .from('articles')
-        .select('*')
+        .select(ARTICLE_CARD_SELECT)
         .eq('status', 'published')
         .order('published_at', { ascending: false })
     ]);
@@ -375,9 +404,7 @@ export async function getAllPosts(filters?: BlogListFilters, options: Pagination
  */
 export async function getPostBySlug(slug: string, includeUnpublished: boolean = false) {
   try {
-    if (!includeUnpublished) {
-      await publishDueScheduledPostsNonBlocking();
-    }
+    // Scheduled post publishing is handled by the cron function; skip the per-request RPC.
 
     if (!includeUnpublished) {
       const { data, error } = await supabase
@@ -422,13 +449,11 @@ export async function getPostBySlug(slug: string, includeUnpublished: boolean = 
  */
 export async function getFeaturedPosts(limit: number = 3) {
   try {
-    await publishDueScheduledPostsNonBlocking();
-
     console.log('[getFeaturedPosts] Fetching featured posts:', { limit });
 
     const { data, error } = await supabase
       .from('posts')
-      .select('*')
+      .select(POST_CARD_SELECT)
       .eq('status', 'published')
       .eq('noindex', false)
       .eq('featured', true)
@@ -453,24 +478,22 @@ export async function getFeaturedPosts(limit: number = 3) {
  */
 export async function getPostsByCategory(category: string, options: PaginationOptions = { page: 1, perPage: 12 }) {
   try {
-    await publishDueScheduledPostsNonBlocking();
-
     const { page, perPage } = options;
 
     console.log('[getPostsByCategory] Fetching posts:', { category, page, perPage });
 
-    // Fetch both legacy posts and articles
+    // Fetch both legacy posts and articles (articles have no category column — filtered in JS)
     const [postsRes, articlesRes] = await Promise.all([
       supabase
         .from('posts')
-        .select('*')
+        .select(POST_CARD_SELECT)
         .eq('status', 'published')
         .eq('noindex', false)
         .eq('category', category)
         .order('published_at', { ascending: false }),
       supabase
         .from('articles')
-        .select('*')
+        .select(ARTICLE_CARD_SELECT)
         .eq('status', 'published')
         .order('published_at', { ascending: false })
     ]);
@@ -562,15 +585,13 @@ export async function getPostsByCategory(category: string, options: PaginationOp
  * Fetch posts by tag
  */
 export async function getPostsByTag(tag: string, options: PaginationOptions = { page: 1, perPage: 12 }) {
-  await publishDueScheduledPostsNonBlocking();
-
   const { page, perPage } = options;
   const from = (page - 1) * perPage;
   const to = from + perPage - 1;
 
   const { data, error, count } = await supabase
     .from('posts')
-    .select('*', { count: 'exact' })
+    .select(POST_CARD_SELECT, { count: 'exact' })
     .eq('status', 'published')
     .eq('noindex', false)
     .contains('tags', [tag])
@@ -586,11 +607,9 @@ export async function getPostsByTag(tag: string, options: PaginationOptions = { 
 export async function getRelatedPosts(category: string | null, currentSlug: string, limit: number = 3) {
   if (!category) return { posts: null, error: null };
 
-  await publishDueScheduledPostsNonBlocking();
-
   const { data, error } = await supabase
     .from('posts')
-    .select('*')
+    .select(POST_CARD_SELECT)
     .eq('status', 'published')
     .eq('noindex', false)
     .eq('category', category)
