@@ -19,7 +19,7 @@ import { getPostBySlug } from '../../lib/supabaseBlog.ts';
 import { getArticleBySlug } from '../../lib/articles.ts';
 import HostedArticleTemplate from '../components/HostedArticleTemplate';
 import ExternalArticleTemplate from '../components/ExternalArticleTemplate';
-import { generateMetaTags, updateDocumentMeta, generateArticleStructuredData, generateBreadcrumbListSchema, generateEnhancedArticleStructuredData } from '../../lib/seoHelpers.ts';
+import { generateMetaTags, updateDocumentMeta, generateBreadcrumbListSchema, generateEnhancedArticleStructuredData } from '../../lib/seoHelpers.ts';
 import { safeImageSrc, safeMarkdownContent, coerceToString, PLACEHOLDER_IMAGE } from '../../lib/blogImages.ts';
 import { injectHeadingIdsInHtml } from '../../lib/blogHelpers.ts';
 import { debugLog, debugError, debugTiming } from '../../lib/debug.ts';
@@ -170,6 +170,8 @@ export function BlogPostPage() {
             });
             
             // Add comprehensive JSON-LD structured data for external articles
+            // Defensive: remove any unnamed JSON-LD scripts that may have been left by stale cached bundles
+            document.head.querySelectorAll('script[type="application/ld+json"]:not([id])').forEach(el => el.remove());
             // 1. BreadcrumbList schema
             let breadcrumbScriptTag = document.getElementById('breadcrumb-structured-data') as HTMLScriptElement;
             if (!breadcrumbScriptTag) {
@@ -233,6 +235,8 @@ export function BlogPostPage() {
         updateDocumentMeta(metaTags, 'The Wildland Fire Recovery Fund');
         
         // Add comprehensive JSON-LD structured data for legacy posts
+        // Defensive: remove any unnamed JSON-LD scripts that may have been left by stale cached bundles
+        document.head.querySelectorAll('script[type="application/ld+json"]:not([id])').forEach(el => el.remove());
         // 1. BreadcrumbList schema
         let breadcrumbScriptTag = document.getElementById('breadcrumb-structured-data') as HTMLScriptElement;
         if (!breadcrumbScriptTag) {
