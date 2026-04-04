@@ -19,7 +19,7 @@ import { getPostBySlug } from '../../lib/supabaseBlog.ts';
 import { getArticleBySlug } from '../../lib/articles.ts';
 import HostedArticleTemplate from '../components/HostedArticleTemplate';
 import ExternalArticleTemplate from '../components/ExternalArticleTemplate';
-import { generateMetaTags, updateDocumentMeta, generateArticleStructuredData, generateOrganizationSchema, generateBreadcrumbListSchema, generateEnhancedArticleStructuredData } from '../../lib/seoHelpers.ts';
+import { generateMetaTags, updateDocumentMeta, generateArticleStructuredData, generateBreadcrumbListSchema, generateEnhancedArticleStructuredData } from '../../lib/seoHelpers.ts';
 import { safeImageSrc, safeMarkdownContent, coerceToString, PLACEHOLDER_IMAGE } from '../../lib/blogImages.ts';
 import { injectHeadingIdsInHtml } from '../../lib/blogHelpers.ts';
 import { debugLog, debugError, debugTiming } from '../../lib/debug.ts';
@@ -170,18 +170,7 @@ export function BlogPostPage() {
             });
             
             // Add comprehensive JSON-LD structured data for external articles
-            // 1. Organization schema
-            let orgScriptTag = document.getElementById('org-structured-data') as HTMLScriptElement;
-            if (!orgScriptTag) {
-              orgScriptTag = document.createElement('script');
-              orgScriptTag.id = 'org-structured-data';
-              orgScriptTag.type = 'application/ld+json';
-              document.head.appendChild(orgScriptTag);
-            }
-            const orgSchema = generateOrganizationSchema();
-            orgScriptTag.textContent = JSON.stringify(orgSchema);
-            
-            // 2. BreadcrumbList schema
+            // 1. BreadcrumbList schema
             let breadcrumbScriptTag = document.getElementById('breadcrumb-structured-data') as HTMLScriptElement;
             if (!breadcrumbScriptTag) {
               breadcrumbScriptTag = document.createElement('script');
@@ -192,7 +181,7 @@ export function BlogPostPage() {
             const breadcrumbSchema = generateBreadcrumbListSchema(slug, articleTitle, window.location.origin, article.category || 'Disaster Recovery');
             breadcrumbScriptTag.textContent = JSON.stringify(breadcrumbSchema);
             
-            // 3. Enhanced BlogPosting schema with image dimensions
+            // 2. Enhanced BlogPosting schema with image dimensions
             let articleScriptTag = document.getElementById('article-structured-data') as HTMLScriptElement;
             if (!articleScriptTag) {
               articleScriptTag = document.createElement('script');
@@ -244,18 +233,7 @@ export function BlogPostPage() {
         updateDocumentMeta(metaTags, 'The Wildland Fire Recovery Fund');
         
         // Add comprehensive JSON-LD structured data for legacy posts
-        // 1. Organization schema
-        let orgScriptTag = document.getElementById('org-structured-data') as HTMLScriptElement;
-        if (!orgScriptTag) {
-          orgScriptTag = document.createElement('script');
-          orgScriptTag.id = 'org-structured-data';
-          orgScriptTag.type = 'application/ld+json';
-          document.head.appendChild(orgScriptTag);
-        }
-        const orgSchema = generateOrganizationSchema();
-        orgScriptTag.textContent = JSON.stringify(orgSchema);
-        
-        // 2. BreadcrumbList schema
+        // 1. BreadcrumbList schema
         let breadcrumbScriptTag = document.getElementById('breadcrumb-structured-data') as HTMLScriptElement;
         if (!breadcrumbScriptTag) {
           breadcrumbScriptTag = document.createElement('script');
@@ -266,7 +244,7 @@ export function BlogPostPage() {
         const breadcrumbSchema = generateBreadcrumbListSchema(slug, fetchedPost.title, window.location.origin, fetchedPost.category || 'Disaster Recovery');
         breadcrumbScriptTag.textContent = JSON.stringify(breadcrumbSchema);
         
-        // 3. Enhanced BlogPosting schema
+        // 2. Enhanced BlogPosting schema
         const structuredData = generateEnhancedArticleStructuredData(fetchedPost, window.location.origin);
         let scriptTag = document.getElementById('article-structured-data') as HTMLScriptElement;
         if (!scriptTag) {
@@ -276,7 +254,26 @@ export function BlogPostPage() {
           document.head.appendChild(scriptTag);
         }
         scriptTag.textContent = JSON.stringify(structuredData);
-        
+
+        // 3. FAQPage schema (only when the post has FAQ data)
+        const existingFaqTag = document.getElementById('faq-structured-data');
+        if (existingFaqTag) existingFaqTag.remove();
+        if (fetchedPost.faq_json && fetchedPost.faq_json.length > 0) {
+          const faqScriptTag = document.createElement('script');
+          faqScriptTag.id = 'faq-structured-data';
+          faqScriptTag.type = 'application/ld+json';
+          faqScriptTag.textContent = JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: fetchedPost.faq_json.map((faq: { question: string; answer: string }) => ({
+              '@type': 'Question',
+              name: faq.question,
+              acceptedAnswer: { '@type': 'Answer', text: faq.answer }
+            }))
+          });
+          document.head.appendChild(faqScriptTag);
+        }
+
         endTiming();
         debugLog('=== BlogPostPage Load Complete (Posts) ===');
         
@@ -326,10 +323,10 @@ export function BlogPostPage() {
       document.title = 'The Wildland Fire Recovery Fund';
       
       // Remove article structured data when leaving
-      const scriptTag = document.getElementById('article-structured-data');
-      if (scriptTag) {
-        scriptTag.remove();
-      }
+      ['article-structured-data', 'breadcrumb-structured-data', 'faq-structured-data'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.remove();
+      });
     };
   }, [slug]);
 
