@@ -46,6 +46,46 @@ export function BlogPostPage() {
     let isMounted = true;
     const abortController = new AbortController();
 
+    // ── Schema sanitation ─────────────────────────────────────────────────────
+    // Runs SYNCHRONOUSLY on mount and on every slug change (route transition),
+    // BEFORE any async work begins.  This guarantees a clean <head> before fresh
+    // schemas are injected, regardless of what stale cached bundles or the edge
+    // function may have left behind.
+    //
+    // Step 1: Remove every JSON-LD <script> that has no id attribute.
+    //   Sources of unnamed scripts: older cached JS bundles, Netlify edge-function
+    //   responses cached before the structured-data consolidation commits, or any
+    //   third-party injector that omits the id.
+    document.head
+      .querySelectorAll('script[type="application/ld+json"]')
+      .forEach(el => {
+        const hasId = (el as HTMLElement).id && (el as HTMLElement).id.length > 0;
+        if (!hasId) el.remove();
+      });
+
+    // Step 2: Among the remaining NAMED scripts, remove duplicates by @type.
+    //   If two scripts share the same @type (e.g. two BlogPosting entries from
+    //   a prerender pass and a stale hydration), keep only the first occurrence
+    //   and remove the rest.  Malformed JSON-LD is also removed.
+    const _seenSchemaTypes = new Map<string, Element>();
+    document.head
+      .querySelectorAll('script[type="application/ld+json"][id]')
+      .forEach(el => {
+        try {
+          const data = JSON.parse((el as HTMLElement).textContent || '{}');
+          const type = data['@type'];
+          if (!type) return;
+          if (_seenSchemaTypes.has(type)) {
+            el.remove(); // duplicate – purge
+          } else {
+            _seenSchemaTypes.set(type, el);
+          }
+        } catch {
+          el.remove(); // malformed JSON-LD – purge
+        }
+      });
+    // ──────────────────────────────────────────────────────────────────────────
+
     async function loadPost() {
       const endTiming = debugTiming('BlogPostPage.loadPost');
       
@@ -170,8 +210,6 @@ export function BlogPostPage() {
             });
             
             // Add comprehensive JSON-LD structured data for external articles
-            // Defensive: remove any unnamed JSON-LD scripts that may have been left by stale cached bundles
-            document.head.querySelectorAll('script[type="application/ld+json"]:not([id])').forEach(el => el.remove());
             // 1. BreadcrumbList schema
             let breadcrumbScriptTag = document.getElementById('breadcrumb-structured-data') as HTMLScriptElement;
             if (!breadcrumbScriptTag) {
@@ -235,8 +273,6 @@ export function BlogPostPage() {
         updateDocumentMeta(metaTags, 'The Wildland Fire Recovery Fund');
         
         // Add comprehensive JSON-LD structured data for legacy posts
-        // Defensive: remove any unnamed JSON-LD scripts that may have been left by stale cached bundles
-        document.head.querySelectorAll('script[type="application/ld+json"]:not([id])').forEach(el => el.remove());
         // 1. BreadcrumbList schema
         let breadcrumbScriptTag = document.getElementById('breadcrumb-structured-data') as HTMLScriptElement;
         if (!breadcrumbScriptTag) {
