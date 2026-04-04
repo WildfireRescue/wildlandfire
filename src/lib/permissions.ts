@@ -12,7 +12,6 @@ const ADMIN_EMAILS = [
   "editor@thewildlandfirerecoveryfund.org",
   "reports@goldie.agency",
   "help@goldie.agency",
-  "truedesertwarriors@gmail.com",
 ];
 
 export type PermissionStatus = "no_session" | "allowlist" | "insufficient_role" | "error";
