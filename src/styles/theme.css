@@ -197,12 +197,6 @@
     scroll-margin-top: calc(var(--nav-height) + 1rem);
   }
 
-  /* Prevent horizontal overflow on all pages */
-  html,
-  body {
-    overflow-x: hidden;
-  }
-
   /* Better tap highlight on mobile */
   a,
   button {
