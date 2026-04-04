@@ -246,7 +246,7 @@ export function BlogIndexPage() {
               transition={{ delay: 0.3 }}
               className="mb-16"
             >
-              <BlogPostCard post={featuredPosts[0]} featured={true} />
+              <BlogPostCard post={featuredPosts[0]} featured={true} priority={true} />
             </motion.div>
           )}
 
@@ -280,7 +280,12 @@ export function BlogIndexPage() {
                 {posts
                   .filter(post => !featuredPosts.some(fp => fp.id === post.id))
                   .map((post, index) => (
-                    <BlogPostCard key={post.id} post={post} index={index} />
+                    <BlogPostCard
+                      key={post.id}
+                      post={post}
+                      index={index}
+                      priority={index === 0}
+                    />
                   ))}
               </div>
 

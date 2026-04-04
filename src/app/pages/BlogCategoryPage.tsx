@@ -204,7 +204,12 @@ export function BlogCategoryPage() {
             <>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {posts.map((post, index) => (
-                  <BlogPostCard key={post.id} post={post} index={index} />
+                  <BlogPostCard
+                    key={post.id}
+                    post={post}
+                    index={index}
+                    priority={index === 0}
+                  />
                 ))}
               </div>
 

@@ -16,9 +16,11 @@ interface BlogPostCardProps {
   post: BlogPost;
   index?: number;
   featured?: boolean;
+  /** Set true for above-the-fold cards that are likely LCP candidates */
+  priority?: boolean;
 }
 
-export function BlogPostCard({ post, index = 0, featured = false }: BlogPostCardProps) {
+export function BlogPostCard({ post, index = 0, featured = false, priority = false }: BlogPostCardProps) {
   const blogUrl = `/blog/${safeSlug(post.slug)}`;
 
   // Resolve cover image — fall back through featured_image_url → og_image_url
@@ -43,8 +45,9 @@ export function BlogPostCard({ post, index = 0, featured = false }: BlogPostCard
               src={coverImageSrc}
               alt={post.title || 'Blog post cover'}
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              loading="lazy"
-              decoding="async"
+              loading={priority ? 'eager' : 'lazy'}
+              fetchPriority={priority ? 'high' : 'auto'}
+              decoding={priority ? 'sync' : 'async'}
               onError={(e) => {
                 console.warn('[BlogPostCard] Image failed to load:', post.cover_image_url);
                 e.currentTarget.src = PLACEHOLDER_IMAGE;
@@ -118,8 +121,9 @@ export function BlogPostCard({ post, index = 0, featured = false }: BlogPostCard
           src={coverImageSrc}
           alt={post.title || 'Blog post cover'}
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-          loading="lazy"
-          decoding="async"
+          loading={priority ? 'eager' : 'lazy'}
+          fetchPriority={priority ? 'high' : 'auto'}
+          decoding={priority ? 'sync' : 'async'}
           onError={(e) => {
             console.warn('[BlogPostCard] Image failed to load:', post.cover_image_url);
             e.currentTarget.src = PLACEHOLDER_IMAGE;

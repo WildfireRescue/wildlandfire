@@ -78,6 +78,16 @@ export default defineConfig({
       output: {
         manualChunks: (id) => {
           // Aggressive code splitting for mobile performance
+          // Keep admin/editor code out of the public bundle
+          if (
+            id.includes('pages/admin/') ||
+            id.includes('components/ArticleEditor') ||
+            id.includes('components/RichTextEditor') ||
+            id.includes('components/ArticleList') ||
+            id.includes('components/FeaturedImageUpload')
+          ) {
+            return 'admin';
+          }
           if (id.includes('node_modules')) {
             // React core - critical path
             if (id.includes('react/') || id.includes('react-dom/') || id.includes('scheduler')) {

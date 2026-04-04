@@ -7,7 +7,11 @@ import { Footer } from "./components/Footer";
 import { StructuredData } from "./components/StructuredData";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { AuthProvider } from "../contexts/AuthContext";
-import { BlogEditorPage } from "./pages/admin/BlogEditorPage";
+
+// Admin: lazy-load so editor code never lands in the public bundle
+const BlogEditorPage = lazy(() =>
+  import("./pages/admin/BlogEditorPage").then((m) => ({ default: m.BlogEditorPage }))
+);
 
 console.log("[App] Module loading...");
 
