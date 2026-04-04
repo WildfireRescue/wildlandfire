@@ -353,6 +353,28 @@ function injectSEOTags(html: string, post: BlogPost, baseUrl: string = SITE_ORIG
   }
   schemaScript.textContent = JSON.stringify(blogPostingSchema, null, 2);
 
+  // BreadcrumbList schema — mirrors what BlogPostPage.tsx injects at hydration time
+  const category = post.category || 'Disaster Recovery';
+  const categorySlug = category.toLowerCase().replace(/\s+/g, '-');
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: baseUrl },
+      { '@type': 'ListItem', position: 2, name: 'Blog', item: `${baseUrl}/blog` },
+      { '@type': 'ListItem', position: 3, name: category, item: `${baseUrl}/blog/category/${categorySlug}` },
+      { '@type': 'ListItem', position: 4, name: post.title || post.meta_title_final, item: postUrl },
+    ],
+  };
+  let breadcrumbScript = doc.getElementById('breadcrumb-structured-data');
+  if (!breadcrumbScript) {
+    breadcrumbScript = doc.createElement('script');
+    breadcrumbScript.id = 'breadcrumb-structured-data';
+    breadcrumbScript.type = 'application/ld+json';
+    doc.head.appendChild(breadcrumbScript);
+  }
+  breadcrumbScript.textContent = JSON.stringify(breadcrumbSchema, null, 2);
+
   return doc.documentElement.outerHTML;
 }
 

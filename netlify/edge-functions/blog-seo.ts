@@ -98,8 +98,6 @@ export default async (request: Request, context: any) => {
 };
 
 function injectSEOTags(html: string, post: BlogPost): string {
-  const schema = generateBlogPostingSchema(post);
-
   const seoTags = `
     <title>${escapeHtml(post.meta_title_final)}</title>
     <meta name="description" content="${escapeHtml(post.meta_description_final)}">
@@ -125,12 +123,7 @@ function injectSEOTags(html: string, post: BlogPost): string {
     <!-- Article Meta -->
     <meta property="article:published_time" content="${post.published_at}">
     <meta property="article:modified_time" content="${post.updated_at}">
-    ${post.author_name ? `<meta property="article:author" content="${escapeHtml(post.author_name)}">` : ""}
-    
-    <!-- Structured Data (JSON-LD) -->
-    <script type="application/ld+json">
-      ${JSON.stringify(schema, null, 2)}
-    </script>`;
+    ${post.author_name ? `<meta property="article:author" content="${escapeHtml(post.author_name)}">` : ""}`;
 
   // Replace closing </head> with our tags + closing </head>
   if (html.includes("</head>")) {
@@ -148,40 +141,6 @@ function injectSEOTags(html: string, post: BlogPost): string {
 
   // Last resort: just append
   return html + seoTags;
-}
-
-function generateBlogPostingSchema(post: BlogPost): Record<string, any> {
-  return {
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    headline: post.title,
-    description: post.meta_description_final,
-    image: {
-      "@type": "ImageObject",
-      url: post.og_image_url,
-      width: post.og_image_width,
-      height: post.og_image_height,
-    },
-    datePublished: post.published_at,
-    dateModified: post.updated_at,
-    ...(post.author_name && {
-      author: {
-        "@type": "Person",
-        name: post.author_name,
-        ...(post.author_bio && { description: post.author_bio }),
-      },
-    }),
-    publisher: {
-      "@type": "Organization",
-      name: "The Wildland Fire Recovery Fund",
-      logo: {
-        "@type": "ImageObject",
-        url: "https://thewildlandfirerecoveryfund.org/logo.png",
-        width: 250,
-        height: 60,
-      },
-    },
-  };
 }
 
 function escapeHtml(text: string): string {
