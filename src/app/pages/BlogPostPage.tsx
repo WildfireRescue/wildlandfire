@@ -231,6 +231,25 @@ export function BlogPostPage() {
             }
             const enhancedSchema = generateEnhancedArticleStructuredData(article, window.location.origin);
             articleScriptTag.textContent = JSON.stringify(enhancedSchema);
+
+            // 3. FAQPage schema (only when the article has FAQ data)
+            const existingFaqTagA = document.getElementById('faq-structured-data');
+            if (existingFaqTagA) existingFaqTagA.remove();
+            if (article.faq_json && Array.isArray(article.faq_json) && article.faq_json.length > 0) {
+              const faqScriptTagA = document.createElement('script');
+              faqScriptTagA.id = 'faq-structured-data';
+              faqScriptTagA.type = 'application/ld+json';
+              faqScriptTagA.textContent = JSON.stringify({
+                '@context': 'https://schema.org',
+                '@type': 'FAQPage',
+                mainEntity: article.faq_json.map((faq: { question: string; answer: string }) => ({
+                  '@type': 'Question',
+                  name: faq.question,
+                  acceptedAnswer: { '@type': 'Answer', text: faq.answer }
+                }))
+              });
+              document.head.appendChild(faqScriptTagA);
+            }
             
             setLoading(false);
             endTiming();
@@ -298,7 +317,7 @@ export function BlogPostPage() {
         // 3. FAQPage schema (only when the post has FAQ data)
         const existingFaqTag = document.getElementById('faq-structured-data');
         if (existingFaqTag) existingFaqTag.remove();
-        if (fetchedPost.faq_json && fetchedPost.faq_json.length > 0) {
+        if (fetchedPost.faq_json && Array.isArray(fetchedPost.faq_json) && fetchedPost.faq_json.length > 0) {
           const faqScriptTag = document.createElement('script');
           faqScriptTag.id = 'faq-structured-data';
           faqScriptTag.type = 'application/ld+json';
