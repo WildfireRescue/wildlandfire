@@ -19,22 +19,44 @@ if (!supabaseUrl || !supabaseAnonKey) {
   <url>
     <loc>https://thewildlandfirerecoveryfund.org/</loc>
     <lastmod>${new Date().toISOString()}</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://thewildlandfirerecoveryfund.org/#donate</loc>
+    <loc>https://thewildlandfirerecoveryfund.org/donate</loc>
     <lastmod>${new Date().toISOString()}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://thewildlandfirerecoveryfund.org/about</loc>
+    <lastmod>${new Date().toISOString()}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://thewildlandfirerecoveryfund.org/blog</loc>
+    <lastmod>${new Date().toISOString()}</lastmod>
+    <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://thewildlandfirerecoveryfund.org/#about</loc>
+    <loc>https://thewildlandfirerecoveryfund.org/stories</loc>
     <lastmod>${new Date().toISOString()}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://thewildlandfirerecoveryfund.org/grants</loc>
+    <lastmod>${new Date().toISOString()}</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://thewildlandfirerecoveryfund.org/#blog</loc>
+    <loc>https://thewildlandfirerecoveryfund.org/contact</loc>
     <lastmod>${new Date().toISOString()}</lastmod>
-    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
   </url>
 </urlset>`;
 
@@ -85,17 +107,17 @@ async function generateSitemap() {
     // Define static URLs
     const staticUrls: SitemapUrl[] = [
       { loc: '/', priority: 1.0, changefreq: 'weekly' },
-      { loc: '/#donate', priority: 1.0, changefreq: 'weekly' },
-      { loc: '/#about', priority: 0.8, changefreq: 'monthly' },
-      { loc: '/#blog', priority: 0.9, changefreq: 'daily' },
-      { loc: '/#stories', priority: 0.7, changefreq: 'weekly' },
-      { loc: '/#grants', priority: 0.8, changefreq: 'monthly' },
-      { loc: '/#contact', priority: 0.6, changefreq: 'monthly' },
+      { loc: '/donate', priority: 1.0, changefreq: 'weekly' },
+      { loc: '/about', priority: 0.8, changefreq: 'monthly' },
+      { loc: '/blog', priority: 0.9, changefreq: 'daily' },
+      { loc: '/stories', priority: 0.7, changefreq: 'weekly' },
+      { loc: '/grants', priority: 0.8, changefreq: 'monthly' },
+      { loc: '/contact', priority: 0.6, changefreq: 'monthly' },
     ];
 
     // Add blog posts
     const postUrls: SitemapUrl[] = (posts || []).map(post => ({
-      loc: `/#blog/${post.slug}`,
+      loc: `/blog/${post.slug}`,
       lastmod: post.updated_at || post.published_at,
       changefreq: 'monthly',
       priority: 0.7
