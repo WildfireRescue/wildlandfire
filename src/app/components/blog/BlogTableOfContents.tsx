@@ -55,8 +55,11 @@ export function BlogTableOfContents({ content }: BlogTableOfContentsProps) {
   const handleClick = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
-      const offset = 100;
-      const top = element.getBoundingClientRect().top + window.scrollY - offset;
+      const navHeight = parseInt(
+        getComputedStyle(document.documentElement).getPropertyValue('--nav-height') || '88',
+        10
+      ) + 16; // 16px extra breathing room
+      const top = element.getBoundingClientRect().top + window.scrollY - navHeight;
       window.scrollTo({ top, behavior: 'smooth' });
       // Close on mobile after clicking
       if (window.innerWidth < 1024) {

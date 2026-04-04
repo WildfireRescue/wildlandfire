@@ -17,7 +17,7 @@ export function BlogReadingProgress() {
       setProgress(Math.min(Math.max(scrollPercent, 0), 100));
     };
 
-    window.addEventListener('scroll', updateProgress);
+    window.addEventListener('scroll', updateProgress, { passive: true });
     updateProgress(); // Initial calculation
 
     return () => window.removeEventListener('scroll', updateProgress);
@@ -25,7 +25,7 @@ export function BlogReadingProgress() {
 
   return (
     <motion.div
-      className="fixed top-0 left-0 right-0 z-50 h-1 bg-primary/20"
+      className="fixed top-[var(--nav-height)] left-0 right-0 z-40 h-1 bg-primary/20"
       initial={{ opacity: 0 }}
       animate={{ opacity: progress > 0 ? 1 : 0 }}
       transition={{ duration: 0.2 }}

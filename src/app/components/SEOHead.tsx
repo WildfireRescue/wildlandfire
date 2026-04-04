@@ -60,6 +60,9 @@ export function SEOHead({
     updateMetaTag('og:title', seoTitle, true);
     updateMetaTag('og:description', seoDescription, true);
     updateMetaTag('og:image', seoImage, true);
+    updateMetaTag('og:image:width', '1200', true);
+    updateMetaTag('og:image:height', '630', true);
+    updateMetaTag('og:image:type', 'image/webp', true);
     updateMetaTag('og:url', seoUrl, true);
     updateMetaTag('og:type', type, true);
     updateMetaTag('og:site_name', defaultSEO.siteName, true);

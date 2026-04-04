@@ -190,4 +190,30 @@
     font-weight: var(--font-weight-normal);
     line-height: 1.5;
   }
+
+  /* Prevent in-page anchors from hiding under the fixed nav */
+  :target,
+  [id] {
+    scroll-margin-top: calc(var(--nav-height) + 1rem);
+  }
+
+  /* Prevent horizontal overflow on all pages */
+  html,
+  body {
+    overflow-x: hidden;
+  }
+
+  /* Better tap highlight on mobile */
+  a,
+  button {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  /* Minimum tap target size for interactive elements */
+  a:not([class]),
+  button:not([class]) {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }

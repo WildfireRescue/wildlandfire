@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { Link } from 'react-router-dom';
 import { Heart, X } from 'lucide-react';
 
 export function MobileStickyDonateBar() {
@@ -16,7 +17,7 @@ export function MobileStickyDonateBar() {
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isDismissed]);
 
@@ -76,13 +77,12 @@ export function MobileStickyDonateBar() {
 
               {/* Right: CTA + Dismiss */}
               <div className="flex items-center gap-2">
-                <motion.a
-                  href="#donate"
-                  whileTap={{ scale: 0.95 }}
+                <Link
+                  to="/donate"
                   className="px-6 py-3 bg-white text-primary font-bold text-sm rounded-lg shadow-lg min-h-[48px] flex items-center justify-center"
                 >
                   Donate
-                </motion.a>
+                </Link>
 
                 <button
                   onClick={handleDismiss}

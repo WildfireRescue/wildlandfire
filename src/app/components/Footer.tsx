@@ -1,5 +1,6 @@
 import { Facebook, Twitter, Instagram, Mail } from 'lucide-react';
 import { motion } from 'motion/react';
+import { Link } from 'react-router-dom';
 import logoImage from '../../assets/e43d164f2f92fa60d5e9ac721dd31bf10ad9da66.png';
 
 export function Footer() {
@@ -58,13 +59,13 @@ export function Footer() {
             <h4 className="mb-4 uppercase tracking-wider text-sm">Quick Links</h4>
             <ul className="space-y-2 text-muted-foreground">
               {[
-                { name: 'Home', url: '#home' },
-                { name: 'About Us', url: '#about' },
-                { name: 'Stories', url: '#stories' },
-                { name: 'Grants', url: '#grants' },
-                { name: 'Donate', url: '#donate' },
-                { name: 'Blog', url: '#blog' },
-                { name: 'Contact Us', url: '#contact' }
+                { name: 'Home', url: '/' },
+                { name: 'About Us', url: '/about' },
+                { name: 'Stories', url: '/stories' },
+                { name: 'Grants', url: '/grants' },
+                { name: 'Donate', url: '/donate' },
+                { name: 'Blog', url: '/blog' },
+                { name: 'Contact Us', url: '/contact' }
               ].map((link, index) => (
                 <motion.li
                   key={link.name}
@@ -74,12 +75,12 @@ export function Footer() {
                   transition={{ duration: 0.3, delay: 0.2 + index * 0.05 }}
                   whileHover={{ x: 5 }}
                 >
-                  <a
-                    href={link.url}
+                  <Link
+                    to={link.url}
                     className="hover:text-primary transition-colors inline-block"
                   >
                     {link.name}
-                  </a>
+                  </Link>
                 </motion.li>
               ))}
             </ul>
@@ -142,20 +143,18 @@ export function Footer() {
             © {new Date().getFullYear()} The Wildland Fire Recovery Fund. All rights reserved.
           </p>
           <div className="flex gap-6">
-            <motion.a
-              href="#privacy"
-              whileHover={{ scale: 1.05 }}
+            <Link
+              to="/privacy"
               className="hover:text-primary transition-colors"
             >
               Privacy Policy
-            </motion.a>
-            <motion.a
-              href="#terms"
-              whileHover={{ scale: 1.05 }}
+            </Link>
+            <Link
+              to="/terms"
               className="hover:text-primary transition-colors"
             >
               Terms of Use
-            </motion.a>
+            </Link>
           </div>
         </motion.div>
       </div>

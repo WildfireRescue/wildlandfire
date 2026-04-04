@@ -364,7 +364,7 @@ export function BlogPostPage() {
   // Loading State
   if (loading) {
     return (
-      <div className="min-h-screen bg-background pt-20 pb-24">
+      <div className="min-h-screen bg-background pt-[var(--nav-height)] pb-24">
         <div className="container mx-auto px-6 text-center py-20">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           <p className="text-muted-foreground mt-4">Loading post...</p>
@@ -390,7 +390,7 @@ export function BlogPostPage() {
     const isServer = errorCategory === 'SERVER_ERROR';
 
     return (
-      <div className="min-h-screen bg-background pt-20 pb-24">
+      <div className="min-h-screen bg-background pt-[var(--nav-height)] pb-24">
         <div className="container mx-auto px-6 max-w-2xl">
           <div className={`rounded-xl p-8 text-center ${
             isNotFound ? 'bg-muted/50 border border-border' :
@@ -498,7 +498,7 @@ export function BlogPostPage() {
       {/* Reading Progress Bar */}
       <BlogReadingProgress />
 
-      <div className="min-h-screen bg-background pt-20 pb-24">
+      <div className="min-h-screen bg-background pt-[var(--nav-height)] pb-24">
         {/* Centered Content Layout - No Sidebar */}
         <div className="container mx-auto px-4 sm:px-6 lg:px-12 max-w-5xl">
           {/* Back Button */}
@@ -538,7 +538,7 @@ export function BlogPostPage() {
             transition={{ delay: 0.1 }}
             className="mb-12 text-center max-w-4xl mx-auto"
           >
-            <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-8 leading-[1.1] tracking-tight text-heading">
+            <h1 className="mb-8 font-bold leading-[1.1] tracking-tight text-heading" style={{ fontSize: 'clamp(1.875rem, 4vw + 0.75rem, 4.5rem)' }}>
               {coerceToString(post.title)}
             </h1>
 

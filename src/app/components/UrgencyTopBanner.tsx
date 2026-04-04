@@ -1,5 +1,6 @@
 import { motion } from 'motion/react';
 import { Flame, TrendingUp, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useState } from 'react';
 
 export function UrgencyTopBanner() {
@@ -61,15 +62,13 @@ export function UrgencyTopBanner() {
 
           {/* Right: CTA + Close */}
           <div className="flex items-center gap-3">
-            <motion.a
-              href="#donate"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+            <Link
+              to="/donate"
               className="hidden sm:flex items-center gap-2 px-5 py-2 bg-white text-red-600 font-bold text-sm rounded-lg shadow-lg hover:shadow-xl transition-shadow"
             >
               <TrendingUp size={16} />
               Donate Now
-            </motion.a>
+            </Link>
 
             <button
               onClick={() => setIsVisible(false)}

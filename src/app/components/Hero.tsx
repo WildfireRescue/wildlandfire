@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'motion/react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 const heroImages = [
   {
@@ -38,30 +38,40 @@ const heroImages = [
 
 export function Hero() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isMobile, setIsMobile] = useState(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    // Detect mobile for reduced animations
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    checkMobile();
-    
-    // Only run slideshow on desktop or if user prefers motion
+    const isMobile = window.innerWidth < 768;
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    
+
     if (!isMobile && !prefersReducedMotion) {
-      const interval = setInterval(() => {
-        setCurrentImageIndex((prevIndex) => (prevIndex + 1) % heroImages.length);
-      }, 5000); // Change image every 5 seconds
-      return () => clearInterval(interval);
+      intervalRef.current = setInterval(() => {
+        setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
+      }, 5000);
     }
-  }, [isMobile]);
+
+    const handleResize = () => {
+      if (window.innerWidth < 768 && intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+    window.addEventListener('resize', handleResize, { passive: true });
+
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   return (
-    <section id="home" className="relative min-h-[90vh] flex items-center justify-center overflow-hidden pt-28">
+    <section
+      id="home"
+      className="relative flex items-center justify-center overflow-hidden pt-[var(--nav-height)]"
+      style={{ minHeight: 'min(90svh, 90vh)' }}
+    >
       {/* Rotating Background Slideshow */}
-      <div className="absolute inset-0" style={{ minHeight: '90vh' }}>
+      <div className="absolute inset-0">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentImageIndex}
@@ -94,27 +104,28 @@ export function Hero() {
       {/* Main Content */}
       <div className="relative z-10 container mx-auto px-4">
         <motion.div
-          initial={isMobile ? { opacity: 1 } : { opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: isMobile ? 0 : 0.8, delay: isMobile ? 0 : 0.2 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
           className="max-w-5xl mx-auto text-center"
         >
           {/* Overline */}
           <motion.p
-            initial={isMobile ? { opacity: 1 } : { opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: isMobile ? 0 : 0.6, delay: isMobile ? 0 : 0.3 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
             className="text-primary uppercase tracking-wider mb-6 text-sm font-semibold"
           >
             The Wildland Fire Recovery Fund
           </motion.p>
 
-          {/* Main Headline - Matching your site exactly */}
+          {/* Main Headline */}
           <motion.h1
-            initial={isMobile ? { opacity: 1 } : { opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: isMobile ? 0 : 0.8, delay: isMobile ? 0 : 0.4 }}
-            className="text-5xl md:text-7xl lg:text-8xl mb-6 leading-tight"
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className="mb-6 leading-tight"
+            style={{ fontSize: 'clamp(2rem, 6vw + 0.5rem, 5rem)' }}
           >
             Empowering Communities Affected by Wildfires to{' '}
             <span className="text-primary font-bold">
@@ -122,12 +133,12 @@ export function Hero() {
             </span>
           </motion.h1>
 
-          {/* Tagline - From your site */}
+          {/* Tagline */}
           <motion.p
-            initial={isMobile ? { opacity: 1 } : { opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: isMobile ? 0 : 0.6, delay: isMobile ? 0 : 0.6 }}
-            className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed"
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className="text-base sm:text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed"
           >
             We provide financial relief and support to firefighters and families affected by wildfires. When the flames are gone, we help communities begin to rebuild.
           </motion.p>

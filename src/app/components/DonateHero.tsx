@@ -20,7 +20,7 @@ export function DonateHero() {
             <Heart className="text-primary mx-auto" size={48} fill="currentColor" />
           </motion.div>
 
-          <h1 className="text-5xl md:text-7xl mb-4">Give Hope Today</h1>
+          <h1 className="mb-4" style={{ fontSize: 'clamp(2.25rem, 5vw + 0.5rem, 4.5rem)' }}>Give Hope Today</h1>
 
           <p className="text-2xl text-muted-foreground mb-4 leading-relaxed">
             Your donation doesn't just help rebuild homes. It rebuilds lives, restores dignity, and
