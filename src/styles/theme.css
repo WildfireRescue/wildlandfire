@@ -127,6 +127,44 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+/* =========================================================
+   PERFORMANCE: CSS-only animations that replace Framer Motion
+   on the critical render path (Hero, Navigation, Footer).
+   Removing the static motion/react imports from those three
+   files drops the ~125 KB motion chunk from the eager-load
+   waterfall, saving ~36 KB brotli + significant CPU parse time.
+   ========================================================= */
+
+@keyframes navSlideDown {
+  from { transform: translateY(-100%); }
+  to   { transform: translateY(0); }
+}
+
+@keyframes heroFadeUp {
+  from { opacity: 0; transform: translateY(1.875rem); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.nav-slide-down {
+  animation: navSlideDown 0.5s ease both;
+}
+
+/* Staggered hero text reveal — no JS required */
+.hero-fade-1 { animation: heroFadeUp 0.6s ease 0.3s both; }
+.hero-fade-2 { animation: heroFadeUp 0.8s ease 0.4s both; }
+.hero-fade-3 { animation: heroFadeUp 0.6s ease 0.6s both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-slide-down,
+  .hero-fade-1,
+  .hero-fade-2,
+  .hero-fade-3 {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

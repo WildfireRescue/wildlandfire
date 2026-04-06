@@ -4,44 +4,66 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
-    <!-- Preconnect to external domains for faster loading -->
+    <!-- ── User Timing: record the moment the HTML is parsed ─────────────── -->
+    <!-- This is the earliest possible performance mark; works before any JS  -->
+    <!-- module is loaded or parsed. Visible in DevTools Performance timeline  -->
+    <!-- and via PerformanceObserver in the browser.                           -->
+    <script>performance?.mark('html-parsed');</script>
+
+    <!-- ── Resource hints ─────────────────────────────────────────────────── -->
+    <!-- Only Unsplash is preconnected — the only external origin that serves  -->
+    <!-- content needed for the LCP image. GTM is loaded via requestIdleCallback -->
+    <!-- so preconnecting to it here gains nothing and wastes a connection slot. -->
     <link rel="preconnect" href="https://images.unsplash.com" crossorigin>
     <link rel="dns-prefetch" href="https://images.unsplash.com">
 
-    <!-- Preload LCP hero image (first slide, desktop) -->
+    <!-- ── LCP hero image preload ─────────────────────────────────────────── -->
+    <!--                                                                        -->
+    <!-- CRITICAL: This <link rel="preload"> must match the srcset + sizes      -->
+    <!-- used by the <img> in Hero.tsx exactly so the browser pairs the         -->
+    <!-- preloaded bytes with the rendered element. Any mismatch causes a        -->
+    <!-- double-download (preload wasted + fresh fetch on hydration).           -->
+    <!--                                                                        -->
+    <!-- Mobile DPR note: A Moto G Power (412 px, DPR 2.625) computes a        -->
+    <!-- display size of 480 px (from sizes) → needs 480×2.625 = 1260 px       -->
+    <!-- intrinsic resolution → browser selects the 1200w entry (largest        -->
+    <!-- available). Quality reduced to q=62 to save ~20 % bytes vs q=68.      -->
     <link
       rel="preload"
       as="image"
-      href="https://images.unsplash.com/photo-1562457346-b1b743feb764?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMGFjdGlvbnxlbnwxfHx8fDE3NjU4NDY0NDV8MA&ixlib=rb-4.1.0&q=68&w=1200"
-      imagesrcset="https://images.unsplash.com/photo-1562457346-b1b743feb764?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMGFjdGlvbnxlbnwxfHx8fDE3NjU4NDY0NDV8MA&ixlib=rb-4.1.0&q=55&w=480 480w, https://images.unsplash.com/photo-1562457346-b1b743feb764?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMGFjdGlvbnxlbnwxfHx8fDE3NjU4NDY0NDV8MA&ixlib=rb-4.1.0&q=63&w=768 768w, https://images.unsplash.com/photo-1562457346-b1b743feb764?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMGFjdGlvbnxlbnwxfHx8fDE3NjU4NDY0NDV8MA&ixlib=rb-4.1.0&q=68&w=1200 1200w"
+      href="https://images.unsplash.com/photo-1562457346-b1b743feb764?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMGFjdGlvbnxlbnwxfHx8fDE3NjU4NDY0NDV8MA&ixlib=rb-4.1.0&q=62&w=1200"
+      imagesrcset="https://images.unsplash.com/photo-1562457346-b1b743feb764?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMGFjdGlvbnxlbnwxfHx8fDE3NjU4NDY0NDV8MA&ixlib=rb-4.1.0&q=55&w=480 480w, https://images.unsplash.com/photo-1562457346-b1b743feb764?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMGFjdGlvbnxlbnwxfHx8fDE3NjU4NDY0NDV8MA&ixlib=rb-4.1.0&q=63&w=768 768w, https://images.unsplash.com/photo-1562457346-b1b743feb764?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMGFjdGlvbnxlbnwxfHx8fDE3NjU4NDY0NDV8MA&ixlib=rb-4.1.0&q=62&w=1200 1200w"
       imagesizes="(max-width: 480px) 480px, (max-width: 768px) 768px, 100vw"
       fetchpriority="high"
     />
-    <!-- Preload nav logo WebP -->
+    <!-- Preload nav logo (above-the-fold, WebP) -->
     <link rel="preload" as="image" href="/Images/logo-128.webp" type="image/webp" />
 
-    <!-- Google Analytics 4 - Fully deferred and non blocking -->
+    <!-- ── Google Analytics 4 — fully deferred, non-blocking ─────────────── -->
+    <!-- GA is initialised immediately so gtag() calls work, but the network   -->
+    <!-- request is deferred until the CPU is idle (or 3 s after load as       -->
+    <!-- fallback). This prevents the GTM/GA script from creating long tasks    -->
+    <!-- that inflate TBT during the initial render window.                    -->
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
       gtag('config', 'G-91F19C5VXB');
-      
-      // Load GA after everything else is done - idle time
+
       if ('requestIdleCallback' in window) {
-        requestIdleCallback(() => {
-          const script = document.createElement('script');
-          script.async = true;
-          script.src = 'https://www.googletagmanager.com/gtag/js?id=G-91F19C5VXB';
-          document.head.appendChild(script);
-        });
+        requestIdleCallback(function() {
+          var s = document.createElement('script');
+          s.async = true;
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-91F19C5VXB';
+          document.head.appendChild(s);
+        }, { timeout: 4000 });
       } else {
-        window.addEventListener('load', () => {
-          setTimeout(() => {
-            const script = document.createElement('script');
-            script.async = true;
-            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-91F19C5VXB';
-            document.head.appendChild(script);
+        window.addEventListener('load', function() {
+          setTimeout(function() {
+            var s = document.createElement('script');
+            s.async = true;
+            s.src = 'https://www.googletagmanager.com/gtag/js?id=G-91F19C5VXB';
+            document.head.appendChild(s);
           }, 3000);
         });
       }

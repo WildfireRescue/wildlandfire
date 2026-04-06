@@ -1,11 +1,22 @@
+/**
+ * Footer.tsx — motion/react-free
+ *
+ * Removed the static import of motion/react (the only remaining eager-path
+ * consumer after Hero and Navigation were fixed). The motion chunk is now
+ * exclusively a dynamic import loaded by below-fold lazy-loaded sections,
+ * so it no longer blocks the initial page paint.
+ *
+ * Hover effects preserved via Tailwind transition utilities.
+ * Entrance animations removed — the footer is below the fold and entrance
+ * animations on scroll are a progressive enhancement, not a requirement.
+ */
 import { Facebook, Twitter, Instagram, Mail } from 'lucide-react';
-import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 
 export function Footer() {
   const socialLinks = [
     { icon: Facebook, href: 'https://www.facebook.com/profile.php?id=61585125667396', label: 'Facebook' },
-    { icon: Twitter, href: '#', label: 'Twitter' },
+    { icon: Twitter,  href: '#', label: 'Twitter' },
     { icon: Instagram, href: '#', label: 'Instagram' },
     { icon: Mail, href: 'mailto:info@thewildlandfirerecoveryfund.org', label: 'Email' },
   ];
@@ -14,23 +25,16 @@ export function Footer() {
     <footer className="bg-card border-t border-border">
       <div className="container mx-auto px-4 py-12">
         <div className="grid md:grid-cols-4 gap-8 mb-8">
+
           {/* Brand / Mission */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="md:col-span-2"
-          >
+          <div className="md:col-span-2">
             <div className="mb-4">
               <picture>
                 <source srcSet="/Images/logo-footer.webp" type="image/webp" />
-                <motion.img
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ duration: 0.3 }}
+                <img
                   src="/Images/logo-footer.png"
                   alt="The Wildland Fire Recovery Fund"
-                  className="h-16 w-auto mb-3"
+                  className="h-16 w-auto mb-3 transition-transform duration-300 hover:scale-105"
                   loading="lazy"
                   decoding="async"
                   width="303"
@@ -38,7 +42,7 @@ export function Footer() {
                 />
               </picture>
               <div className="text-sm text-muted-foreground max-w-md">
-                For families, firefighters & children after the flames
+                For families, firefighters &amp; children after the flames
               </div>
             </div>
 
@@ -47,58 +51,40 @@ export function Footer() {
               and long-term recovery assistance.
             </p>
 
-            {/* Entity Disambiguation */}
             <p className="text-xs text-muted-foreground mt-4 max-w-md">
               The Wildland Fire Recovery Fund is an independent nonprofit organization and is
               not affiliated with the California Community Foundation or other similarly named
               wildfire funds.
             </p>
-          </motion.div>
+          </div>
 
           {/* Quick Links */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          >
+          <div>
             <h4 className="mb-4 uppercase tracking-wider text-sm">Quick Links</h4>
             <ul className="space-y-2 text-muted-foreground">
               {[
-                { name: 'Home', url: '/' },
-                { name: 'About Us', url: '/about' },
-                { name: 'Stories', url: '/stories' },
-                { name: 'Grants', url: '/grants' },
-                { name: 'Donate', url: '/donate' },
-                { name: 'Blog', url: '/blog' },
-                { name: 'Contact Us', url: '/contact' }
-              ].map((link, index) => (
-                <motion.li
-                  key={link.name}
-                  initial={{ opacity: 0, x: -10 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.3, delay: 0.2 + index * 0.05 }}
-                  whileHover={{ x: 5 }}
-                >
+                { name: 'Home',       url: '/' },
+                { name: 'About Us',   url: '/about' },
+                { name: 'Stories',    url: '/stories' },
+                { name: 'Grants',     url: '/grants' },
+                { name: 'Donate',     url: '/donate' },
+                { name: 'Blog',       url: '/blog' },
+                { name: 'Contact Us', url: '/contact' },
+              ].map((link) => (
+                <li key={link.name}>
                   <Link
                     to={link.url}
-                    className="hover:text-primary transition-colors inline-block"
+                    className="hover:text-primary hover:translate-x-1 transition-all duration-200 inline-block"
                   >
                     {link.name}
                   </Link>
-                </motion.li>
+                </li>
               ))}
             </ul>
-          </motion.div>
+          </div>
 
           {/* Contact */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
+          <div>
             <h4 className="mb-4 uppercase tracking-wider text-sm">Contact</h4>
             <ul className="space-y-2 text-muted-foreground">
               <li>
@@ -109,61 +95,43 @@ export function Footer() {
                   info@thewildlandfirerecoveryfund.org
                 </a>
               </li>
-
               <li className="pt-4">
                 <div className="flex gap-3">
-                  {socialLinks.map((social, index) => {
+                  {socialLinks.map((social) => {
                     const Icon = social.icon;
                     return (
-                      <motion.a
+                      <a
                         key={social.label}
                         href={social.href}
-                        initial={{ opacity: 0, scale: 0 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.3, delay: 0.3 + index * 0.1 }}
-                        whileHover={{ scale: 1.2, y: -3 }}
-                        whileTap={{ scale: 0.9 }}
-                        className="hover:text-primary transition-colors p-3 min-h-[48px] min-w-[48px] flex items-center justify-center"
+                        className="hover:text-primary hover:scale-110 hover:-translate-y-0.5 active:scale-90 transition-all duration-200 p-3 min-h-[48px] min-w-[48px] flex items-center justify-center"
                         aria-label={social.label}
                       >
                         <Icon size={24} />
-                      </motion.a>
+                      </a>
                     );
                   })}
                 </div>
               </li>
             </ul>
-          </motion.div>
+          </div>
         </div>
 
-        {/* Bottom Bar */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          className="border-t border-border pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-muted-foreground"
-        >
+        {/* Bottom bar */}
+        <div className="border-t border-border pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
           <p>
-            © {new Date().getFullYear()} The Wildland Fire Recovery Fund. All rights reserved.
+            &copy; {new Date().getFullYear()} The Wildland Fire Recovery Fund. All rights reserved.
           </p>
           <div className="flex gap-6">
-            <Link
-              to="/privacy"
-              className="hover:text-primary transition-colors"
-            >
+            <Link to="/privacy" className="hover:text-primary transition-colors">
               Privacy Policy
             </Link>
-            <Link
-              to="/terms"
-              className="hover:text-primary transition-colors"
-            >
+            <Link to="/terms" className="hover:text-primary transition-colors">
               Terms of Use
             </Link>
           </div>
-        </motion.div>
+        </div>
       </div>
     </footer>
   );
 }
+

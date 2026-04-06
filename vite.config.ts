@@ -17,15 +17,19 @@ import compression from 'vite-plugin-compression'
  *         SPA for all other routes (fast, interactive)
  */
 
-// Strip modulepreload hints for lazy admin/db chunks so browsers don't
-// eagerly download them on every public page visit.
+// Strip modulepreload hints for chunks that should load lazily.
+// Vite/Rollup adds modulepreload for every chunk reachable from the
+// entry point — even dynamic imports. We remove these hints for:
+//   • admin / db  — only needed at /blog/editor
+//   • motion      — now only imported by lazy-loaded below-fold sections.
+//                   Hero, Navigation, and Footer no longer import it,
+//                   so it must NOT be loaded on every public page visit.
 const stripLazyPreloads: import('vite').Plugin = {
   name: 'strip-lazy-preloads',
   enforce: 'post',
   transformIndexHtml(html) {
-    // Remove modulepreload for chunks that are only needed for /blog/editor
     return html.replace(
-      /<link rel="modulepreload"[^>]*\/(db|admin)\.[^>]*>\n?/g,
+      /<link rel="modulepreload"[^>]*\/(db|admin|motion)\.[^>]*>\n?/g,
       '',
     );
   },
