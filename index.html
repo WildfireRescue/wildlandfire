@@ -11,11 +11,7 @@
     <script>performance?.mark('html-parsed');</script>
 
     <!-- ── Resource hints ─────────────────────────────────────────────────── -->
-    <!-- Only Unsplash is preconnected — the only external origin that serves  -->
-    <!-- content needed for the LCP image. GTM is loaded via requestIdleCallback -->
-    <!-- so preconnecting to it here gains nothing and wastes a connection slot. -->
-    <link rel="preconnect" href="https://images.unsplash.com" crossorigin>
-    <link rel="dns-prefetch" href="https://images.unsplash.com">
+    <!-- LCP hero is now served from local /Images/hero/ — no external origin. -->
 
     <!-- ── LCP hero image preload ─────────────────────────────────────────── -->
     <!--                                                                        -->
@@ -24,15 +20,16 @@
     <!-- preloaded bytes with the rendered element. Any mismatch causes a        -->
     <!-- double-download (preload wasted + fresh fetch on hydration).           -->
     <!--                                                                        -->
+    <!-- Local WebP assets served from Netlify CDN — zero extra connection.    -->
     <!-- Mobile DPR note: A Moto G Power (412 px, DPR 2.625) computes a        -->
     <!-- display size of 480 px (from sizes) → needs 480×2.625 = 1260 px       -->
     <!-- intrinsic resolution → browser selects the 1200w entry (largest        -->
-    <!-- available). Quality reduced to q=62 to save ~20 % bytes vs q=68.      -->
+    <!-- available).                                                            -->
     <link
       rel="preload"
       as="image"
-      href="https://images.unsplash.com/photo-1562457346-b1b743feb764?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMGFjdGlvbnxlbnwxfHx8fDE3NjU4NDY0NDV8MA&ixlib=rb-4.1.0&q=62&w=1200"
-      imagesrcset="https://images.unsplash.com/photo-1562457346-b1b743feb764?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMGFjdGlvbnxlbnwxfHx8fDE3NjU4NDY0NDV8MA&ixlib=rb-4.1.0&q=55&w=480 480w, https://images.unsplash.com/photo-1562457346-b1b743feb764?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMGFjdGlvbnxlbnwxfHx8fDE3NjU4NDY0NDV8MA&ixlib=rb-4.1.0&q=63&w=768 768w, https://images.unsplash.com/photo-1562457346-b1b743feb764?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMGFjdGlvbnxlbnwxfHx8fDE3NjU4NDY0NDV8MA&ixlib=rb-4.1.0&q=62&w=1200 1200w"
+      href="/Images/hero/hero-1200.webp"
+      imagesrcset="/Images/hero/hero-480.webp 480w, /Images/hero/hero-768.webp 768w, /Images/hero/hero-1200.webp 1200w"
       imagesizes="(max-width: 480px) 480px, (max-width: 768px) 768px, 100vw"
       fetchpriority="high"
     />

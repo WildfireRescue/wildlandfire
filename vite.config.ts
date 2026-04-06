@@ -29,7 +29,7 @@ const stripLazyPreloads: import('vite').Plugin = {
   enforce: 'post',
   transformIndexHtml(html) {
     return html.replace(
-      /<link rel="modulepreload"[^>]*\/(db|admin|motion)\.[^>]*>\n?/g,
+      /<link rel="modulepreload"[^>]*\/(db|admin|motion|blog-content|icons)\.[^>]*>\n?/g,
       '',
     );
   },
@@ -133,13 +133,32 @@ export default defineConfig({
             if (id.includes('@supabase') || id.includes('supabase')) {
               return 'db';
             }
-            // Icons - separate
+            // Icons - separate (not preloaded eagerly)
             if (id.includes('lucide-react')) {
               return 'icons';
             }
             // Router - critical
             if (id.includes('react-router')) {
               return 'router';
+            }
+            // Blog content rendering — only needed by lazy BlogPostPage.
+            // Keeps ~100 KB of markdown/AST libs out of the eager vendor chunk.
+            if (
+              id.includes('react-markdown') ||
+              id.includes('remark') ||
+              id.includes('rehype') ||
+              id.includes('micromark') ||
+              id.includes('unified') ||
+              id.includes('/hast') ||
+              id.includes('/mdast') ||
+              id.includes('/unist') ||
+              id.includes('dompurify') ||
+              id.includes('DOMPurify') ||
+              id.includes('vfile') ||
+              id.includes('decode-named-character-reference') ||
+              id.includes('character-entities')
+            ) {
+              return 'blog-content';
             }
             // All other vendor code
             return 'vendor';

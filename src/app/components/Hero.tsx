@@ -21,9 +21,10 @@
 import { useState, useEffect, useRef } from 'react';
 
 // ── LCP slide — must exactly match the preload href/imagesrcset in index.html ──
-const LCP_MOBILE  = "https://images.unsplash.com/photo-1562457346-b1b743feb764?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMGFjdGlvbnxlbnwxfHx8fDE3NjU4NDY0NDV8MA&ixlib=rb-4.1.0&q=55&w=480";
-const LCP_TABLET  = "https://images.unsplash.com/photo-1562457346-b1b743feb764?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMGFjdGlvbnxlbnwxfHx8fDE3NjU4NDY0NDV8MA&ixlib=rb-4.1.0&q=63&w=768";
-const LCP_DESKTOP = "https://images.unsplash.com/photo-1562457346-b1b743feb764?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMGFjdGlvbnxlbnwxfHx8fDE3NjU4NDY0NDV8MA&ixlib=rb-4.1.0&q=62&w=1200";
+// Local assets: generated WebP + AVIF variants (portrait 0.825 aspect ratio)
+const LCP_MOBILE  = "/Images/hero/hero-480.webp";
+const LCP_TABLET  = "/Images/hero/hero-768.webp";
+const LCP_DESKTOP = "/Images/hero/hero-1200.webp";
 
 const extraSlides = [
   {
@@ -116,19 +117,27 @@ export function Hero() {
           className="absolute inset-0 transition-opacity duration-[1500ms] ease-in-out"
           style={{ opacity: currentIndex === 0 ? 1 : 0 }}
         >
-          <img
-            srcSet={lcpSrcSet}
-            sizes={SIZES}
-            src={LCP_MOBILE}
-            alt="Firefighters in action"
-            className="w-full h-full object-cover"
-            fetchPriority="high"
-            loading="eager"
-            decoding="async"
-            width={1920}
-            height={1080}
-            onLoad={() => performance?.mark('hero-lcp-image-loaded')}
-          />
+          {/* picture element lets AVIF-capable browsers skip the larger WebP */}
+          <picture>
+            <source
+              type="image/avif"
+              srcSet="/Images/hero/hero-480.avif 480w, /Images/hero/hero-768.avif 768w, /Images/hero/hero-1200.avif 1200w"
+              sizes={SIZES}
+            />
+            <img
+              srcSet={lcpSrcSet}
+              sizes={SIZES}
+              src={LCP_MOBILE}
+              alt="Fire rescue vehicles and firefighters ready to respond"
+              className="w-full h-full object-cover"
+              fetchPriority="high"
+              loading="eager"
+              decoding="async"
+              width={480}
+              height={582}
+              onLoad={() => performance?.mark('hero-lcp-image-loaded')}
+            />
+          </picture>
         </div>
 
         {/* Slides 1-3 — added to DOM only after LCP window closes */}
