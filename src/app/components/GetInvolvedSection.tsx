@@ -71,7 +71,7 @@ export function GetInvolvedSection() {
                   className="bg-background text-primary hover:bg-background/90 shadow-lg w-full sm:w-auto"
                 >
                   <a 
-                    href="#donate"
+                    href="/donate"
                     className="flex items-center justify-center whitespace-nowrap"
                   >
                     <Heart size={20} className="mr-2 flex-shrink-0" />

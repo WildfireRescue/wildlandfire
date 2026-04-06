@@ -97,6 +97,10 @@ function CheckoutForm({ amount, donorName, donorEmail, onSuccess, onBack }: {
         </div>
       )}
 
+      <p className="text-xs text-center text-muted-foreground">
+        🔒 Secured by Stripe &nbsp;·&nbsp; Payment info encrypted &nbsp;·&nbsp; Never stored on our servers
+      </p>
+
       <div className="flex gap-3">
         <button
           type="button"

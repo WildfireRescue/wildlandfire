@@ -40,7 +40,7 @@ export function MissionStatement() {
               size="lg"
               className="bg-primary text-primary-foreground hover:bg-primary/90 text-lg px-8"
             >
-              <a href="#donate">
+              <a href="/donate">
                 <Heart size={20} className="mr-2" />
                 Donate Now
               </a>

@@ -10,10 +10,10 @@ interface SEOHeadProps {
 }
 
 const defaultSEO = {
-  title: 'The Wildland Fire Recovery Fund - Helping Wildfire Survivors Rebuild',
-  description: 'The Wildland Fire Recovery Fund provides emergency assistance, housing support, and resources to wildfire survivors. 501(c)(3) nonprofit committed to rapid emergency response and transparent aid distribution.',
-  keywords: 'wildfire relief, wildfire survivors, fire disaster relief, emergency housing assistance, wildfire recovery fund, fire victim support, nonprofit wildfire aid, California wildfire relief, firefighter support, fire emergency grants',
-  image: 'https://images.unsplash.com/photo-1562457346-b1b743feb764?w=1200&h=630&fit=crop',
+  title: 'Wildfire Relief Donations for Long-Term Recovery | The Wildland Fire Recovery Fund',
+  description: 'Support wildfire relief donations to help families rebuild. The Wildland Fire Recovery Fund provides long-term wildfire recovery aid to displaced families and firefighters. 501(c)(3) nonprofit.',
+  keywords: 'wildfire relief donations, wildfire recovery, wildfire relief fund, wildfire survivor support, fire victim donations, wildfire recovery fund, firefighter family grants, wildfire emergency aid, nonprofit wildfire relief, tax-deductible wildfire donation',
+  image: 'https://www.thewildlandfirerecoveryfund.org/Images/hero/hero-1200.webp',
   url: 'https://www.thewildlandfirerecoveryfund.org',
   siteName: 'The Wildland Fire Recovery Fund'
 };

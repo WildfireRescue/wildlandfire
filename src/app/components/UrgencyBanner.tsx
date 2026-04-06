@@ -50,7 +50,7 @@ export function UrgencyBanner() {
             className="bg-primary text-primary-foreground hover:bg-primary/90 whitespace-nowrap"
           >
             <motion.a
-              href="#donate"
+              href="/donate"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >

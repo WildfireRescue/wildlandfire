@@ -4,54 +4,73 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
-    <!-- Preconnect to external domains for faster loading -->
-    <link rel="preconnect" href="https://images.unsplash.com" crossorigin>
-    <link rel="dns-prefetch" href="https://images.unsplash.com">
+    <!-- ── User Timing: record the moment the HTML is parsed ─────────────── -->
+    <!-- This is the earliest possible performance mark; works before any JS  -->
+    <!-- module is loaded or parsed. Visible in DevTools Performance timeline  -->
+    <!-- and via PerformanceObserver in the browser.                           -->
+    <script>performance?.mark('html-parsed');</script>
 
-    <!-- Preload LCP hero image (first slide, desktop) -->
+    <!-- ── Resource hints ─────────────────────────────────────────────────── -->
+    <!-- LCP hero is now served from local /Images/hero/ — no external origin. -->
+
+    <!-- ── LCP hero image preload ─────────────────────────────────────────── -->
+    <!--                                                                        -->
+    <!-- CRITICAL: This <link rel="preload"> must match the srcset + sizes      -->
+    <!-- used by the <img> in Hero.tsx exactly so the browser pairs the         -->
+    <!-- preloaded bytes with the rendered element. Any mismatch causes a        -->
+    <!-- double-download (preload wasted + fresh fetch on hydration).           -->
+    <!--                                                                        -->
+    <!-- Local WebP assets served from Netlify CDN — zero extra connection.    -->
+    <!-- Mobile DPR note: A Moto G Power (412 px, DPR 2.625) computes a        -->
+    <!-- display size of 480 px (from sizes) → needs 480×2.625 = 1260 px       -->
+    <!-- intrinsic resolution → browser selects the 1200w entry (largest        -->
+    <!-- available).                                                            -->
     <link
       rel="preload"
       as="image"
-      href="https://images.unsplash.com/photo-1562457346-b1b743feb764?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMGFjdGlvbnxlbnwxfHx8fDE3NjU4NDY0NDV8MA&ixlib=rb-4.1.0&q=68&w=1200"
-      imagesrcset="https://images.unsplash.com/photo-1562457346-b1b743feb764?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMGFjdGlvbnxlbnwxfHx8fDE3NjU4NDY0NDV8MA&ixlib=rb-4.1.0&q=55&w=480 480w, https://images.unsplash.com/photo-1562457346-b1b743feb764?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMGFjdGlvbnxlbnwxfHx8fDE3NjU4NDY0NDV8MA&ixlib=rb-4.1.0&q=63&w=768 768w, https://images.unsplash.com/photo-1562457346-b1b743feb764?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMGFjdGlvbnxlbnwxfHx8fDE3NjU4NDY0NDV8MA&ixlib=rb-4.1.0&q=68&w=1200 1200w"
+      href="/Images/hero/hero-1200.webp"
+      imagesrcset="/Images/hero/hero-480.webp 480w, /Images/hero/hero-768.webp 768w, /Images/hero/hero-1200.webp 1200w"
       imagesizes="(max-width: 480px) 480px, (max-width: 768px) 768px, 100vw"
       fetchpriority="high"
     />
-    <!-- Preload nav logo WebP -->
+    <!-- Preload nav logo (above-the-fold, WebP) -->
     <link rel="preload" as="image" href="/Images/logo-128.webp" type="image/webp" />
 
-    <!-- Google Analytics 4 - Fully deferred and non blocking -->
+    <!-- ── Google Analytics 4 — fully deferred, non-blocking ─────────────── -->
+    <!-- GA is initialised immediately so gtag() calls work, but the network   -->
+    <!-- request is deferred until the CPU is idle (or 3 s after load as       -->
+    <!-- fallback). This prevents the GTM/GA script from creating long tasks    -->
+    <!-- that inflate TBT during the initial render window.                    -->
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
       gtag('config', 'G-91F19C5VXB');
-      
-      // Load GA after everything else is done - idle time
+
       if ('requestIdleCallback' in window) {
-        requestIdleCallback(() => {
-          const script = document.createElement('script');
-          script.async = true;
-          script.src = 'https://www.googletagmanager.com/gtag/js?id=G-91F19C5VXB';
-          document.head.appendChild(script);
-        });
+        requestIdleCallback(function() {
+          var s = document.createElement('script');
+          s.async = true;
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-91F19C5VXB';
+          document.head.appendChild(s);
+        }, { timeout: 4000 });
       } else {
-        window.addEventListener('load', () => {
-          setTimeout(() => {
-            const script = document.createElement('script');
-            script.async = true;
-            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-91F19C5VXB';
-            document.head.appendChild(script);
+        window.addEventListener('load', function() {
+          setTimeout(function() {
+            var s = document.createElement('script');
+            s.async = true;
+            s.src = 'https://www.googletagmanager.com/gtag/js?id=G-91F19C5VXB';
+            document.head.appendChild(s);
           }, 3000);
         });
       }
     </script>
 
     <!-- Primary SEO Meta -->
-    <title>The Wildland Fire Recovery Fund | Long Term Recovery After Wildfires</title>
+    <title>Wildfire Relief Donations for Long-Term Recovery | The Wildland Fire Recovery Fund</title>
     <meta
       name="description"
-      content="The Wildland Fire Recovery Fund supports long term recovery for wildfire affected communities, families, and first responders. We help after the flames are out."
+      content="Support wildfire relief donations to help families rebuild. The Wildland Fire Recovery Fund provides long-term wildfire recovery aid to displaced families and firefighters. 501(c)(3) nonprofit."
     />
     <meta name="author" content="The Wildland Fire Recovery Fund" />
     <meta name="publisher" content="The Wildland Fire Recovery Fund" />
@@ -69,15 +88,15 @@
     <meta property="og:url" content="https://www.thewildlandfirerecoveryfund.org/" />
     <meta
       property="og:title"
-      content="The Wildland Fire Recovery Fund | Long Term Recovery After Wildfires"
+      content="Wildfire Relief Donations for Long-Term Recovery | The Wildland Fire Recovery Fund"
     />
     <meta
       property="og:description"
-      content="Supporting long term recovery for wildfire affected communities, families, and first responders after the flames are out."
+      content="Support wildfire relief donations to help families rebuild. The Wildland Fire Recovery Fund provides long-term wildfire recovery aid to displaced families and firefighters."
     />
     <meta property="og:site_name" content="The Wildland Fire Recovery Fund" />
     <meta property="og:locale" content="en_US" />
-    <meta property="og:image" content="https://images.unsplash.com/photo-1562457346-b1b743feb764?w=1200&h=630&fit=crop&fm=webp&q=75" />
+    <meta property="og:image" content="https://www.thewildlandfirerecoveryfund.org/Images/hero/hero-1200.webp" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:type" content="image/webp" />
@@ -88,24 +107,23 @@
     <meta name="twitter:url" content="https://www.thewildlandfirerecoveryfund.org/" />
     <meta
       name="twitter:title"
-      content="The Wildland Fire Recovery Fund | Long Term Recovery After Wildfires"
+      content="Wildfire Relief Donations for Long-Term Recovery | The Wildland Fire Recovery Fund"
     />
     <meta
       name="twitter:description"
-      content="Supporting long term recovery for wildfire affected communities, families, and first responders after the flames are out."
+      content="Support wildfire relief donations to help families rebuild. Long-term wildfire recovery aid for displaced families and firefighters."
     />
-    <meta name="twitter:image" content="https://images.unsplash.com/photo-1562457346-b1b743feb764?w=1200&h=630&fit=crop&fm=webp&q=75" />
+    <meta name="twitter:image" content="https://www.thewildlandfirerecoveryfund.org/Images/hero/hero-1200.webp" />
     <meta name="twitter:image:alt" content="Wildland Fire Recovery Fund - Supporting wildfire survivors" />
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <script type="module" crossorigin src="/js/index.xXFiycn6.js"></script>
-    <link rel="modulepreload" crossorigin href="/js/react-core.BEds4sTx.js">
-    <link rel="modulepreload" crossorigin href="/js/vendor.r-4zJDs4.js">
-    <link rel="modulepreload" crossorigin href="/js/motion.DMYqWCQp.js">
-        <link rel="modulepreload" crossorigin href="/js/ui.Em49PWTm.js">
-        <link rel="modulepreload" crossorigin href="/js/router.ccecnMQ5.js">
-    <link rel="stylesheet" crossorigin href="/assets/index.CuTZ9J1u.css">
+    <script type="module" crossorigin src="/js/index.BIncoa5P.js"></script>
+    <link rel="modulepreload" crossorigin href="/js/react-core.BwXzZjie.js">
+    <link rel="modulepreload" crossorigin href="/js/vendor.ByYTZpO7.js">
+        <link rel="modulepreload" crossorigin href="/js/ui.Di1N4U15.js">
+            <link rel="modulepreload" crossorigin href="/js/router.vSZlPq4T.js">
+    <link rel="stylesheet" crossorigin href="/assets/index.D4YKgPVt.css">
   </head>
 
   <body>

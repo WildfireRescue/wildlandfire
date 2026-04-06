@@ -662,6 +662,27 @@ export function BlogPostPage() {
             </div>
           </motion.article>
 
+          {/* Donate CTA — post-article */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="max-w-3xl mx-auto mt-16 rounded-2xl border border-primary/30 bg-primary/5 p-8 text-center"
+          >
+            <p className="text-xs uppercase tracking-widest text-primary font-semibold mb-3">Support Our Work</p>
+            <h2 className="text-2xl font-bold mb-3">Help Wildfire Survivors Rebuild</h2>
+            <p className="text-muted-foreground mb-6 max-w-lg mx-auto">
+              Your tax-deductible donation provides emergency housing, living expenses, and long-term recovery aid to families and firefighters affected by wildfires.
+            </p>
+            <Link
+              to="/donate"
+              className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground font-semibold px-8 py-4 rounded-full text-base hover:bg-primary/90 transition-colors"
+            >
+              Donate Now — 100% Tax-Deductible
+            </Link>
+          </motion.div>
+
           {/* Post Footer: Sources, E-E-A-T, Share */}
           <div className="max-w-3xl mx-auto mt-16 space-y-12">
             {/* Sources & Citations */}
@@ -682,7 +703,18 @@ export function BlogPostPage() {
           </div>
 
           {/* Related Posts */}
-          <div className="mt-20">
+          <div className="mt-20 pt-8 border-t border-border/20">
+            <div className="mb-10 rounded-xl bg-card border border-border/40 px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <p className="text-sm text-muted-foreground text-center sm:text-left">
+                Reading about wildfire recovery? <strong className="text-foreground">Make it count.</strong>
+              </p>
+              <Link
+                to="/donate"
+                className="shrink-0 inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground font-semibold px-6 py-3 rounded-full text-sm hover:bg-primary/90 transition-colors"
+              >
+                Donate to Wildfire Relief
+              </Link>
+            </div>
             <BlogRelatedPosts category={post.category} currentSlug={post.slug} />
           </div>
 

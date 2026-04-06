@@ -1,3 +1,4 @@
+import { SEOHead } from '../components/SEOHead';
 import { AboutHero } from '../components/AboutHero';
 import { WhoWeAre } from '../components/WhoWeAre';
 import { WhatWeDo } from '../components/WhatWeDo';
@@ -6,6 +7,11 @@ import { AboutKendra } from '../components/AboutKendra';
 export function AboutPage() {
   return (
     <>
+      <SEOHead
+        title="About The Wildland Fire Recovery Fund | Nonprofit Wildfire Relief"
+        description="Learn about The Wildland Fire Recovery Fund, an independent 501(c)(3) nonprofit providing direct financial relief to wildfire survivors, displaced families, and firefighters."
+        url="https://www.thewildlandfirerecoveryfund.org/about"
+      />
       <AboutHero />
 
       {/* Disambiguation / Identity Clarifier */}

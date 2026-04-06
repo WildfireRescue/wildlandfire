@@ -72,7 +72,7 @@ export function HowWeDeployAid() {
               size="lg"
               className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
-              <a href="#donate">
+              <a href="/donate">
                 <Heart size={20} className="mr-2" />
                 Support Our Mission
               </a>

@@ -12,15 +12,11 @@ export function DonateHero() {
           transition={{ duration: 0.6 }}
           className="max-w-4xl mx-auto text-center"
         >
-          <motion.div
-            animate={{ scale: [1, 1.2, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="inline-block mb-4"
-          >
+          <div className="inline-block mb-4">
             <Heart className="text-primary mx-auto" size={48} fill="currentColor" />
-          </motion.div>
+          </div>
 
-          <h1 className="mb-4" style={{ fontSize: 'clamp(2.25rem, 5vw + 0.5rem, 4.5rem)' }}>Give Hope Today</h1>
+          <h1 className="mb-4" style={{ fontSize: 'clamp(2.25rem, 5vw + 0.5rem, 4.5rem)' }}>Support Wildfire Relief — Make a Donation Today</h1>
 
           <p className="text-2xl text-muted-foreground mb-4 leading-relaxed">
             Your donation doesn't just help rebuild homes. It rebuilds lives, restores dignity, and

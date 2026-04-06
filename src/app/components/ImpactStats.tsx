@@ -5,17 +5,17 @@ const stats = [
   {
     icon: Heart,
     label: 'Direct Impact',
-    description: 'Your donations fund real recovery through housing, counseling, and rebuilding'
+    description: 'Your donations fund real wildfire recovery needs: housing, counseling, and rebuilding. Aid is delivered directly to survivors without bureaucratic delays.'
   },
   {
     icon: Users,
     label: 'Rapid Response',
-    description: 'We find survivors in need and bring help directly to them'
+    description: 'When a wildfire strikes, every hour counts. We find survivors in need and deploy aid directly to them as quickly as possible — often within days.'
   },
   {
     icon: Flame,
     label: 'Our Promise',
-    description: 'Every family deserves to rebuild with dignity and hope'
+    description: 'Every family deserves to rebuild with dignity and hope. We stand with wildfire survivors not just in the days after a fire, but through the years of recovery.'
   },
 ];
 
@@ -48,9 +48,9 @@ export function ImpactStats() {
           className="text-center mb-12"
         >
           <p className="text-sm tracking-widest uppercase text-primary mb-3">OUR COMMITMENT</p>
-          <h2 className="text-4xl md:text-5xl mb-4">Built to Make a Difference</h2>
+          <h2 className="text-4xl md:text-5xl mb-4">Built to Make a Difference in Wildfire Recovery</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            We're just getting started, but our vision is clear and our commitment is unwavering
+            We were created with one purpose: to help communities devastated by wildfires rebuild stronger than before.
           </p>
         </motion.div>
         

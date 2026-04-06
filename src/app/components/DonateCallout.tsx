@@ -70,7 +70,7 @@ export function DonateCallout() {
                 size="lg"
                 className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2"
               >
-                <a href="#donate">
+                <a href="/donate">
                   <Heart size={20} />
                   Donate Now
                   <ArrowRight size={20} />
@@ -81,7 +81,7 @@ export function DonateCallout() {
                 variant="outline"
                 className="border-2 border-border hover:bg-secondary"
               >
-                <a href="#about">
+                <a href="/about">
                   Learn More About Us
                 </a>
               </Button>

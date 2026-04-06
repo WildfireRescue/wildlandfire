@@ -172,7 +172,7 @@ export function BlogIndexPage() {
           name="description" 
           content="Read the latest news, survivor stories, and updates from The Wildland Fire Recovery Fund. Stay informed about our work supporting wildfire survivors." 
         />
-        <link rel="canonical" href="https://thewildlandfirerecoveryfund.org/#blog" />
+        <link rel="canonical" href="https://thewildlandfirerecoveryfund.org/blog" />
         <meta name="robots" content="index, follow, max-image-preview:large" />
         
         {/* Open Graph */}

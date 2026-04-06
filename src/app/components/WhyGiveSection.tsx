@@ -4,27 +4,27 @@ import { Heart, Users, Shield, ArrowRight } from 'lucide-react';
 const quickPaths = [
   {
     icon: Heart,
-    title: "Make a Difference",
-    description: "Your donation rebuilds lives, restores hope, and proves the world still cares",
-    path: "#donate",
+    title: "Make a Difference with Your Wildfire Recovery Support",
+    description: "Your donation rebuilds lives, restores hope, and proves the world still cares. Every gift, large or small, helps families start over with dignity.",
+    path: "/donate",
     color: "from-rose-500/20 to-pink-500/20",
     borderColor: "border-rose-500/30",
     iconColor: "text-rose-400"
   },
   {
     icon: Users,
-    title: "See Real Impact",
-    description: "Meet the families whose lives were transformed by donations like yours",
-    path: "#stories",
+    title: "See Real Impact: How Donations Transform Lives",
+    description: "From the single mother who received housing assistance to the firefighter family supported after loss, your generosity creates lasting stories of hope.",
+    path: "/stories",
     color: "from-purple-500/20 to-indigo-500/20",
     borderColor: "border-purple-500/30",
     iconColor: "text-purple-400"
   },
   {
     icon: Shield,
-    title: "100% Transparency",
-    description: "See exactly where every dollar goes with full financial accountability",
-    path: "#about",
+    title: "100% Transparency in How We Use Your Donations",
+    description: "See exactly where every dollar goes. We keep administrative costs low so more of your money reaches the people who need it most.",
+    path: "/about",
     color: "from-blue-500/20 to-cyan-500/20",
     borderColor: "border-blue-500/30",
     iconColor: "text-blue-400"
@@ -42,9 +42,9 @@ export function WhyGiveSection() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-5xl mb-4">Why Your Donation Matters</h2>
+          <h2 className="text-4xl md:text-5xl mb-4">Why Your Wildfire Relief Donation Matters</h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            When wildfires destroy everything, your generosity becomes the foundation for rebuilding.
+            When wildfires destroy everything, your generosity becomes the foundation for rebuilding. A single wildfire can displace entire communities in hours. But so is the power of people coming together to help.
           </p>
         </motion.div>
 

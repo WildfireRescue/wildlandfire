@@ -26,7 +26,7 @@ export function NextChapterCTA() {
               size="lg"
               className="bg-primary text-primary-foreground hover:bg-primary/90 text-lg px-8"
             >
-              <a href="#donate">
+              <a href="/donate">
                 <Heart size={20} className="mr-2" />
                 Give Hope Today
               </a>
@@ -37,7 +37,7 @@ export function NextChapterCTA() {
               variant="outline"
               className="text-lg px-8"
             >
-              <a href="#donate">
+              <a href="/stories">
                 See Donation Impact
                 <ArrowRight size={20} className="ml-2" />
               </a>

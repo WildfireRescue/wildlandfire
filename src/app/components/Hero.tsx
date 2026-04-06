@@ -177,23 +177,38 @@ export function Hero() {
         <div className="max-w-5xl mx-auto text-center">
 
           <p className="text-primary uppercase tracking-wider mb-6 text-sm font-semibold hero-fade-1">
-            The Wildland Fire Recovery Fund
+            The Wildland Fire Recovery Fund &nbsp;|&nbsp; 501(c)(3) Nonprofit
           </p>
 
           <h1
             className="mb-6 leading-tight hero-fade-2"
             style={{ fontSize: 'clamp(2rem, 6vw + 0.5rem, 5rem)' }}
           >
-            Empowering Communities Affected by Wildfires to{' '}
-            <span className="text-primary font-bold">Rise from the Ashes.</span>
+            Wildfire Relief Donations for{' '}
+            <span className="text-primary font-bold">Long-Term Recovery</span>
           </h1>
 
-          <p className="text-base sm:text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed hero-fade-3">
+          <p className="text-base sm:text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed hero-fade-3">
             We provide financial relief and support to firefighters and families affected by
-            wildfires. When the flames are gone, we help communities begin to rebuild.
+            wildfires. When the flames are gone, we help communities rebuild.
           </p>
 
-          <p className="mt-8 text-sm text-muted-foreground italic">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center hero-fade-3 mb-6">
+            <a
+              href="/donate"
+              className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground font-semibold px-8 py-4 rounded-full text-lg hover:bg-primary/90 transition-colors"
+            >
+              Donate Now · 100% Tax-Deductible
+            </a>
+            <a
+              href="#programs"
+              className="inline-flex items-center justify-center gap-2 border border-white/40 text-white font-semibold px-8 py-4 rounded-full text-lg hover:bg-white/10 transition-colors"
+            >
+              See How It Works
+            </a>
+          </div>
+
+          <p className="text-sm text-muted-foreground italic">
             For families, firefighters &amp; children after the flames
           </p>
 

@@ -1,5 +1,6 @@
 import { motion } from 'motion/react';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
+import { SEOHead } from '../components/SEOHead';
 import { Button } from '../components/ui/button';
 import { useState } from 'react';
 
@@ -27,6 +28,11 @@ export function ContactPage() {
 
   return (
     <div className="pt-28 pb-20">
+      <SEOHead
+        title="Contact The Wildland Fire Recovery Fund | Get in Touch"
+        description="Contact The Wildland Fire Recovery Fund to ask about wildfire relief grants, donations, volunteering, or media inquiries. We're here to help wildfire survivors and their families."
+        url="https://www.thewildlandfirerecoveryfund.org/contact"
+      />
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 30 }}

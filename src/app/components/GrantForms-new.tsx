@@ -128,7 +128,7 @@ export function GrantForms() {
               size="lg"
               className="w-full bg-blue-500 text-white hover:bg-blue-600"
             >
-              <a href="#donate">
+              <a href="/donate">
                 <Home size={20} className="mr-2" />
                 Support Individual Relief
               </a>

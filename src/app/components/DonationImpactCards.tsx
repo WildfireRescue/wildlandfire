@@ -5,29 +5,32 @@ export function DonationImpactCards() {
   const impactAreas = [
     {
       tag: 'RELIEF FOR COMMUNITIES',
-      title: 'On-site help for displaced families.',
-      description: 'We provide relief and supplies on-site to displaced and evacuated families during wildland fire operations. Along with immediate relief funds, we help communities rebuild and recover.',
+      title: 'On-Site Help for Displaced Families',
+      description:
+        'Our relief teams provide emergency supplies, cash assistance, and on-site support to displaced families during wildland fire operations. We help them meet urgent needs from day one.',
       icon: Home,
-      gradient: 'from-primary/20 to-primary/5'
+      gradient: 'from-primary/20 to-primary/5',
     },
     {
       tag: 'GRANTS FOR FAMILIES',
-      title: 'Standing with families of fallen firefighters.',
-      description: 'We provide financial grants to families of firefighters who have tragically lost their lives while serving on the frontlines.',
+      title: 'Standing with Families of Fallen Firefighters',
+      description:
+        'We provide financial grants to families of firefighters who have lost their lives on the frontlines. These grants cover funeral expenses, living costs, and the financial gap left behind.',
       icon: Heart,
-      gradient: 'from-primary/20 to-primary/5'
+      gradient: 'from-primary/20 to-primary/5',
     },
     {
       tag: 'SUPPORT PARTNERSHIPS',
-      title: 'Equipping those who protect us.',
-      description: 'We partner with Wildland Firefighter Organizations to ensure frontline responders have the tools, equipment, and support they need to stay safe.',
+      title: 'Equipping Those Who Protect Us',
+      description:
+        'We partner with wildland firefighter organizations to fund essential equipment, safety training, and mental health resources so frontline responders can protect communities and themselves.',
       icon: Shield,
-      gradient: 'from-primary/20 to-primary/5'
-    }
+      gradient: 'from-primary/20 to-primary/5',
+    },
   ];
 
   return (
-    <section className="py-20 bg-background">
+    <section id="programs" className="py-20 bg-background">
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <motion.div
@@ -38,8 +41,11 @@ export function DonationImpactCards() {
           className="text-center mb-16"
         >
           <h2 className="text-4xl md:text-5xl mb-4 max-w-4xl mx-auto">
-            Explore How Your Donations Support Affected Communities
+            Explore How Your Wildfire Relief Donations Support Affected Communities
           </h2>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            Every dollar you give goes directly to families, firefighters, and communities rebuilding after the flames.
+          </p>
         </motion.div>
 
         {/* Three Cards */}

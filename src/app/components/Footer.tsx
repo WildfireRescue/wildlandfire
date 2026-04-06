@@ -10,14 +10,12 @@
  * Entrance animations removed — the footer is below the fold and entrance
  * animations on scroll are a progressive enhancement, not a requirement.
  */
-import { Facebook, Twitter, Instagram, Mail } from 'lucide-react';
+import { Facebook, Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export function Footer() {
   const socialLinks = [
     { icon: Facebook, href: 'https://www.facebook.com/profile.php?id=61585125667396', label: 'Facebook' },
-    { icon: Twitter,  href: '#', label: 'Twitter' },
-    { icon: Instagram, href: '#', label: 'Instagram' },
     { icon: Mail, href: 'mailto:info@thewildlandfirerecoveryfund.org', label: 'Email' },
   ];
 
