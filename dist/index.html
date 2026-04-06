@@ -2,11 +2,23 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
     <!-- Preconnect to external domains for faster loading -->
     <link rel="preconnect" href="https://images.unsplash.com" crossorigin>
-    <link rel="dns prefetch" href="https://images.unsplash.com">
+    <link rel="dns-prefetch" href="https://images.unsplash.com">
+
+    <!-- Preload LCP hero image (first slide, desktop) -->
+    <link
+      rel="preload"
+      as="image"
+      href="https://images.unsplash.com/photo-1562457346-b1b743feb764?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMGFjdGlvbnxlbnwxfHx8fDE3NjU4NDY0NDV8MA&ixlib=rb-4.1.0&q=68&w=1200"
+      imagesrcset="https://images.unsplash.com/photo-1562457346-b1b743feb764?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMGFjdGlvbnxlbnwxfHx8fDE3NjU4NDY0NDV8MA&ixlib=rb-4.1.0&q=55&w=480 480w, https://images.unsplash.com/photo-1562457346-b1b743feb764?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMGFjdGlvbnxlbnwxfHx8fDE3NjU4NDY0NDV8MA&ixlib=rb-4.1.0&q=63&w=768 768w, https://images.unsplash.com/photo-1562457346-b1b743feb764?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMGFjdGlvbnxlbnwxfHx8fDE3NjU4NDY0NDV8MA&ixlib=rb-4.1.0&q=68&w=1200 1200w"
+      imagesizes="(max-width: 480px) 480px, (max-width: 768px) 768px, 100vw"
+      fetchpriority="high"
+    />
+    <!-- Preload nav logo WebP -->
+    <link rel="preload" as="image" href="/Images/logo-128.webp" type="image/webp" />
 
     <!-- Google Analytics 4 - Fully deferred and non blocking -->
     <script>
@@ -50,7 +62,7 @@
     <link rel="canonical" href="https://www.thewildlandfirerecoveryfund.org/" />
 
     <!-- Theme -->
-    <meta name="theme color" content="#FF9933" />
+    <meta name="theme-color" content="#FF9933" />
 
     <!-- Open Graph (Facebook / LinkedIn) -->
     <meta property="og:type" content="website" />
@@ -65,6 +77,11 @@
     />
     <meta property="og:site_name" content="The Wildland Fire Recovery Fund" />
     <meta property="og:locale" content="en_US" />
+    <meta property="og:image" content="https://images.unsplash.com/photo-1562457346-b1b743feb764?w=1200&h=630&fit=crop&fm=webp&q=75" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/webp" />
+    <meta property="og:image:alt" content="Wildland Fire Recovery Fund - Supporting wildfire survivors" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
@@ -77,52 +94,18 @@
       name="twitter:description"
       content="Supporting long term recovery for wildfire affected communities, families, and first responders after the flames are out."
     />
-
-    <!-- Organization Schema (JSON LD) -->
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "NonprofitOrganization",
-        "name": "The Wildland Fire Recovery Fund",
-        "url": "https://www.thewildlandfirerecoveryfund.org/",
-        "logo": "https://thewildlandfirerecoveryfund.org/assets/e43d164f2f92fa60d5e9ac721dd31bf10ad9da66-BGX1aa5Y.png",
-        "description": "The Wildland Fire Recovery Fund supports long term recovery for wildfire affected communities, families, and first responders after the flames are out.",
-        "email": "info@thewildlandfirerecoveryfund.org",
-        "contactPoint": {
-          "@type": "ContactPoint",
-          "contactType": "general inquiries",
-          "email": "info@thewildlandfirerecoveryfund.org",
-          "availableLanguage": "English"
-        },
-        "areaServed": {
-          "@type": "AdministrativeArea",
-          "name": "United States"
-        },
-        "knowsAbout": [
-          "Wildfire recovery",
-          "Disaster recovery",
-          "Community rebuilding after wildfires",
-          "Emergency housing assistance",
-          "Long term housing stabilization",
-          "Mental health support after disasters",
-          "Trauma informed care for disaster survivors",
-          "Support for firefighters and first responders",
-          "Wildfire preparedness and resilience"
-        ],
-        "sameAs": []
-      }
-    </script>
+    <meta name="twitter:image" content="https://images.unsplash.com/photo-1562457346-b1b743feb764?w=1200&h=630&fit=crop&fm=webp&q=75" />
+    <meta name="twitter:image:alt" content="Wildland Fire Recovery Fund - Supporting wildfire survivors" />
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <script type="module" crossorigin src="/js/index.BGZne_W0.js"></script>
-    <link rel="modulepreload" crossorigin href="/js/react-core.CbyFTCwb.js">
-    <link rel="modulepreload" crossorigin href="/js/vendor.DLvbv0pG.js">
-    <link rel="modulepreload" crossorigin href="/js/motion.BgM0W_JP.js">
-    <link rel="modulepreload" crossorigin href="/js/ui.DNCZDc5u.js">
-    <link rel="modulepreload" crossorigin href="/js/router.CdwGvBAH.js">
-    <link rel="modulepreload" crossorigin href="/js/db.Bxzionr-.js">
-    <link rel="stylesheet" crossorigin href="/assets/index.xbnP9gar.css">
+    <script type="module" crossorigin src="/js/index.xXFiycn6.js"></script>
+    <link rel="modulepreload" crossorigin href="/js/react-core.BEds4sTx.js">
+    <link rel="modulepreload" crossorigin href="/js/vendor.r-4zJDs4.js">
+    <link rel="modulepreload" crossorigin href="/js/motion.DMYqWCQp.js">
+        <link rel="modulepreload" crossorigin href="/js/ui.Em49PWTm.js">
+        <link rel="modulepreload" crossorigin href="/js/router.ccecnMQ5.js">
+    <link rel="stylesheet" crossorigin href="/assets/index.CuTZ9J1u.css">
   </head>
 
   <body>

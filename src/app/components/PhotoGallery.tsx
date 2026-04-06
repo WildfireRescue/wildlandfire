@@ -5,32 +5,32 @@ import idahoMountainImage from '../../assets/fire33333.webp';
 
 const galleryImages = [
   {
-    url: "https://images.unsplash.com/photo-1736976050816-bdacec2444a1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwYWxpc2FkZXMlMjBmaXJlJTIwbG9zJTIwYW5nZWxlc3xlbnwxfHx8fDE3NjY0NjQ5NjB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    url: "https://images.unsplash.com/photo-1736976050816-bdacec2444a1?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwYWxpc2FkZXMlMjBmaXJlJTIwbG9zJTIwYW5nZWxlc3xlbnwxfHx8fDE3NjY0NjQ5NjB8MA&ixlib=rb-4.1.0&q=72&w=1080",
     caption: "The Palisades Fire: devastating Los Angeles communities",
     span: "col-span-2 row-span-2"
   },
   {
-    url: "https://images.unsplash.com/photo-1602980045360-d94be60e4775?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpZGFobyUyMHdpbGRmaXJlJTIwZmxhbWVzfGVufDF8fHx8MTc2NjQ2NTA0NHww&ixlib=rb-4.1.0&q=80&w=1080",
+    url: "https://images.unsplash.com/photo-1602980045360-d94be60e4775?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpZGFobyUyMHdpbGRmaXJlJTIwZmxhbWVzfGVufDF8fHx8MTc2NjQ2NTA0NHww&ixlib=rb-4.1.0&q=72&w=1080",
     caption: "Idaho wildfires threatening rural communities",
     span: "col-span-1 row-span-1"
   },
   {
-    url: "https://images.unsplash.com/photo-1736636990289-d891ac0decc6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsb3MlMjBhbmdlbGVzJTIwd2lsZGZpcmUlMjBkZXN0cnVjdGlvbnxlbnwxfHx8fDE3NjY0NjQ5NjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    url: "https://images.unsplash.com/photo-1736636990289-d891ac0decc6?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsb3MlMjBhbmdlbGVzJTIwd2lsZGZpcmUlMjBkZXN0cnVjdGlvbnxlbnwxfHx8fDE3NjY0NjQ5NjF8MA&ixlib=rb-4.1.0&q=72&w=1080",
     caption: "Los Angeles neighborhoods destroyed: families displaced",
     span: "col-span-1 row-span-1"
   },
   {
-    url: "https://images.unsplash.com/photo-1666518871327-b4134de451d5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMGJhdHRsaW5nJTIwd2lsZGZpcmV8ZW58MXx8fHwxNzY2NDY0ODYwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+    url: "https://images.unsplash.com/photo-1666518871327-b4134de451d5?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMGJhdHRsaW5nJTIwd2lsZGZpcmV8ZW58MXx8fHwxNzY2NDY0ODYwfDA&ixlib=rb-4.1.0&q=72&w=1080",
     caption: "Brave firefighters risking everything to protect our communities",
     span: "col-span-1 row-span-1"
   },
   {
-    url: "https://images.unsplash.com/photo-1671959784652-8096fd28b17c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpZGFobyUyMGZvcmVzdCUyMGZpcmV8ZW58MXx8fHwxNzY2NDY1MDQ1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+    url: "https://images.unsplash.com/photo-1671959784652-8096fd28b17c?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpZGFobyUyMGZvcmVzdCUyMGZpcmV8ZW58MXx8fHwxNzY2NDY1MDQ1fDA&ixlib=rb-4.1.0&q=72&w=1080",
     caption: "Idaho forests burning: devastating natural landscapes",
     span: "col-span-1 row-span-1"
   },
   {
-    url: "https://images.unsplash.com/photo-1541959745973-a077c204173a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtYWxpYnUlMjB3aWxkZmlyZSUyMGFmdGVybWF0aHxlbnwxfHx8fDE3NjY0NjQ5NjJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    url: "https://images.unsplash.com/photo-1541959745973-a077c204173a?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtYWxpYnUlMjB3aWxkZmlyZSUyMGFmdGVybWF0aHxlbnwxfHx8fDE3NjY0NjQ5NjJ8MA&ixlib=rb-4.1.0&q=72&w=1080",
     caption: "Malibu wildfire aftermath: entire California neighborhoods lost",
     span: "col-span-2 row-span-1"
   },

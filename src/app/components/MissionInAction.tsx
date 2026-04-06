@@ -6,7 +6,7 @@ const impactAreas = [
     id: 1,
     icon: Home,
     title: "Emergency Housing & Rebuilding",
-    image: "https://images.unsplash.com/photo-1760273463901-199a180b2886?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxlbWVyZ2VuY3klMjBob3VzaW5nJTIwc2hlbHRlcnxlbnwxfHx8fDE3NjYxMTcyMTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    image: "https://images.unsplash.com/photo-1760273463901-199a180b2886?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxlbWVyZ2VuY3klMjBob3VzaW5nJTIwc2hlbHRlcnxlbnwxfHx8fDE3NjYxMTcyMTh8MA&ixlib=rb-4.1.0&q=72&w=1080",
     description: "When families lose everything, we provide immediate emergency housing assistance and support for rebuilding. Essentials like temporary shelter, clothing, and household items.",
     commitment: "Our commitment: Immediate emergency response"
   },
@@ -14,7 +14,7 @@ const impactAreas = [
     id: 2,
     icon: Heart,
     title: "Mental Health & Emotional Support",
-    image: "https://images.unsplash.com/photo-1758273240360-76b908e7582a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb3Vuc2VsaW5nJTIwdGhlcmFweSUyMHN1cHBvcnR8ZW58MXx8fHwxNzY2MTE3MjE4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+    image: "https://images.unsplash.com/photo-1758273240360-76b908e7582a?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb3Vuc2VsaW5nJTIwdGhlcmFweSUyMHN1cHBvcnR8ZW58MXx8fHwxNzY2MTE3MjE4fDA&ixlib=rb-4.1.0&q=72&w=1080",
     description: "The trauma of losing your home extends far beyond physical loss. We connect survivors with therapy, counseling, and support groups to help families heal emotionally.",
     commitment: "Our commitment: Whole-person recovery"
   },
@@ -22,7 +22,7 @@ const impactAreas = [
     id: 3,
     icon: Users,
     title: "Firefighter & First Responder Care",
-    image: "https://images.unsplash.com/photo-1713689824343-77d2f99e19b8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMGhlcm8lMjBwb3J0cmFpdHxlbnwxfHx8fDE3NjYxMTcyMTl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    image: "https://images.unsplash.com/photo-1713689824343-77d2f99e19b8?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMGhlcm8lMjBwb3J0cmFpdHxlbnwxfHx8fDE3NjYxMTcyMTl8MA&ixlib=rb-4.1.0&q=72&w=1080",
     description: "Those who risk everything to save others, deserve our support. We provide resources for firefighters and their families, including mental health services and emergency assistance.",
     commitment: "Our commitment: Supporting our heroes"
   }

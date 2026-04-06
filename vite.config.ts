@@ -17,6 +17,20 @@ import compression from 'vite-plugin-compression'
  *         SPA for all other routes (fast, interactive)
  */
 
+// Strip modulepreload hints for lazy admin/db chunks so browsers don't
+// eagerly download them on every public page visit.
+const stripLazyPreloads: import('vite').Plugin = {
+  name: 'strip-lazy-preloads',
+  enforce: 'post',
+  transformIndexHtml(html) {
+    // Remove modulepreload for chunks that are only needed for /blog/editor
+    return html.replace(
+      /<link rel="modulepreload"[^>]*\/(db|admin)\.[^>]*>\n?/g,
+      '',
+    );
+  },
+};
+
 export default defineConfig({
   plugins: [
     // The React and Tailwind plugins are both required for Make, even if
@@ -37,6 +51,9 @@ export default defineConfig({
       threshold: 512,
       deleteOriginFile: false,
     }),
+    // Remove modulepreload for admin/db chunks — they're lazy-loaded
+    // and should not be fetched on every public page visit
+    stripLazyPreloads,
   ],
   resolve: {
     alias: {
@@ -78,9 +95,12 @@ export default defineConfig({
       output: {
         manualChunks: (id) => {
           // Aggressive code splitting for mobile performance
-          // Keep admin/editor code out of the public bundle
+          // Keep admin/editor code out of the public bundle.
+          // AdminRoute lazy-loads AuthContext which lazy-loads supabase,
+          // so public visitors never load the db chunk.
           if (
             id.includes('pages/admin/') ||
+            id.includes('contexts/AuthContext') ||
             id.includes('components/ArticleEditor') ||
             id.includes('components/RichTextEditor') ||
             id.includes('components/ArticleList') ||
@@ -105,7 +125,7 @@ export default defineConfig({
             if (id.includes('@stripe') || id.includes('stripe')) {
               return 'payment';
             }
-            // Supabase - async only
+            // Supabase - async only (loaded via admin chunk)
             if (id.includes('@supabase') || id.includes('supabase')) {
               return 'db';
             }

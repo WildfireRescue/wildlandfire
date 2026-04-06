@@ -3,33 +3,33 @@ import { useState, useEffect, useRef } from 'react';
 
 const heroImages = [
   {
-    mobile: "https://images.unsplash.com/photo-1562457346-b1b743feb764?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMGFjdGlvbnxlbnwxfHx8fDE3NjU4NDY0NDV8MA&ixlib=rb-4.1.0&q=65&w=480",
-    tablet: "https://images.unsplash.com/photo-1562457346-b1b743feb764?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMGFjdGlvbnxlbnwxfHx8fDE3NjU4NDY0NDV8MA&ixlib=rb-4.1.0&q=70&w=768",
-    desktop: "https://images.unsplash.com/photo-1562457346-b1b743feb764?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMGFjdGlvbnxlbnwxfHx8fDE3NjU4NDY0NDV8MA&ixlib=rb-4.1.0&q=75&w=1200",
+    mobile: "https://images.unsplash.com/photo-1562457346-b1b743feb764?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMGFjdGlvbnxlbnwxfHx8fDE3NjU4NDY0NDV8MA&ixlib=rb-4.1.0&q=55&w=480",
+    tablet: "https://images.unsplash.com/photo-1562457346-b1b743feb764?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMGFjdGlvbnxlbnwxfHx8fDE3NjU4NDY0NDV8MA&ixlib=rb-4.1.0&q=63&w=768",
+    desktop: "https://images.unsplash.com/photo-1562457346-b1b743feb764?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMGFjdGlvbnxlbnwxfHx8fDE3NjU4NDY0NDV8MA&ixlib=rb-4.1.0&q=68&w=1200",
     alt: "Firefighters in action",
     width: 1920,
     height: 1080
   },
   {
-    mobile: "https://images.unsplash.com/photo-1550522485-b6dcf200b087?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3aWxkZmlyZSUyMGZvcmVzdCUyMGZpcmV8ZW58MXx8fHwxNzY1OTIyODE3fDA&ixlib=rb-4.1.0&q=65&w=480",
-    tablet: "https://images.unsplash.com/photo-1550522485-b6dcf200b087?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3aWxkZmlyZSUyMGZvcmVzdCUyMGZpcmV8ZW58MXx8fHwxNzY1OTIyODE3fDA&ixlib=rb-4.1.0&q=70&w=768",
-    desktop: "https://images.unsplash.com/photo-1550522485-b6dcf200b087?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3aWxkZmlyZSUyMGZvcmVzdCUyMGZpcmV8ZW58MXx8fHwxNzY1OTIyODE3fDA&ixlib=rb-4.1.0&q=75&w=1200",
+    mobile: "https://images.unsplash.com/photo-1550522485-b6dcf200b087?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3aWxkZmlyZSUyMGZvcmVzdCUyMGZpcmV8ZW58MXx8fHwxNzY1OTIyODE3fDA&ixlib=rb-4.1.0&q=55&w=480",
+    tablet: "https://images.unsplash.com/photo-1550522485-b6dcf200b087?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3aWxkZmlyZSUyMGZvcmVzdCUyMGZpcmV8ZW58MXx8fHwxNzY1OTIyODE3fDA&ixlib=rb-4.1.0&q=63&w=768",
+    desktop: "https://images.unsplash.com/photo-1550522485-b6dcf200b087?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3aWxkZmlyZSUyMGZvcmVzdCUyMGZpcmV8ZW58MXx8fHwxNzY1OTIyODE3fDA&ixlib=rb-4.1.0&q=68&w=1200",
     alt: "Wildfire scene",
     width: 1920,
     height: 1080
   },
   {
-    mobile: "https://images.unsplash.com/photo-1764639568368-9a60bdd7602c?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMHdpbGRmaXJlJTIwc21va2V8ZW58MXx8fHwxNzY1OTIzMTYxfDA&ixlib=rb-4.1.0&q=65&w=480",
-    tablet: "https://images.unsplash.com/photo-1764639568368-9a60bdd7602c?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMHdpbGRmaXJlJTIwc21va2V8ZW58MXx8fHwxNzY1OTIzMTYxfDA&ixlib=rb-4.1.0&q=70&w=768",
-    desktop: "https://images.unsplash.com/photo-1764639568368-9a60bdd7602c?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMHdpbGRmaXJlJTIwc21va2V8ZW58MXx8fHwxNzY1OTIzMTYxfDA&ixlib=rb-4.1.0&q=75&w=1200",
+    mobile: "https://images.unsplash.com/photo-1764639568368-9a60bdd7602c?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMHdpbGRmaXJlJTIwc21va2V8ZW58MXx8fHwxNzY1OTIzMTYxfDA&ixlib=rb-4.1.0&q=55&w=480",
+    tablet: "https://images.unsplash.com/photo-1764639568368-9a60bdd7602c?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMHdpbGRmaXJlJTIwc21va2V8ZW58MXx8fHwxNzY1OTIzMTYxfDA&ixlib=rb-4.1.0&q=63&w=768",
+    desktop: "https://images.unsplash.com/photo-1764639568368-9a60bdd7602c?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMHdpbGRmaXJlJTIwc21va2V8ZW58MXx8fHwxNzY1OTIzMTYxfDA&ixlib=rb-4.1.0&q=68&w=1200",
     alt: "Firefighter in smoke",
     width: 1920,
     height: 1080
   },
   {
-    mobile: "https://images.unsplash.com/photo-1694700792440-042af6d0e8fb?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3aWxkZmlyZSUyMGFmdGVybWF0aCUyMGNvbW11bml0eXxlbnwxfHx8fDE3NjU5MjMxNjJ8MA&ixlib=rb-4.1.0&q=65&w=480",
-    tablet: "https://images.unsplash.com/photo-1694700792440-042af6d0e8fb?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3aWxkZmlyZSUyMGFmdGVybWF0aCUyMGNvbW11bml0eXxlbnwxfHx8fDE3NjU5MjMxNjJ8MA&ixlib=rb-4.1.0&q=70&w=768",
-    desktop: "https://images.unsplash.com/photo-1694700792440-042af6d0e8fb?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3aWxkZmlyZSUyMGFmdGVybWF0aCUyMGNvbW11bml0eXxlbnwxfHx8fDE3NjU5MjMxNjJ8MA&ixlib=rb-4.1.0&q=75&w=1200",
+    mobile: "https://images.unsplash.com/photo-1694700792440-042af6d0e8fb?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3aWxkZmlyZSUyMGFmdGVybWF0aCUyMGNvbW11bml0eXxlbnwxfHx8fDE3NjU5MjMxNjJ8MA&ixlib=rb-4.1.0&q=55&w=480",
+    tablet: "https://images.unsplash.com/photo-1694700792440-042af6d0e8fb?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3aWxkZmlyZSUyMGFmdGVybWF0aCUyMGNvbW11bml0eXxlbnwxfHx8fDE3NjU5MjMxNjJ8MA&ixlib=rb-4.1.0&q=63&w=768",
+    desktop: "https://images.unsplash.com/photo-1694700792440-042af6d0e8fb?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3aWxkZmlyZSUyMGFmdGVybWF0aCUyMGNvbW11bml0eXxlbnwxfHx8fDE3NjU5MjMxNjJ8MA&ixlib=rb-4.1.0&q=68&w=1200",
     alt: "Wildfire aftermath",
     width: 1920,
     height: 1080
@@ -83,7 +83,7 @@ export function Hero() {
           >
             <img
               srcSet={`${heroImages[currentImageIndex].mobile} 480w, ${heroImages[currentImageIndex].tablet} 768w, ${heroImages[currentImageIndex].desktop} 1200w`}
-              sizes="(max-width: 480px) 480px, (max-width: 768px) 768px, 1200px"
+              sizes="(max-width: 480px) 480px, (max-width: 768px) 768px, 100vw"
               src={heroImages[currentImageIndex].mobile}
               alt={heroImages[currentImageIndex].alt}
               className="w-full h-full object-cover"

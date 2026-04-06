@@ -8,7 +8,7 @@ export function StoriesHero() {
       {/* Hero Background Image */}
       <div className="absolute inset-0 z-0">
         <ImageWithFallback
-          src="https://images.unsplash.com/photo-1759892587820-4fe1f97046a7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3aWxkZmlyZSUyMGFmdGVybWF0aCUyMGxhbmRzY2FwZSUyMGRyYW1hdGljfGVufDF8fHx8MTc2NjM4NTUwNHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+          src="https://images.unsplash.com/photo-1759892587820-4fe1f97046a7?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3aWxkZmlyZSUyMGFmdGVybWF0aCUyMGxhbmRzY2FwZSUyMGRyYW1hdGljfGVufDF8fHx8MTc2NjM4NTUwNHww&ixlib=rb-4.1.0&q=72&w=1080&utm_source=figma&utm_medium=referral"
           alt="Wildfire impact landscape"
           className="w-full h-full object-cover"
         />

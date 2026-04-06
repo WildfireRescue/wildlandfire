@@ -20,7 +20,7 @@ export function WhatWeDo() {
               {/* Back Image */}
               <div className="relative h-[300px] rounded-2xl overflow-hidden shadow-xl mb-6 ml-8">
                 <ImageWithFallback
-                  src="https://images.unsplash.com/photo-1762086649719-4d62f45a98c1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxob3VzZSUyMHJlYnVpbGQlMjBjb25zdHJ1Y3Rpb258ZW58MXx8fHwxNzY1OTIyODE4fDA&ixlib=rb-4.1.0&q=80&w=1080"
+                  src="https://images.unsplash.com/photo-1762086649719-4d62f45a98c1?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxob3VzZSUyMHJlYnVpbGQlMjBjb25zdHJ1Y3Rpb258ZW58MXx8fHwxNzY1OTIyODE4fDA&ixlib=rb-4.1.0&q=72&w=1080"
                   alt="Rebuilding homes"
                   className="w-full h-full object-cover"
                 />
@@ -30,7 +30,7 @@ export function WhatWeDo() {
               {/* Front Image - Offset */}
               <div className="relative h-[300px] rounded-2xl overflow-hidden shadow-2xl -mt-24 mr-8 group">
                 <ImageWithFallback
-                  src="https://images.unsplash.com/photo-1764639567003-67eca9d60329?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3aWxkZmlyZSUyMHZvbHVudGVlciUyMGNvbW11bml0eXxlbnwxfHx8fDE3NjYxMTEwNTd8MA&ixlib=rb-4.1.0&q=80&w=1080"
+                  src="https://images.unsplash.com/photo-1764639567003-67eca9d60329?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3aWxkZmlyZSUyMHZvbHVudGVlciUyMGNvbW11bml0eXxlbnwxfHx8fDE3NjYxMTEwNTd8MA&ixlib=rb-4.1.0&q=72&w=1080"
                   alt="Community support and recovery"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />

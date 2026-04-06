@@ -10,7 +10,7 @@ export function ThankYouPage() {
       {/* Background Image */}
       <div className="absolute inset-0 opacity-20">
         <ImageWithFallback
-          src="https://images.unsplash.com/photo-1565665681743-6ff01c5181e3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxoYW5kcyUyMHRvZ2V0aGVyJTIwdGVhbXdvcmt8ZW58MXx8fHwxNzY2MDQ0OTMyfDA&ixlib=rb-4.1.0&q=80&w=1080"
+          src="https://images.unsplash.com/photo-1565665681743-6ff01c5181e3?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxoYW5kcyUyMHRvZ2V0aGVyJTIwdGVhbXdvcmt8ZW58MXx8fHwxNzY2MDQ0OTMyfDA&ixlib=rb-4.1.0&q=72&w=1080"
           alt="Community working together"
           className="w-full h-full object-cover"
         />

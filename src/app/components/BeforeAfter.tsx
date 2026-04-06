@@ -7,24 +7,24 @@ const recoveryExamples = [
     id: 1,
     location: "Paradise, CA",
     context: "Camp Fire Recovery",
-    before: "https://images.unsplash.com/photo-1764639568022-e78a62df2851?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3aWxkZmlyZSUyMGRlc3RydWN0aW9uJTIwYWZ0ZXJtYXRofGVufDF8fHx8MTc2NjExNzA4MHww&ixlib=rb-4.1.0&q=80&w=1080",
-    after: "https://images.unsplash.com/photo-1744092476578-30b8c33d649c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyZWJ1aWx0JTIwY29tbXVuaXR5JTIwaG91c2VzfGVufDF8fHx8MTc2NjExNzA4MHww&ixlib=rb-4.1.0&q=80&w=1080",
+    before: "https://images.unsplash.com/photo-1764639568022-e78a62df2851?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3aWxkZmlyZSUyMGRlc3RydWN0aW9uJTIwYWZ0ZXJtYXRofGVufDF8fHx8MTc2NjExNzA4MHww&ixlib=rb-4.1.0&q=72&w=1080",
+    after: "https://images.unsplash.com/photo-1744092476578-30b8c33d649c?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyZWJ1aWx0JTIwY29tbXVuaXR5JTIwaG91c2VzfGVufDF8fHx8MTc2NjExNzA4MHww&ixlib=rb-4.1.0&q=72&w=1080",
     description: "This is the transformation we envision"
   },
   {
     id: 2,
     location: "Sonoma County",
     context: "Tubbs Fire Area",
-    before: "https://images.unsplash.com/photo-1569963737067-221b7baafde9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxidXJuZWQlMjBmb3Jlc3QlMjB3aWxkZmlyZXxlbnwxfHx8fDE3NjYxMTcwODF8MA&ixlib=rb-4.1.0&q=80&w=1080",
-    after: "https://images.unsplash.com/photo-1762130099386-a206cd876302?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmb3Jlc3QlMjByZWNvdmVyeSUyMHJlZ3Jvd3RofGVufDF8fHx8MTc2NjExNzA4MXww&ixlib=rb-4.1.0&q=80&w=1080",
+    before: "https://images.unsplash.com/photo-1569963737067-221b7baafde9?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxidXJuZWQlMjBmb3Jlc3QlMjB3aWxkZmlyZXxlbnwxfHx8fDE3NjYxMTcwODF8MA&ixlib=rb-4.1.0&q=72&w=1080",
+    after: "https://images.unsplash.com/photo-1762130099386-a206cd876302?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmb3Jlc3QlMjByZWNvdmVyeSUyMHJlZ3Jvd3RofGVufDF8fHx8MTc2NjExNzA4MXww&ixlib=rb-4.1.0&q=72&w=1080",
     description: "From devastation to hope and renewal"
   },
   {
     id: 3,
     location: "Southern California",
     context: "Community Resilience",
-    before: "https://images.unsplash.com/photo-1694700792440-042af6d0e8fb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3aWxkZmlyZSUyMGRhbWFnZWQlMjBuZWlnaGJvcmhvb2R8ZW58MXx8fHwxNzY2MTE3MDgyfDA&ixlib=rb-4.1.0&q=80&w=1080",
-    after: "https://images.unsplash.com/photo-1694105050266-911023811297?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxuZXclMjByZWJ1aWx0JTIwaG9tZXN8ZW58MXx8fHwxNzY2MTE3MDgyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+    before: "https://images.unsplash.com/photo-1694700792440-042af6d0e8fb?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3aWxkZmlyZSUyMGRhbWFnZWQlMjBuZWlnaGJvcmhvb2R8ZW58MXx8fHwxNzY2MTE3MDgyfDA&ixlib=rb-4.1.0&q=72&w=1080",
+    after: "https://images.unsplash.com/photo-1694105050266-911023811297?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxuZXclMjByZWJ1aWx0JTIwaG9tZXN8ZW58MXx8fHwxNzY2MTE3MDgyfDA&ixlib=rb-4.1.0&q=72&w=1080",
     description: "Stronger and more resilient together"
   }
 ];

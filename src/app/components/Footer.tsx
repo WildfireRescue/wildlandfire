@@ -1,7 +1,6 @@
 import { Facebook, Twitter, Instagram, Mail } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
-import logoImage from '../../assets/e43d164f2f92fa60d5e9ac721dd31bf10ad9da66.png';
 
 export function Footer() {
   const socialLinks = [
@@ -24,13 +23,20 @@ export function Footer() {
             className="md:col-span-2"
           >
             <div className="mb-4">
-              <motion.img
-                whileHover={{ scale: 1.05 }}
-                transition={{ duration: 0.3 }}
-                src={logoImage}
-                alt="The Wildland Fire Recovery Fund"
-                className="h-16 w-auto mb-3"
-              />
+              <picture>
+                <source srcSet="/Images/logo-footer.webp" type="image/webp" />
+                <motion.img
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ duration: 0.3 }}
+                  src="/Images/logo-footer.png"
+                  alt="The Wildland Fire Recovery Fund"
+                  className="h-16 w-auto mb-3"
+                  loading="lazy"
+                  decoding="async"
+                  width="303"
+                  height="180"
+                />
+              </picture>
               <div className="text-sm text-muted-foreground max-w-md">
                 For families, firefighters & children after the flames
               </div>

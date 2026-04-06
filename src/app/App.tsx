@@ -5,14 +5,9 @@ import { Navigation } from "./components/Navigation";
 import { Footer } from "./components/Footer";
 import { StructuredData } from "./components/StructuredData";
 import { ErrorBoundary } from "./components/ErrorBoundary";
-import { AuthProvider } from "../contexts/AuthContext";
 
-// Admin: lazy-load so editor code never lands in the public bundle
-const BlogEditorPage = lazy(() =>
-  import("./pages/admin/BlogEditorPage").then((m) => ({ default: m.BlogEditorPage }))
-);
-
-console.log("[App] Module loading...");
+// Admin: lazy-load entire auth+supabase+editor tree so it never lands in the public bundle
+const AdminRoute = lazy(() => import("./pages/admin/AdminRoute"));
 
 // Lazy load pages that aren't immediately needed
 const AboutPage = lazy(() => import("./pages/AboutPage").then((m) => ({ default: m.AboutPage })));
@@ -57,11 +52,10 @@ function PageLoader() {
 export default function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <div className="min-h-screen flex flex-col bg-background">
-          <StructuredData />
-          <Navigation />
-          <main className="flex-grow" role="main" aria-label="Main content">
+      <div className="min-h-screen flex flex-col bg-background">
+        <StructuredData />
+        <Navigation />
+        <main className="flex-grow" role="main" aria-label="Main content">
             <ErrorBoundary>
               <Suspense fallback={<PageLoader />}>
                 <Routes>
@@ -74,11 +68,13 @@ export default function App() {
                   <Route path="/stories" element={<StoriesPage />} />
                   <Route path="/grants" element={<GrantsPage />} />
 
-                  {/* ✅ Auth callback route */}
+                  {/* Auth callback route */}
                   <Route path="/auth-callback" element={<AuthCallback />} />
 
+                  {/* Admin route: lazy-loads AuthProvider + Supabase only when accessed */}
+                  <Route path="/blog/editor" element={<AdminRoute />} />
+
                   {/* Blog routes */}
-                  <Route path="/blog/editor" element={<BlogEditorPage />} />
                   <Route path="/blog" element={<BlogIndexPage />} />
                   <Route path="/blog/category/:categorySlug" element={<BlogCategoryPage />} />
                   <Route path="/blog/:slug" element={<BlogPostPage />} />
@@ -103,7 +99,6 @@ export default function App() {
             <UrgencyTopBanner />
           </Suspense>
         </div>
-      </AuthProvider>
     </BrowserRouter>
   );
 }

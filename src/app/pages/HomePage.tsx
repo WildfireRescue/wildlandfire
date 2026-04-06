@@ -1,12 +1,28 @@
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { Hero } from '../components/Hero';
-import { DonationImpactCards } from '../components/DonationImpactCards';
-import { WhyGiveSection } from '../components/WhyGiveSection';
-import { ImpactStats } from '../components/ImpactStats';
-import { FinalUrgencyCTA } from '../components/FinalUrgencyCTA';
-import { TrustIndicators } from '../components/TrustIndicators';
-import { FloatingProgressIndicator } from '../components/FloatingProgressIndicator';
-// import { LiveDonationNotifications } from '../components/LiveDonationNotifications';
+
+// Below-fold sections: lazy-loaded so they don't block the initial JS parse
+// or delay the LCP hero image. Each section loads independently after hydration.
+const DonationImpactCards = lazy(() =>
+  import('../components/DonationImpactCards').then((m) => ({ default: m.DonationImpactCards }))
+);
+const WhyGiveSection = lazy(() =>
+  import('../components/WhyGiveSection').then((m) => ({ default: m.WhyGiveSection }))
+);
+const ImpactStats = lazy(() =>
+  import('../components/ImpactStats').then((m) => ({ default: m.ImpactStats }))
+);
+const FinalUrgencyCTA = lazy(() =>
+  import('../components/FinalUrgencyCTA').then((m) => ({ default: m.FinalUrgencyCTA }))
+);
+const TrustIndicators = lazy(() =>
+  import('../components/TrustIndicators').then((m) => ({ default: m.TrustIndicators }))
+);
+const FloatingProgressIndicator = lazy(() =>
+  import('../components/FloatingProgressIndicator').then((m) => ({
+    default: m.FloatingProgressIndicator,
+  }))
+);
 
 export function HomePage() {
   useEffect(() => {
@@ -15,10 +31,7 @@ export function HomePage() {
     const code = params.get('code');
     
     if (code) {
-      console.log('[HomePage] Auth code detected in URL, redirecting to editor...');
-      console.log('[HomePage] Current URL:', window.location.href);
-      // Redirect to editor with the code still in the URL
-      // The editor will handle the code exchange
+      // Redirect to editor with the code still in the URL for exchange
       window.location.replace(window.location.origin + '/#blog/editor');
       return; // Stop rendering homepage
     }
@@ -27,15 +40,19 @@ export function HomePage() {
   return (
     <>
       <Hero />
-      <DonationImpactCards />
-      <WhyGiveSection />
-      <ImpactStats />
-      <FinalUrgencyCTA />
-      <TrustIndicators />
-      
+      {/* Below-fold: rendered lazily — does not block LCP or initial paint */}
+      <Suspense fallback={null}>
+        <DonationImpactCards />
+        <WhyGiveSection />
+        <ImpactStats />
+        <FinalUrgencyCTA />
+        <TrustIndicators />
+      </Suspense>
+
       {/* Floating/Sticky Elements */}
-      <FloatingProgressIndicator />
-      {/* <LiveDonationNotifications /> */}
+      <Suspense fallback={null}>
+        <FloatingProgressIndicator />
+      </Suspense>
     </>
   );
 }

@@ -97,7 +97,7 @@ export function DonateCallout() {
             className="relative h-[500px] rounded-2xl overflow-hidden shadow-2xl group"
           >
             <ImageWithFallback
-              src="https://images.unsplash.com/photo-1741119064982-c740f83dbc3e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMHNpbGhvdWV0dGUlMjBmbGFtZXMlMjBzdW5zZXR8ZW58MXx8fHwxNzY2Mzg1MzczfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+              src="https://images.unsplash.com/photo-1741119064982-c740f83dbc3e?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJlZmlnaHRlciUyMHNpbGhvdWV0dGUlMjBmbGFtZXMlMjBzdW5zZXR8ZW58MXx8fHwxNzY2Mzg1MzczfDA&ixlib=rb-4.1.0&q=72&w=1080&utm_source=figma&utm_medium=referral"
               alt="Community standing together"
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
             />

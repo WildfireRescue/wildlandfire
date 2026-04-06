@@ -619,6 +619,8 @@ export function BlogPostPage() {
                 className="rounded-none sm:rounded-2xl w-full border-0 sm:border border-border/30 shadow-2xl"
                 loading="eager"
                 decoding="async"
+                width="1200"
+                height="630"
                 onError={(e) => {
                   console.warn('[BlogPostPage] Cover image failed to load:', post.cover_image_url);
                   e.currentTarget.src = PLACEHOLDER_IMAGE;

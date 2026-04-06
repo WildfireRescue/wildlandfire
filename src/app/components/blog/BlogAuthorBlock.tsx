@@ -36,11 +36,13 @@ export function BlogAuthorBlock({
       <div className="flex items-center gap-2">
         {isOrganization ? (
           <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center ring-2 ring-primary/20 overflow-hidden flex-shrink-0">
-            <img 
-              src="/Images/logo-128.png" 
-              alt="Wildland Fire Recovery Fund" 
+            <img
+              src="/Images/logo-128.webp"
+              alt="Wildland Fire Recovery Fund"
               className="w-8 h-8 object-contain"
               loading="lazy"
+              width="32"
+              height="32"
               onError={(e) => {
                 // Fallback to gradient circle with initials
                 e.currentTarget.style.display = 'none';

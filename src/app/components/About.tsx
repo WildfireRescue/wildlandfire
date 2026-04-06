@@ -31,7 +31,7 @@ export function About() {
               className="w-full h-full"
             >
               <ImageWithFallback
-                src="https://images.unsplash.com/photo-1603676429893-c763cb7cb2bd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmb3Jlc3QlMjB3aWxkZmlyZSUyMHJlY292ZXJ5fGVufDF8fHx8MTc2NTc3Mzc0OXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+                src="https://images.unsplash.com/photo-1603676429893-c763cb7cb2bd?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmb3Jlc3QlMjB3aWxkZmlyZSUyMHJlY292ZXJ5fGVufDF8fHx8MTc2NTc3Mzc0OXww&ixlib=rb-4.1.0&q=72&w=1080&utm_source=figma&utm_medium=referral"
                 alt="Wildfire recovery efforts"
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               />

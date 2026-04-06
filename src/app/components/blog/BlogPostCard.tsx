@@ -48,6 +48,8 @@ export function BlogPostCard({ post, index = 0, featured = false, priority = fal
               loading={priority ? 'eager' : 'lazy'}
               fetchPriority={priority ? 'high' : 'auto'}
               decoding={priority ? 'sync' : 'async'}
+              width="1200"
+              height="675"
               onError={(e) => {
                 console.warn('[BlogPostCard] Image failed to load:', post.cover_image_url);
                 e.currentTarget.src = PLACEHOLDER_IMAGE;
@@ -124,6 +126,8 @@ export function BlogPostCard({ post, index = 0, featured = false, priority = fal
           loading={priority ? 'eager' : 'lazy'}
           fetchPriority={priority ? 'high' : 'auto'}
           decoding={priority ? 'sync' : 'async'}
+          width="1200"
+          height="675"
           onError={(e) => {
             console.warn('[BlogPostCard] Image failed to load:', post.cover_image_url);
             e.currentTarget.src = PLACEHOLDER_IMAGE;

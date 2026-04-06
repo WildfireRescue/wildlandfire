@@ -67,16 +67,18 @@ export function Navigation() {
               >
                 <div className="relative">
                   <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <img 
-                    src="/Images/logo-128.png" 
-                    alt="Wildland Fire Recovery Fund" 
-                    className="h-14 w-14 relative z-10 drop-shadow-lg" 
-                    loading="eager"
-                    fetchpriority="high"
-                    decoding="async"
-                    width="56"
-                    height="56"
-                  />
+                  <picture>
+                    <source srcSet="/Images/logo-128.webp" type="image/webp" />
+                    <img
+                      src="/Images/logo-128.png"
+                      alt="Wildland Fire Recovery Fund"
+                      className="h-14 w-14 relative z-10 drop-shadow-lg"
+                      loading="eager"
+                      decoding="async"
+                      width="56"
+                      height="56"
+                    />
+                  </picture>
                 </div>
                 <div className="hidden md:flex flex-col leading-tight">
                   <span className="text-base font-bold tracking-tight text-foreground">
@@ -159,7 +161,7 @@ export function Navigation() {
                   transition={{ delay: 0.1 }}
                   className="flex items-center justify-center gap-3 mb-12"
                 >
-                  <img src="/Images/logo-128.png" alt="Wildland Fire Recovery Fund" className="h-16 w-auto" loading="eager" fetchpriority="high" decoding="async" width="64" height="64" />
+                  <img src="/Images/logo-128.webp" alt="Wildland Fire Recovery Fund" className="h-16 w-auto" loading="lazy" decoding="async" width="64" height="64" />
                   <div>
                     <div className="text-lg tracking-wider uppercase">THE WILDLAND FIRE</div>
                     <div className="text-lg tracking-wider uppercase">RECOVERY FUND</div>
