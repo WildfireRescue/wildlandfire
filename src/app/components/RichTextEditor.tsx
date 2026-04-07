@@ -40,9 +40,9 @@ interface LinkModalState {
   open: boolean;
   url: string;
   openInNewTab: boolean;
-  /** Selected text at modal open — used to determine if a selection exists */
+  /** Selected text at the time the modal was opened */
   anchorText: string;
-  /** True when cursor is inside an existing link */
+  /** True when the cursor was inside an existing link at modal open */
   isEditing: boolean;
 }
 
@@ -53,8 +53,35 @@ interface ImageModalState {
   altText: string;
 }
 
-const EMPTY_LINK: LinkModalState = { open: false, url: '', openInNewTab: false, anchorText: '', isEditing: false };
-const EMPTY_IMAGE: ImageModalState = { open: false, file: null, previewUrl: '', altText: '' };
+const EMPTY_LINK: LinkModalState = {
+  open: false, url: '', openInNewTab: false, anchorText: '', isEditing: false,
+};
+const EMPTY_IMAGE: ImageModalState = {
+  open: false, file: null, previewUrl: '', altText: '',
+};
+
+// ── URL normalization ─────────────────────────────────────────────────────────
+
+/**
+ * Ensures URLs always have a scheme so links work correctly.
+ * Accepts: https://, http://, /relative, #anchor, mailto:, tel:
+ * Promotes: example.com → https://example.com
+ */
+function normalizeUrl(raw: string): string {
+  const url = raw.trim();
+  if (!url) return '';
+  // Already has a scheme or is a relative path / anchor / protocol
+  if (/^https?:\/\//i.test(url)) return url;
+  if (url.startsWith('//')) return `https:${url}`;
+  if (
+    url.startsWith('/') ||
+    url.startsWith('#') ||
+    /^mailto:/i.test(url) ||
+    /^tel:/i.test(url)
+  ) return url;
+  // Bare domain like "example.com" → prepend https://
+  return `https://${url}`;
+}
 
 // ── Toolbar button helper ─────────────────────────────────────────────────────
 
@@ -70,12 +97,17 @@ function TBtn({ onAction, active, disabled, title, children }: TBtnProps) {
   return (
     <button
       type="button"
-      // onMouseDown + preventDefault keeps editor focus & selection intact
+      // onMouseDown + preventDefault preserves editor focus & selection
       onMouseDown={(e) => { e.preventDefault(); onAction(); }}
       disabled={disabled}
       title={title}
       aria-pressed={active}
-      className={`p-1.5 rounded text-slate-600 hover:bg-slate-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${active ? 'bg-slate-200 text-slate-900' : ''}`}
+      className={[
+        'p-1.5 rounded transition-colors',
+        'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
+        'disabled:opacity-40 disabled:cursor-not-allowed',
+        active ? 'bg-slate-200 text-slate-900' : '',
+      ].join(' ')}
     >
       {children}
     </button>
@@ -86,10 +118,25 @@ function Divider() {
   return <span className="w-px bg-slate-200 mx-0.5 self-stretch" aria-hidden />;
 }
 
+// ── Modal shared styles (force light rendering regardless of OS theme) ─────────
+
+/**
+ * The site uses a dark theme by default. Modal form controls inherit the dark
+ * foreground color (#f5f1ed — near-white) which is invisible on a white bg.
+ * Adding these explicit colors overrides the inheritance chain.
+ */
+const MODAL_INPUT_CLASS =
+  'w-full border border-slate-300 rounded-lg px-3 py-2 text-sm ' +
+  'text-slate-900 bg-white placeholder-slate-400 ' +
+  'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500';
+
 // ── Component ──────────────────────────────────────────────────────────────────
 
 export default function RichTextEditor({ value, onChange }: RichTextEditorProps) {
   const imageInputRef = useRef<HTMLInputElement>(null);
+  /** Saves the ProseMirror cursor position before the file-picker dialog opens */
+  const savedEditorPosRef = useRef<number>(0);
+
   const [linkModal, setLinkModal] = useState<LinkModalState>(EMPTY_LINK);
   const [imageModal, setImageModal] = useState<ImageModalState>(EMPTY_IMAGE);
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -98,7 +145,7 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        // H1 is reserved for the post title — enforce heading hierarchy
+        // H1 is reserved for the post title field — enforce heading hierarchy in body
         heading: { levels: [2, 3] },
       }),
       Underline,
@@ -107,7 +154,8 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
         HTMLAttributes: { rel: 'noopener noreferrer' },
       }),
       Image.configure({
-        HTMLAttributes: { class: 'rounded-lg max-w-full h-auto' },
+        // Classes are applied via theme.css .tiptap img rule too
+        HTMLAttributes: { class: 'editor-image' },
       }),
       Placeholder.configure({ placeholder: 'Start writing your article…' }),
       CharacterCount,
@@ -118,20 +166,22 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm prose-slate max-w-none p-5 min-h-[28rem] focus:outline-none bg-white text-slate-900',
+        // bg-white and text-slate-900 ensure readable content inside the editor
+        class: 'prose prose-sm prose-slate max-w-none p-5 min-h-[28rem] ' +
+               'focus:outline-none bg-white text-slate-900',
         spellcheck: 'true',
       },
     },
   });
 
-  // Sync externally provided value (e.g. loading an article into form)
-  // without clobbering in-progress edits.
+  // Sync externally supplied value (e.g. loading a saved draft) without
+  // overwriting an in-progress edit.
   useEffect(() => {
     if (!editor || editor.isFocused) return;
     if (value !== editor.getHTML()) {
       editor.commands.setContent(value || '', { emitUpdate: false });
     }
-  }, [value]); // `editor` intentionally omitted — stable ref after mount
+  }, [value]); // `editor` omitted intentionally — stable after mount
 
   // ── Block style helpers ────────────────────────────────────────────────────
 
@@ -147,11 +197,11 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
   const setBlockStyle = (val: string) => {
     if (!editor) return;
     switch (val) {
-      case 'h2':        editor.chain().focus().setHeading({ level: 2 }).run(); break;
-      case 'h3':        editor.chain().focus().setHeading({ level: 3 }).run(); break;
+      case 'h2':         editor.chain().focus().setHeading({ level: 2 }).run(); break;
+      case 'h3':         editor.chain().focus().setHeading({ level: 3 }).run(); break;
       case 'blockquote': editor.chain().focus().setBlockquote().run(); break;
-      case 'codeBlock': editor.chain().focus().setCodeBlock().run(); break;
-      default:          editor.chain().focus().setParagraph().run();
+      case 'codeBlock':  editor.chain().focus().setCodeBlock().run(); break;
+      default:           editor.chain().focus().setParagraph().run();
     }
   };
 
@@ -173,7 +223,7 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
 
   const submitLink = () => {
     const { url, openInNewTab, isEditing, anchorText } = linkModal;
-    const href = url.trim();
+    const href = normalizeUrl(url);
     if (!href || !editor) return;
 
     const attrs = openInNewTab
@@ -183,10 +233,10 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
     if (isEditing) {
       editor.chain().focus().extendMarkRange('link').updateAttributes('link', attrs).run();
     } else if (anchorText) {
-      // Text was selected — apply link mark to the selection
+      // Text was selected — apply the link mark to the selection
       editor.chain().focus().setLink(attrs).run();
     } else {
-      // No selection — insert the URL as linked text
+      // No selection — insert the URL as clickable text
       editor.chain().focus()
         .insertContent({ type: 'text', text: href, marks: [{ type: 'link', attrs }] })
         .run();
@@ -201,6 +251,14 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
 
   // ── Image modal ────────────────────────────────────────────────────────────
 
+  const handleImageButtonClick = () => {
+    // Save cursor position before the file-picker takes focus away from editor
+    if (editor) {
+      savedEditorPosRef.current = editor.state.selection.anchor;
+    }
+    imageInputRef.current?.click();
+  };
+
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -213,13 +271,36 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
   const handleImageUploadConfirm = async () => {
     const { file, altText, previewUrl } = imageModal;
     if (!file || !editor) return;
+
     setUploadingImage(true);
     setImageError(null);
-    setImageModal(EMPTY_IMAGE);
+    setImageModal(EMPTY_IMAGE); // close modal; spinner appears on toolbar button
+
     try {
       const result = await uploadArticleImage(file);
-      if ('error' in result) { setImageError(result.error); return; }
-      editor.chain().focus().setImage({ src: result.publicUrl, alt: altText || file.name }).run();
+
+      if ('error' in result) {
+        setImageError(result.error);
+        return;
+      }
+
+      // Restore cursor to saved position before inserting image
+      const savedPos = savedEditorPosRef.current;
+      const chain = editor.chain().focus();
+      if (savedPos > 0 && savedPos <= editor.state.doc.content.size) {
+        chain.setTextSelection(savedPos);
+      }
+      const inserted = chain.setImage({ src: result.publicUrl, alt: altText || file.name }).run();
+
+      if (!inserted) {
+        // setImage can fail if cursor is inside an incompatible node (e.g. table cell)
+        // Fall back to inserting at the end of the document
+        console.warn('[RichTextEditor] setImage failed at saved position — inserting at end of document');
+        editor.chain().focus().setTextSelection(editor.state.doc.content.size).setImage({
+          src: result.publicUrl,
+          alt: altText || file.name,
+        }).run();
+      }
     } catch (err: unknown) {
       setImageError((err as Error)?.message ?? 'Image upload failed');
     } finally {
@@ -237,11 +318,11 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
 
   const insertDonateCTA = () => {
     editor?.chain().focus().insertContent(
-      '<p><a href="/donate">&#8594; Donate Now and help families recover</a></p>'
+      '<p><a href="/donate">→ Donate Now and help families recover</a></p>'
     ).run();
   };
 
-  // ── Derived state ──────────────────────────────────────────────────────────
+  // ── Derived toolbar state ──────────────────────────────────────────────────
 
   const wordCount = editor?.storage?.characterCount?.words() ?? 0;
   const canUndo = !!editor?.can().undo();
@@ -252,34 +333,44 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
   return (
     <div className="border border-slate-200 rounded-lg bg-white">
 
-      {/* ── BubbleMenu: contextual inline toolbar (Notion-style) ──────────── */}
+      {/* ── BubbleMenu: appears on text selection (Notion-style) ──────────── */}
       {editor && (
         <BubbleMenu
           editor={editor}
           options={{ placement: 'top' }}
           className="flex items-center gap-0.5 bg-slate-900 text-white rounded-lg shadow-xl px-1.5 py-1 border border-slate-700"
         >
-          <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleBold().run(); }}
-            className={`px-2 py-1 rounded text-sm font-bold hover:bg-white/20 transition-colors ${editor.isActive('bold') ? 'bg-white/20' : ''}`} title="Bold">
-            B
-          </button>
-          <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleItalic().run(); }}
-            className={`px-2 py-1 rounded text-sm italic hover:bg-white/20 transition-colors ${editor.isActive('italic') ? 'bg-white/20' : ''}`} title="Italic">
-            I
-          </button>
-          <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleUnderline().run(); }}
-            className={`px-2 py-1 rounded text-sm underline hover:bg-white/20 transition-colors ${editor.isActive('underline') ? 'bg-white/20' : ''}`} title="Underline">
-            U
-          </button>
+          <button
+            type="button"
+            onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleBold().run(); }}
+            className={`px-2 py-1 rounded text-sm font-bold hover:bg-white/20 transition-colors ${editor.isActive('bold') ? 'bg-white/20' : ''}`}
+            title="Bold (⌘B)"
+          >B</button>
+          <button
+            type="button"
+            onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleItalic().run(); }}
+            className={`px-2 py-1 rounded text-sm italic hover:bg-white/20 transition-colors ${editor.isActive('italic') ? 'bg-white/20' : ''}`}
+            title="Italic (⌘I)"
+          >I</button>
+          <button
+            type="button"
+            onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleUnderline().run(); }}
+            className={`px-2 py-1 rounded text-sm underline hover:bg-white/20 transition-colors ${editor.isActive('underline') ? 'bg-white/20' : ''}`}
+            title="Underline (⌘U)"
+          >U</button>
           <span className="w-px bg-white/30 mx-0.5 self-stretch" />
-          <button type="button" onMouseDown={(e) => { e.preventDefault(); openLinkModal(); }}
-            className={`p-1.5 rounded hover:bg-white/20 transition-colors ${editor.isActive('link') ? 'bg-white/20' : ''}`} title="Link">
-            <LinkIcon size={13} />
-          </button>
-          <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().unsetAllMarks().run(); }}
-            className="p-1.5 rounded hover:bg-white/20 transition-colors" title="Clear formatting">
-            <RemoveFormatting size={13} />
-          </button>
+          <button
+            type="button"
+            onMouseDown={(e) => { e.preventDefault(); openLinkModal(); }}
+            className={`p-1.5 rounded hover:bg-white/20 transition-colors ${editor.isActive('link') ? 'bg-white/20' : ''}`}
+            title="Link"
+          ><LinkIcon size={13} /></button>
+          <button
+            type="button"
+            onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().unsetAllMarks().run(); }}
+            className="p-1.5 rounded hover:bg-white/20 transition-colors"
+            title="Clear formatting"
+          ><RemoveFormatting size={13} /></button>
         </BubbleMenu>
       )}
 
@@ -288,7 +379,7 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
         className="bg-white border-b border-slate-200 rounded-t-lg px-2 py-1.5 flex flex-wrap items-center gap-0.5 sticky z-40"
         style={{ top: 'var(--nav-height, 5.5rem)' }}
       >
-        {/* Block style */}
+        {/* Block style selector */}
         <select
           value={getBlockStyle()}
           onChange={(e) => setBlockStyle(e.target.value)}
@@ -338,25 +429,28 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
         <TBtn onAction={() => editor?.chain().focus().setHorizontalRule().run()} title="Horizontal rule">
           <Minus size={15} />
         </TBtn>
-        <TBtn
-          onAction={() => imageInputRef.current?.click()}
+        {/* Image button uses its own handler (must save cursor before picker opens) */}
+        <button
+          type="button"
+          onMouseDown={(e) => { e.preventDefault(); handleImageButtonClick(); }}
           disabled={uploadingImage}
           title="Upload image"
+          className="p-1.5 rounded text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {uploadingImage ? <Loader2 size={15} className="animate-spin" /> : <ImagePlus size={15} />}
-        </TBtn>
+        </button>
         <input ref={imageInputRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
 
         <Divider />
 
-        {/* Donate CTA — quick insert for nonprofit conversion content */}
-        <TBtn onAction={insertDonateCTA} title="Insert Donate CTA">
+        {/* Donate CTA — nonprofit-conversion quick insert */}
+        <TBtn onAction={insertDonateCTA} title="Insert Donate CTA link">
           <Heart size={15} />
         </TBtn>
 
         <Divider />
 
-        <TBtn onAction={() => editor?.chain().focus().unsetAllMarks().clearNodes().run()} title="Clear formatting">
+        <TBtn onAction={() => editor?.chain().focus().unsetAllMarks().clearNodes().run()} title="Clear all formatting">
           <RemoveFormatting size={15} />
         </TBtn>
 
@@ -369,16 +463,16 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
           <RedoIcon size={15} />
         </TBtn>
 
-        {/* Keyboard hint */}
-        <span className="ml-auto text-[10px] text-slate-400 hidden sm:block pr-1" aria-hidden>
-          Ctrl/⌘ + B/I/U · Select text for quick menu
+        <span className="ml-auto text-[10px] text-slate-400 hidden sm:block pr-1 select-none" aria-hidden>
+          ⌘B/I/U · Select text for quick menu
         </span>
       </div>
 
+      {/* Upload error banner */}
       {imageError && (
-        <div className="px-4 py-2 text-sm text-red-600 bg-red-50 border-b border-red-100 flex items-center justify-between">
+        <div className="px-4 py-2 text-sm text-red-700 bg-red-50 border-b border-red-100 flex items-center justify-between" role="alert">
           <span>{imageError}</span>
-          <button type="button" onClick={() => setImageError(null)} className="text-red-400 hover:text-red-600 ml-4">
+          <button type="button" onClick={() => setImageError(null)} className="text-red-400 hover:text-red-600 ml-4 flex-shrink-0">
             <X size={14} />
           </button>
         </div>
@@ -388,7 +482,7 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
       <EditorContent editor={editor} />
 
       {/* Word count footer */}
-      <div className="px-4 py-2 border-t border-slate-100 rounded-b-lg flex items-center justify-between">
+      <div className="px-4 py-2 border-t border-slate-100 rounded-b-lg flex items-center justify-between bg-white">
         <span className="text-[11px] text-slate-400 flex items-center gap-1">
           <Type size={11} />
           {wordCount} {wordCount === 1 ? 'word' : 'words'}
@@ -397,7 +491,7 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
           <button
             type="button"
             onMouseDown={(e) => { e.preventDefault(); openLinkModal(); }}
-            className="text-[11px] text-blue-500 hover:underline"
+            className="text-[11px] text-blue-600 hover:underline"
           >
             Edit link
           </button>
@@ -410,7 +504,15 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
           onMouseDown={(e) => { if (e.target === e.currentTarget) setLinkModal(EMPTY_LINK); }}
         >
-          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
+          {/*
+           * colorScheme: 'light' forces native form controls (checkbox, etc.)
+           * inside this modal to render with light-mode OS styling, ensuring
+           * they are visible even when the OS or browser is in dark mode.
+           */}
+          <div
+            className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4"
+            style={{ colorScheme: 'light' }}
+          >
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-slate-800 text-base">
                 {linkModal.isEditing ? 'Edit Link' : 'Insert Link'}
@@ -423,15 +525,25 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">URL</label>
+                {/*
+                 * type="text" (not "url") avoids browser URL validation UI that
+                 * can grey-out or invalidate in-progress edits. We normalize
+                 * the URL ourselves in submitLink().
+                 */}
                 <input
-                  type="url"
+                  type="text"
                   value={linkModal.url}
                   onChange={(e) => setLinkModal(p => ({ ...p, url: e.target.value }))}
                   onKeyDown={(e) => { if (e.key === 'Enter') submitLink(); }}
                   placeholder="https://example.com"
                   autoFocus
-                  className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={MODAL_INPUT_CLASS}
                 />
+                {linkModal.url && !linkModal.url.startsWith('http') && !linkModal.url.startsWith('/') && !linkModal.url.startsWith('#') && (
+                  <p className="text-xs text-amber-600 mt-1">
+                    Will be saved as: {normalizeUrl(linkModal.url)}
+                  </p>
+                )}
               </div>
 
               <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer select-none">
@@ -439,9 +551,9 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
                   type="checkbox"
                   checked={linkModal.openInNewTab}
                   onChange={(e) => setLinkModal(p => ({ ...p, openInNewTab: e.target.checked }))}
-                  className="rounded"
+                  className="rounded accent-blue-600"
                 />
-                <ExternalLink size={13} />
+                <ExternalLink size={13} className="text-slate-500" />
                 Open in new tab
               </label>
             </div>
@@ -453,7 +565,7 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
                 </button>
               ) : <div />}
               <div className="flex gap-2">
-                <button type="button" onClick={() => setLinkModal(EMPTY_LINK)} className="px-4 py-2 text-sm rounded-lg border border-slate-300 hover:bg-slate-50">
+                <button type="button" onClick={() => setLinkModal(EMPTY_LINK)} className="px-4 py-2 text-sm rounded-lg border border-slate-300 text-slate-700 bg-white hover:bg-slate-50">
                   Cancel
                 </button>
                 <button
@@ -476,7 +588,10 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
           onMouseDown={(e) => { if (e.target === e.currentTarget) handleImageModalCancel(); }}
         >
-          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
+          <div
+            className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4"
+            style={{ colorScheme: 'light' }}
+          >
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-slate-800 text-base">Upload Image</h3>
               <button type="button" onClick={handleImageModalCancel} className="p-1 rounded hover:bg-slate-100 text-slate-500">
@@ -495,27 +610,29 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
                 Alt text{' '}
-                <span className="text-slate-400 font-normal">(required — describes image for SEO &amp; screen readers)</span>
+                <span className="text-red-500">*</span>
+                <span className="text-slate-400 font-normal ml-1">(describes image for SEO &amp; screen readers)</span>
               </label>
               <input
                 type="text"
                 value={imageModal.altText}
                 onChange={(e) => setImageModal(p => ({ ...p, altText: e.target.value }))}
-                onKeyDown={(e) => { if (e.key === 'Enter') handleImageUploadConfirm(); }}
+                onKeyDown={(e) => { if (e.key === 'Enter' && imageModal.altText.trim()) handleImageUploadConfirm(); }}
                 placeholder="Describe the image…"
                 autoFocus
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={MODAL_INPUT_CLASS}
               />
             </div>
 
             <div className="flex justify-end gap-2 mt-6">
-              <button type="button" onClick={handleImageModalCancel} className="px-4 py-2 text-sm rounded-lg border border-slate-300 hover:bg-slate-50">
+              <button type="button" onClick={handleImageModalCancel} className="px-4 py-2 text-sm rounded-lg border border-slate-300 text-slate-700 bg-white hover:bg-slate-50">
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleImageUploadConfirm}
-                className="px-4 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+                disabled={!imageModal.altText.trim()}
+                className="px-4 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
               >
                 Upload &amp; Insert
               </button>
@@ -526,5 +643,3 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
     </div>
   );
 }
-
-
