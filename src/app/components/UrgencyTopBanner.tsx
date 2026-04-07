@@ -52,7 +52,7 @@ export function UrgencyTopBanner() {
 
             <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
               <p className="text-white font-bold text-sm sm:text-base">
-                🚨 URGENT: 2026 Wildfire Season Approaching
+                2026 Wildfire Season: Help Families Prepare
               </p>
               <p className="text-white/90 text-xs sm:text-sm">
                 Help us reach our $5M goal to be ready when disaster strikes

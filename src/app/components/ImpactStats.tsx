@@ -10,7 +10,7 @@ const stats = [
   {
     icon: Users,
     label: 'Rapid Response',
-    description: 'When a wildfire strikes, every hour counts. We find survivors in need and deploy aid directly to them as quickly as possible — often within days.'
+    description: 'When a wildfire strikes, every hour counts. We find survivors in need and deploy aid directly to them as quickly as possible, often within days.'
   },
   {
     icon: Flame,

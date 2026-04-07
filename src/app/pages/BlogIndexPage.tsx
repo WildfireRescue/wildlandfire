@@ -167,7 +167,7 @@ export function BlogIndexPage() {
   return (
     <>
       <Helmet>
-        <title>Blog - Latest News & Stories | The Wildland Fire Recovery Fund</title>
+        <title>Blog | Latest News &amp; Stories | The Wildland Fire Recovery Fund</title>
         <meta 
           name="description" 
           content="Read the latest news, survivor stories, and updates from The Wildland Fire Recovery Fund. Stay informed about our work supporting wildfire survivors." 

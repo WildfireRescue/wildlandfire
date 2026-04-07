@@ -99,7 +99,7 @@ export function ContactPage() {
                       <h3 className="font-semibold mb-1">Location</h3>
                       <p className="text-muted-foreground">
                         Caldwell, Idaho<br />
-                        501(c)(3) Non-Profit Organization
+                        501(c)(3) Nonprofit Organization
                       </p>
                     </div>
                   </div>

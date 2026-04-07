@@ -681,7 +681,7 @@ export function BlogPostPage() {
               to="/donate"
               className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground font-semibold px-8 py-4 rounded-full text-base hover:bg-primary/90 transition-colors"
             >
-              Donate Now — 100% Tax-Deductible
+              Donate Now · 100% Tax-Deductible
             </Link>
           </motion.div>
 

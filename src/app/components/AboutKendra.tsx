@@ -58,7 +58,7 @@ export function AboutKendra() {
               </p>
 
               <p className="text-lg">
-                As a mother, Kendra recognized the long term financial uncertainty faced by fire families and the lack of meaningful support many received following devastating events such as the Palisades Fire. This awareness shaped her commitment to ensuring that no family is left navigating loss, displacement, or inadequate insurance support alone. Central to her work is expanding access to higher education for the children of fallen firefighters through dedicated education grants.
+                As a mother, Kendra recognized the long-term financial uncertainty faced by fire families and the lack of meaningful support many received following devastating events such as the Palisades Fire. This awareness shaped her commitment to ensuring that no family is left navigating loss, displacement, or inadequate insurance support alone. Central to her work is expanding access to higher education for the children of fallen firefighters through dedicated education grants.
               </p>
             </div>
           </motion.div>
