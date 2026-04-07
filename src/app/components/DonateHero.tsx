@@ -16,7 +16,7 @@ export function DonateHero() {
             <Heart className="text-primary mx-auto" size={48} fill="currentColor" />
           </div>
 
-          <h1 className="mb-4" style={{ fontSize: 'clamp(2.25rem, 5vw + 0.5rem, 4.5rem)' }}>Support Wildfire Relief — Make a Donation Today</h1>
+          <h1 className="mb-4" style={{ fontSize: 'clamp(2.25rem, 5vw + 0.5rem, 4.5rem)' }}>Support Wildfire Relief: Make a Donation Today</h1>
 
           <p className="text-2xl text-muted-foreground mb-4 leading-relaxed">
             Your donation doesn't just help rebuild homes. It rebuilds lives, restores dignity, and
