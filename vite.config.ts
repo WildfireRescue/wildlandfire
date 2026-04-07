@@ -113,6 +113,10 @@ export default defineConfig({
             return 'admin';
           }
           if (id.includes('node_modules')) {
+            // TipTap editor + ProseMirror — admin-only, never on public pages
+            if (id.includes('@tiptap') || id.includes('prosemirror')) {
+              return 'admin';
+            }
             // React core - critical path
             if (id.includes('react/') || id.includes('react-dom/') || id.includes('scheduler')) {
               return 'react-core';

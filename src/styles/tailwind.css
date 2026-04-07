@@ -4,7 +4,6 @@
 @source not '../app/components/ArticleEditor.tsx';
 @source not '../app/components/ArticleContent.tsx';
 @source not '../app/components/ArticleList.tsx';
-@source not '../app/components/RichTextEditor.tsx';
 @source not '../app/components/FeaturedImageUpload.tsx';
 @source not '../app/components/ExternalArticleTemplate.tsx';
 @source not '../app/components/HostedArticleTemplate.tsx';
