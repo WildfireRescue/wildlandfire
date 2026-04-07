@@ -32,7 +32,6 @@ export const PLACEHOLDER_IMAGE = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3
 export function resolveCoverImageSrc(cover: unknown): string | null {
   // Handle null/undefined/empty
   if (!cover) {
-    console.log('[resolveCoverImageSrc] Empty/null cover');
     return null;
   }
 
@@ -42,30 +41,25 @@ export function resolveCoverImageSrc(cover: unknown): string | null {
     
     // Empty string
     if (!trimmed) {
-      console.log('[resolveCoverImageSrc] Empty string');
       return null;
     }
     
     // Full URL (http/https) - including Supabase storage URLs
     if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
-      console.log('[resolveCoverImageSrc] Full URL detected:', trimmed);
       return trimmed;
     }
     
     // Supabase Storage URL pattern (already resolved)
     if (trimmed.includes('/storage/v1/object/public/')) {
-      console.log('[resolveCoverImageSrc] Supabase storage URL detected:', trimmed);
       return trimmed;
     }
     
     // Assume it's a Storage path - generate public URL
-    console.log('[resolveCoverImageSrc] Resolving storage path:', trimmed);
     try {
       const { data } = supabase.storage
         .from(BLOG_IMAGE_BUCKET)
         .getPublicUrl(trimmed);
       
-      console.log('[resolveCoverImageSrc] Resolved to:', data.publicUrl);
       return data.publicUrl || null;
     } catch (error) {
       console.error('[resolveCoverImageSrc] Failed to resolve storage path:', trimmed, error);
@@ -76,8 +70,6 @@ export function resolveCoverImageSrc(cover: unknown): string | null {
   // Handle object values (e.g. { url: "...", path: "..." })
   if (typeof cover === 'object' && cover !== null) {
     const obj = cover as Record<string, unknown>;
-    
-    console.log('[resolveCoverImageSrc] Object detected:', obj);
     
     // Try url property first
     if (obj.url && typeof obj.url === 'string') {
@@ -184,9 +176,7 @@ export function safeDangerousHTML(html: unknown): { __html: string } {
  * @returns A valid image URL (never null)
  */
 export function safeImageSrc(cover: unknown, fallback: string = PLACEHOLDER_IMAGE): string {
-  console.log('[safeImageSrc] Input:', { cover, type: typeof cover });
   const resolved = resolveCoverImageSrc(cover);
-  console.log('[safeImageSrc] Resolved:', resolved);
   return resolved || fallback;
 }
 
