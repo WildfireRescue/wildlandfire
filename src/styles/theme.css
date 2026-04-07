@@ -169,6 +169,57 @@
   outline: none;
 }
 
+/* ── Donation Blocks ─────────────────────────────────────────────────────────
+ * Shared base — used in both the TipTap editor (.tiptap div[data-block])
+ * and the blog frontend (.donation-block) after DOMPurify round-trip.
+ * The `not-prose` class is added by DonationBlock.renderHTML so Tailwind
+ * Typography does not override fonts/colors inside these blocks.
+ */
+.tiptap div[data-block],
+.donation-block {
+  border-radius: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  margin: 1.25rem 0;
+  position: relative;
+}
+
+/* Donate CTA — warm orange */
+.tiptap div[data-block="cta"],
+.donation-block--cta {
+  background: #fff7ed;
+  border-left: 4px solid #ea580c;
+}
+
+/* Emotional Appeal — urgent red */
+.tiptap div[data-block="appeal"],
+.donation-block--appeal {
+  background: #fef2f2;
+  border-left: 4px solid #dc2626;
+}
+
+/* Pull Quote — calm blue */
+.tiptap div[data-block="pullquote"],
+.donation-block--pullquote {
+  background: #eff6ff;
+  border-left: 4px solid #2563eb;
+  font-style: italic;
+}
+
+/* FAQ — trustworthy green */
+.tiptap div[data-block="faq"],
+.donation-block--faq {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-left: 4px solid #16a34a;
+}
+
+/* Callout / Impact Stat — alert amber */
+.tiptap div[data-block="callout"],
+.donation-block--callout {
+  background: #fefce8;
+  border-left: 4px solid #ca8a04;
+}
+
 @keyframes navSlideDown {
   from { transform: translateY(-100%); }
   to   { transform: translateY(0); }

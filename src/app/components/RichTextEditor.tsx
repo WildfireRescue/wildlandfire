@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import { BubbleMenu } from '@tiptap/react/menus';
 import { StarterKit } from '@tiptap/starter-kit';
@@ -25,9 +25,18 @@ import {
   Redo2 as RedoIcon,
   RemoveFormatting,
   Heart,
+  Flame,
+  HelpCircle,
+  Star,
   Type,
+  ChevronDown,
+  ChevronUp,
+  AlertTriangle,
+  CheckCircle,
 } from 'lucide-react';
 import { uploadArticleImage } from '../../lib/articleImage';
+import { DonationBlock, insertDonationBlock, DONATION_BLOCK_LABELS } from './editor/donationBlockExtension';
+import { getSlashCommandExtension } from './editor/slashCommand';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -141,11 +150,16 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
   const [imageModal, setImageModal] = useState<ImageModalState>(EMPTY_IMAGE);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [imageError, setImageError] = useState<string | null>(null);
+  const [showDonationTools, setShowDonationTools] = useState(false);
+  const [showQualityPanel, setShowQualityPanel] = useState(false);
+
+  // Ref-based bridge so handleDrop/handlePaste can call latest openImageModal
+  // without capturing a stale closure inside useEditor
+  const dragImageRef = useRef<((file: File) => void) | null>(null);
 
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        // H1 is reserved for the post title field — enforce heading hierarchy in body
         heading: { levels: [2, 3] },
       }),
       Underline,
@@ -154,11 +168,12 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
         HTMLAttributes: { rel: 'noopener noreferrer' },
       }),
       Image.configure({
-        // Classes are applied via theme.css .tiptap img rule too
         HTMLAttributes: { class: 'editor-image' },
       }),
-      Placeholder.configure({ placeholder: 'Start writing your article…' }),
+      Placeholder.configure({ placeholder: 'Start writing\u2026 or type / for commands' }),
       CharacterCount,
+      DonationBlock,
+      getSlashCommandExtension(),
     ],
     content: value || '',
     onUpdate: ({ editor }) => {
@@ -166,22 +181,64 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
     },
     editorProps: {
       attributes: {
-        // bg-white and text-slate-900 ensure readable content inside the editor
         class: 'prose prose-sm prose-slate max-w-none p-5 min-h-[28rem] ' +
                'focus:outline-none bg-white text-slate-900',
         spellcheck: 'true',
       },
+      handleDrop(_view, event) {
+        const files = (event as DragEvent).dataTransfer?.files;
+        if (files?.length && files[0].type.startsWith('image/')) {
+          event.preventDefault();
+          dragImageRef.current?.(files[0]);
+          return true;
+        }
+        return false;
+      },
+      handlePaste(_view, event) {
+        const items = (event as ClipboardEvent).clipboardData?.items;
+        if (items) {
+          for (const item of Array.from(items)) {
+            if (item.type.startsWith('image/')) {
+              const file = item.getAsFile();
+              if (file) {
+                event.preventDefault();
+                dragImageRef.current?.(file);
+                return true;
+              }
+            }
+          }
+        }
+        return false;
+      },
     },
   });
 
-  // Sync externally supplied value (e.g. loading a saved draft) without
-  // overwriting an in-progress edit.
+  // ── Shared image modal opener (toolbar, drag, paste) ────────────────────
+
+  const openImageModal = useCallback((file: File) => {
+    if (editor) {
+      savedEditorPosRef.current = editor.state.selection.anchor;
+    }
+    const previewUrl = URL.createObjectURL(file);
+    const altText = file.name
+      .replace(/\.[^/.]+$/, '')
+      .replace(/[-_]/g, ' ')
+      .trim();
+    setImageModal({ open: true, file, previewUrl, altText });
+  }, [editor]);
+
+  // Keep the drag ref in sync with the latest openImageModal
+  useEffect(() => {
+    dragImageRef.current = openImageModal;
+  }, [openImageModal]);
+
+  // Sync externally supplied value without overwriting an in-progress edit
   useEffect(() => {
     if (!editor || editor.isFocused) return;
     if (value !== editor.getHTML()) {
       editor.commands.setContent(value || '', { emitUpdate: false });
     }
-  }, [value]); // `editor` omitted intentionally — stable after mount
+  }, [value]);
 
   // ── Block style helpers ────────────────────────────────────────────────────
 
@@ -252,7 +309,6 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
   // ── Image modal ────────────────────────────────────────────────────────────
 
   const handleImageButtonClick = () => {
-    // Save cursor position before the file-picker takes focus away from editor
     if (editor) {
       savedEditorPosRef.current = editor.state.selection.anchor;
     }
@@ -263,8 +319,7 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
     const file = e.target.files?.[0];
     if (!file) return;
     if (imageModal.previewUrl) URL.revokeObjectURL(imageModal.previewUrl);
-    const name = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ').trim();
-    setImageModal({ open: true, file, previewUrl: URL.createObjectURL(file), altText: name });
+    openImageModal(file);
     e.target.value = '';
   };
 
@@ -314,19 +369,20 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
     setImageModal(EMPTY_IMAGE);
   };
 
-  // ── Donate CTA insertion ───────────────────────────────────────────────────
-
-  const insertDonateCTA = () => {
-    editor?.chain().focus().insertContent(
-      '<p><a href="/donate">→ Donate Now and help families recover</a></p>'
-    ).run();
-  };
-
-  // ── Derived toolbar state ──────────────────────────────────────────────────
+  // ── Derived toolbar state ─────────────────────────────────────────────────
 
   const wordCount = editor?.storage?.characterCount?.words() ?? 0;
   const canUndo = !!editor?.can().undo();
   const canRedo = !!editor?.can().redo();
+
+  // ── SEO Quality signals ───────────────────────────────────────────────────
+
+  const html = editor?.getHTML() ?? '';
+  const qHasH2 = /<h2\b/i.test(html);
+  const qHasCTA = /data-block="cta"/.test(html) || /href="\/donate"/i.test(html);
+  const qHasImage = /<img\b/i.test(html);
+  const qIsThin = wordCount > 0 && wordCount < 300;
+  const qualityIssues = [!qHasH2, !qHasCTA, !qHasImage, qIsThin].filter(Boolean).length;
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
@@ -429,12 +485,12 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
         <TBtn onAction={() => editor?.chain().focus().setHorizontalRule().run()} title="Horizontal rule">
           <Minus size={15} />
         </TBtn>
-        {/* Image button uses its own handler (must save cursor before picker opens) */}
+        {/* Image button — saves cursor before picker opens; drag & drop also works */}
         <button
           type="button"
           onMouseDown={(e) => { e.preventDefault(); handleImageButtonClick(); }}
           disabled={uploadingImage}
-          title="Upload image"
+          title="Upload image (drag & drop or paste also works)"
           className="p-1.5 rounded text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {uploadingImage ? <Loader2 size={15} className="animate-spin" /> : <ImagePlus size={15} />}
@@ -443,10 +499,22 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
 
         <Divider />
 
-        {/* Donate CTA — nonprofit-conversion quick insert */}
-        <TBtn onAction={insertDonateCTA} title="Insert Donate CTA link">
-          <Heart size={15} />
-        </TBtn>
+        {/* Donation blocks toggle */}
+        <button
+          type="button"
+          onMouseDown={(e) => { e.preventDefault(); setShowDonationTools((v) => !v); }}
+          title="Donation funnel blocks"
+          className={[
+            'flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors',
+            showDonationTools
+              ? 'bg-orange-100 text-orange-700 border border-orange-200'
+              : 'text-slate-600 hover:bg-orange-50 hover:text-orange-600',
+          ].join(' ')}
+        >
+          <Heart size={13} />
+          <span className="hidden sm:inline">Donate</span>
+          {showDonationTools ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
+        </button>
 
         <Divider />
 
@@ -464,9 +532,26 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
         </TBtn>
 
         <span className="ml-auto text-[10px] text-slate-400 hidden sm:block pr-1 select-none" aria-hidden>
-          ⌘B/I/U · Select text for quick menu
+          / for commands · ⌘B/I/U · Select for quick menu
         </span>
       </div>
+
+      {/* ── Donation Blocks Sub-toolbar ────────────────────────────────── */}
+      {showDonationTools && (
+        <div className="bg-orange-50 border-b border-orange-100 px-3 py-2 flex flex-wrap gap-2 items-center">
+          <span className="text-[10px] font-semibold text-orange-600 uppercase tracking-wider mr-1">
+            Insert Block:
+          </span>
+          <DonationToolBtn blockType="cta"       icon={<Heart size={13} />}       color="orange" label="Donate CTA"       editor={editor} />
+          <DonationToolBtn blockType="appeal"    icon={<Flame size={13} />}       color="red"    label="Emotional Appeal" editor={editor} />
+          <DonationToolBtn blockType="pullquote" icon={<span className="font-serif text-base leading-none select-none">&ldquo;</span>} color="blue" label="Pull Quote" editor={editor} />
+          <DonationToolBtn blockType="faq"       icon={<HelpCircle size={13} />}  color="green"  label="FAQ Item"         editor={editor} />
+          <DonationToolBtn blockType="callout"   icon={<Star size={13} />}        color="amber"  label="Callout Box"      editor={editor} />
+          <span className="ml-auto text-[10px] text-orange-400 select-none hidden sm:block">
+            or type / in editor
+          </span>
+        </div>
+      )}
 
       {/* Upload error banner */}
       {imageError && (
@@ -487,16 +572,49 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
           <Type size={11} />
           {wordCount} {wordCount === 1 ? 'word' : 'words'}
         </span>
-        {editor?.isActive('link') && (
+        <div className="flex items-center gap-3">
+          {editor?.isActive('link') && (
+            <button
+              type="button"
+              onMouseDown={(e) => { e.preventDefault(); openLinkModal(); }}
+              className="text-[11px] text-blue-600 hover:underline"
+            >
+              Edit link
+            </button>
+          )}
+          {/* Quality panel toggle */}
           <button
             type="button"
-            onMouseDown={(e) => { e.preventDefault(); openLinkModal(); }}
-            className="text-[11px] text-blue-600 hover:underline"
+            onClick={() => setShowQualityPanel((v) => !v)}
+            className={[
+              'flex items-center gap-1 text-[11px] rounded px-1.5 py-0.5 transition-colors',
+              qualityIssues > 0
+                ? 'text-amber-600 hover:bg-amber-50'
+                : 'text-green-600 hover:bg-green-50',
+            ].join(' ')}
+            title="Content quality signals"
           >
-            Edit link
+            {qualityIssues > 0 ? <AlertTriangle size={11} /> : <CheckCircle size={11} />}
+            {qualityIssues > 0
+              ? `${qualityIssues} signal${qualityIssues > 1 ? 's' : ''}`
+              : 'Quality OK'}
+            {showQualityPanel ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
           </button>
-        )}
+        </div>
       </div>
+
+      {/* ── SEO Content Quality Panel ──────────────────────────────────── */}
+      {showQualityPanel && (
+        <div className="border-t border-slate-100 bg-slate-50 px-4 py-3 rounded-b-lg space-y-1.5">
+          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide mb-2">
+            Content Quality Check
+          </p>
+          <QualityRow ok={qHasH2}    label="H2 heading"    okText="At least one H2 heading found."             warnText="No H2 — add one to improve structure and SEO." />
+          <QualityRow ok={qHasCTA}   label="Donation CTA"  okText="Donation CTA detected."                     warnText="No donation CTA — insert a Donate CTA block or /donate link." />
+          <QualityRow ok={qHasImage} label="Image"         okText="At least one image found."                  warnText="No images — adding one improves engagement and ranking." />
+          <QualityRow ok={!qIsThin}  label="Content depth" okText={`${wordCount} words — good length.`}       warnText={`Only ${wordCount} words — aim for 600+ for SEO impact.`} />
+        </div>
+      )}
 
       {/* ── Link Modal ─────────────────────────────────────────────────────── */}
       {linkModal.open && (
@@ -640,6 +758,62 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ── Sub-components ────────────────────────────────────────────────────────────
+
+type DonationColor = 'orange' | 'red' | 'blue' | 'green' | 'amber';
+
+const COLOR_CLASSES: Record<DonationColor, string> = {
+  orange: 'bg-white border-orange-300 text-orange-700 hover:bg-orange-50',
+  red:    'bg-white border-red-300    text-red-700    hover:bg-red-50',
+  blue:   'bg-white border-blue-300   text-blue-700   hover:bg-blue-50',
+  green:  'bg-white border-green-300  text-green-700  hover:bg-green-50',
+  amber:  'bg-white border-amber-300  text-amber-700  hover:bg-amber-50',
+};
+
+interface DonationToolBtnProps {
+  blockType: string;
+  icon: React.ReactNode;
+  color: DonationColor;
+  label: string;
+  editor: ReturnType<typeof useEditor>;
+}
+
+function DonationToolBtn({ blockType, icon, color, label, editor }: DonationToolBtnProps) {
+  return (
+    <button
+      type="button"
+      onMouseDown={(e) => {
+        e.preventDefault();
+        if (editor) insertDonationBlock(editor, blockType);
+      }}
+      disabled={!editor}
+      title={`Insert ${DONATION_BLOCK_LABELS[blockType] ?? label} block (or type /${blockType} in editor)`}
+      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border transition-colors disabled:opacity-40 ${COLOR_CLASSES[color]}`}
+    >
+      {icon}
+      {label}
+    </button>
+  );
+}
+
+function QualityRow({
+  ok, label, okText, warnText,
+}: {
+  ok: boolean; label: string; okText: string; warnText: string;
+}) {
+  return (
+    <div className="flex items-start gap-2 text-[11px]">
+      <span className={`mt-0.5 flex-shrink-0 ${ok ? 'text-green-500' : 'text-amber-500'}`}>
+        {ok ? <CheckCircle size={12} /> : <AlertTriangle size={12} />}
+      </span>
+      <span className={ok ? 'text-slate-500' : 'text-amber-700'}>
+        <strong className="font-medium">{label}:</strong>{' '}
+        {ok ? okText : warnText}
+      </span>
     </div>
   );
 }

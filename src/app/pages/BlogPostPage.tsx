@@ -542,6 +542,8 @@ export function BlogPostPage() {
         USE_PROFILES: { html: true },
         // Strip inline style/color/bgcolor so prose-invert controls all colors on the dark theme
         FORBID_ATTR: ['style', 'color', 'bgcolor', 'background'],
+        // Allow donation block data attribute set by DonationBlock TipTap extension
+        ADD_ATTR: ['data-block'],
       })
     : '';
   const tocContent = hasHtmlContent ? htmlWithHeadingIds : markdownContent;
