@@ -130,7 +130,9 @@ export function BlogEditorPage() {
   }, [autoSlug]);
 
   function getEmailRedirectTo() {
-    return `${window.location.origin}/auth-callback`;
+    const siteUrl = import.meta.env.VITE_SITE_URL;
+    const base = siteUrl || window.location.origin;
+    return `${base.replace(/\/$/, '')}/auth-callback`;
   }
 
   function toDateTimeLocalValue(value: string | null | undefined): string {

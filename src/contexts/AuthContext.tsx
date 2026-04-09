@@ -109,8 +109,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Handle specific auth events
       if (event === 'SIGNED_IN' && newSession) {
         console.log('[AuthProvider] User signed in, redirecting to blog/editor');
-        // Only redirect if not already on editor page (check pathname for React Router)
-        if (!window.location.pathname.includes('/blog/editor')) {
+        // Don't redirect if already on editor page or on auth-callback (let AuthCallback handle its own redirect)
+        const path = window.location.pathname;
+        if (!path.includes('/blog/editor') && !path.includes('/auth-callback')) {
           window.location.href = '/blog/editor';
         }
       }

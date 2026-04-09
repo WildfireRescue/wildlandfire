@@ -199,7 +199,9 @@ export function BlogEditorPageEnhanced() {
 
   function getEmailRedirectTo() {
     // CRITICAL: Must use path-based URL (not hash #) because app uses React Router
-    return `${window.location.origin}/auth-callback`;
+    const siteUrl = import.meta.env.VITE_SITE_URL;
+    const base = siteUrl || window.location.origin;
+    return `${base.replace(/\/$/, '')}/auth-callback`;
   }
 
   async function sendMagicLink() {
