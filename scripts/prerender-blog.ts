@@ -23,7 +23,7 @@ import { JSDOM } from 'jsdom';
 const DIST_DIR = 'dist';
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY || '';
-const SITE_ORIGIN = 'https://www.thewildlandfirerecoveryfund.org';
+const SITE_ORIGIN = 'https://thewildlandfirerecoveryfund.org';
 
 interface BlogPost {
   id: string;

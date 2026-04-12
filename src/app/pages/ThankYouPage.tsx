@@ -12,6 +12,7 @@ export function ThankYouPage() {
         title="Thank You for Your Donation | The Wildland Fire Recovery Fund"
         description="Thank you for supporting wildfire survivors. Your generous donation helps families and firefighters rebuild their lives after devastating wildfires."
         url="https://thewildlandfirerecoveryfund.org/thankyou"
+        noindex={true}
       />
       {/* Background Image */}
       <div className="absolute inset-0 opacity-20">

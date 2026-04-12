@@ -18,7 +18,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>The Wildland Fire Recovery Fund Blog</title>
-    <link>https://thewildlandfirerecoveryfund.org/#blog</link>
+    <link>https://thewildlandfirerecoveryfund.org/blog</link>
     <description>Latest news, stories, and updates from The Wildland Fire Recovery Fund</description>
     <language>en-us</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
@@ -72,7 +72,7 @@ async function generateRSS() {
      xmlns:dc="http://purl.org/dc/elements/1.1/">
   <channel>
     <title>The Wildland Fire Recovery Fund Blog</title>
-    <link>https://thewildlandfirerecoveryfund.org/#blog</link>
+    <link>https://thewildlandfirerecoveryfund.org/blog</link>
     <description>Latest news, stories, and updates from The Wildland Fire Recovery Fund - supporting wildfire survivors with emergency assistance and long-term recovery.</description>
     <language>en-us</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
@@ -84,8 +84,8 @@ async function generateRSS() {
     </image>
 ${(posts || []).map(post => `    <item>
       <title><![CDATA[${post.title}]]></title>
-      <link>https://thewildlandfirerecoveryfund.org/#blog/${post.slug}</link>
-      <guid isPermaLink="true">https://thewildlandfirerecoveryfund.org/#blog/${post.slug}</guid>
+      <link>https://thewildlandfirerecoveryfund.org/blog/${post.slug}</link>
+      <guid isPermaLink="true">https://thewildlandfirerecoveryfund.org/blog/${post.slug}</guid>
       <pubDate>${new Date(post.published_at || post.updated_at).toUTCString()}</pubDate>
       ${post.author_name ? `<dc:creator><![CDATA[${post.author_name}]]></dc:creator>` : ''}
       ${post.category ? `<category><![CDATA[${post.category}]]></category>` : ''}

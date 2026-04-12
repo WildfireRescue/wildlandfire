@@ -7,6 +7,8 @@ interface SEOHeadProps {
   image?: string;
   url?: string;
   type?: string;
+  /** Set to true for pages that should not be indexed (e.g. thank-you, auth-callback) */
+  noindex?: boolean;
 }
 
 const defaultSEO = {
@@ -24,7 +26,8 @@ export function SEOHead({
   keywords,
   image,
   url,
-  type = 'website'
+  type = 'website',
+  noindex = false
 }: SEOHeadProps) {
   const seoTitle = title || defaultSEO.title;
   const seoDescription = description || defaultSEO.description;
@@ -54,7 +57,12 @@ export function SEOHead({
     updateMetaTag('description', seoDescription);
     updateMetaTag('keywords', seoKeywords);
     updateMetaTag('author', 'The Wildland Fire Recovery Fund');
-    updateMetaTag('robots', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
+    updateMetaTag(
+      'robots',
+      noindex
+        ? 'noindex, nofollow'
+        : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'
+    );
     
     // Open Graph meta tags (Facebook, LinkedIn)
     updateMetaTag('og:title', seoTitle, true);
@@ -87,7 +95,7 @@ export function SEOHead({
     }
     canonicalLink.href = seoUrl;
 
-  }, [seoTitle, seoDescription, seoKeywords, seoImage, seoUrl, type]);
+  }, [seoTitle, seoDescription, seoKeywords, seoImage, seoUrl, type, noindex]);
 
   return null;
 }

@@ -23,8 +23,12 @@ Disallow: /
 User-agent: meta-externalagent
 Disallow: /
 
-# Allow all other bots
+# Allow all other bots, but block private/admin paths
 User-agent: *
 Allow: /
+Disallow: /blog/editor
+Disallow: /auth-callback
+Disallow: /admin/
+Disallow: /thankyou
 
 Sitemap: https://thewildlandfirerecoveryfund.org/sitemap.xml
