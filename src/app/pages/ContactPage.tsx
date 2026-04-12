@@ -31,7 +31,7 @@ export function ContactPage() {
       <SEOHead
         title="Contact The Wildland Fire Recovery Fund | Get in Touch"
         description="Contact The Wildland Fire Recovery Fund to ask about wildfire relief grants, donations, volunteering, or media inquiries. We're here to help wildfire survivors and their families."
-        url="https://www.thewildlandfirerecoveryfund.org/contact"
+        url="https://thewildlandfirerecoveryfund.org/contact"
       />
       <div className="container mx-auto px-4">
         <motion.div

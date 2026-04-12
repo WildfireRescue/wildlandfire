@@ -182,40 +182,31 @@
   to = "/"
   status = 301
 
-# Redirect path-based routes to hash-based routes
+# Legacy path redirects — server-side 301s for SEO-safe routing
 [[redirects]]
   from = "/articles"
-  to = "/#blog"
+  to = "/blog"
   status = 301
 
 [[redirects]]
   from = "/articles/*"
-  to = "/#blog/:splat"
+  to = "/blog"
   status = 301
 
 [[redirects]]
   from = "/publish"
-  to = "/#admin/blog"
+  to = "/blog/editor"
   status = 301
 
-[[redirects]]
-  from = "/donate"
-  to = "/#donate"
-  status = 301
-
-[[redirects]]
-  from = "/donate/*"
-  to = "/#donate"
-  status = 301
-
+# /thank-you → /thankyou (React route uses no hyphen)
 [[redirects]]
   from = "/thank-you"
-  to = "/#thankyou"
+  to = "/thankyou"
   status = 301
 
 [[redirects]]
   from = "/thank-you/*"
-  to = "/#thankyou"
+  to = "/thankyou"
   status = 301
 
 # Don't redirect static assets - let them 404 naturally

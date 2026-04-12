@@ -167,7 +167,7 @@ export function ThankYouPage() {
                 className="border-border hover:bg-secondary"
                 asChild
               >
-                <a href="mailto:?subject=The Wildland Fire Recovery Fund&body=I just donated to help wildfire survivors rebuild their lives. Check out this amazing organization: https://www.thewildlandfirerecoveryfund.org">
+                <a href="mailto:?subject=The Wildland Fire Recovery Fund&body=I just donated to help wildfire survivors rebuild their lives. Check out this amazing organization: https://thewildlandfirerecoveryfund.org">
                   <Mail size={16} className="mr-2" />
                   Email
                 </a>

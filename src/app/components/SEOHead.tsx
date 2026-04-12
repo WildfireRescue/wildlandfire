@@ -13,8 +13,8 @@ const defaultSEO = {
   title: 'Wildfire Relief Donations for Long-Term Recovery | The Wildland Fire Recovery Fund',
   description: 'Support wildfire relief donations to help families rebuild. The Wildland Fire Recovery Fund provides long-term wildfire recovery aid to displaced families and firefighters. 501(c)(3) nonprofit.',
   keywords: 'wildfire relief donations, wildfire recovery, wildfire relief fund, wildfire survivor support, fire victim donations, wildfire recovery fund, firefighter family grants, wildfire emergency aid, nonprofit wildfire relief, tax-deductible wildfire donation',
-  image: 'https://www.thewildlandfirerecoveryfund.org/Images/hero/hero-1200.webp',
-  url: 'https://www.thewildlandfirerecoveryfund.org',
+  image: 'https://thewildlandfirerecoveryfund.org/Images/hero/hero-1200.webp',
+  url: 'https://thewildlandfirerecoveryfund.org',
   siteName: 'The Wildland Fire Recovery Fund'
 };
 

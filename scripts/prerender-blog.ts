@@ -398,13 +398,104 @@ async function prerenderBlogRoutes() {
   console.log(`✓ Found SPA template at ${indexHtmlPath}`);
 
   const baseHtml = fs.readFileSync(indexHtmlPath, 'utf-8');
+
+  let successCount = 0;
+  let errorCount = 0;
+  const failures: string[] = [];
+
+  // ── Always prerender core static pages ────────────────────────────────────
+  // These run REGARDLESS of Supabase availability. Without this, Google sees
+  // the homepage title/description on every core page during its first crawl.
+  console.log('\n📝 Prerendering core static pages...\n');
+  const corePages = [
+    {
+      route: 'about',
+      meta: {
+        slug: 'about', id: 'about',
+        meta_title_final: 'About The Wildland Fire Recovery Fund | Nonprofit Wildfire Relief',
+        meta_description_final: 'Learn about The Wildland Fire Recovery Fund, an independent 501(c)(3) nonprofit providing direct financial relief to wildfire survivors, displaced families, and firefighters.',
+        og_title_final: 'About The Wildland Fire Recovery Fund | Nonprofit Wildfire Relief',
+        og_description_final: 'The Wildland Fire Recovery Fund is a 501(c)(3) nonprofit providing direct financial relief to wildfire survivors, displaced families, and firefighters.',
+        canonical_url_final: `${SITE_ORIGIN}/about`,
+        robots_final: 'index,follow,max-image-preview:large',
+        twitter_card_final: 'summary_large_image',
+      },
+    },
+    {
+      route: 'donate',
+      meta: {
+        slug: 'donate', id: 'donate',
+        meta_title_final: 'Make a Wildfire Relief Donation | The Wildland Fire Recovery Fund',
+        meta_description_final: 'Donate to support wildfire survivors. Your tax-deductible gift provides emergency housing, living expenses, and long-term recovery aid to families and firefighters affected by wildfires.',
+        og_title_final: 'Make a Wildfire Relief Donation | The Wildland Fire Recovery Fund',
+        og_description_final: 'Your tax-deductible gift provides emergency housing, living expenses, and long-term recovery aid to wildfire survivors and firefighters.',
+        canonical_url_final: `${SITE_ORIGIN}/donate`,
+        robots_final: 'index,follow,max-image-preview:large',
+        twitter_card_final: 'summary_large_image',
+      },
+    },
+    {
+      route: 'grants',
+      meta: {
+        slug: 'grants', id: 'grants',
+        meta_title_final: 'Wildfire Relief Grants for Survivors | The Wildland Fire Recovery Fund',
+        meta_description_final: 'Apply for emergency wildfire relief grants. The Wildland Fire Recovery Fund provides financial assistance grants to families and firefighters displaced or impacted by wildfires.',
+        og_title_final: 'Wildfire Relief Grants for Survivors | The Wildland Fire Recovery Fund',
+        og_description_final: 'Apply for emergency wildfire relief grants providing financial assistance to families and firefighters displaced or impacted by wildfires.',
+        canonical_url_final: `${SITE_ORIGIN}/grants`,
+        robots_final: 'index,follow,max-image-preview:large',
+        twitter_card_final: 'summary_large_image',
+      },
+    },
+    {
+      route: 'stories',
+      meta: {
+        slug: 'stories', id: 'stories',
+        meta_title_final: 'Wildfire Survivor Stories | The Wildland Fire Recovery Fund',
+        meta_description_final: 'Read real stories of wildfire survivors and families helped by The Wildland Fire Recovery Fund. See how your donations rebuild lives after devastating wildfires.',
+        og_title_final: 'Wildfire Survivor Stories | The Wildland Fire Recovery Fund',
+        og_description_final: 'Real stories of wildfire survivors and families helped by The Wildland Fire Recovery Fund — see how your donations rebuild lives.',
+        canonical_url_final: `${SITE_ORIGIN}/stories`,
+        robots_final: 'index,follow,max-image-preview:large',
+        twitter_card_final: 'summary_large_image',
+      },
+    },
+    {
+      route: 'contact',
+      meta: {
+        slug: 'contact', id: 'contact',
+        meta_title_final: 'Contact The Wildland Fire Recovery Fund | Get in Touch',
+        meta_description_final: "Contact The Wildland Fire Recovery Fund to ask about wildfire relief grants, donations, volunteering, or media inquiries. We're here to help wildfire survivors and their families.",
+        og_title_final: 'Contact The Wildland Fire Recovery Fund | Get in Touch',
+        og_description_final: "Reach out about wildfire relief grants, donations, volunteering, or media inquiries. We're here to help wildfire survivors and their families.",
+        canonical_url_final: `${SITE_ORIGIN}/contact`,
+        robots_final: 'index,follow,max-image-preview:large',
+        twitter_card_final: 'summary_large_image',
+      },
+    },
+  ];
+
+  for (const { route, meta } of corePages) {
+    try {
+      const html = injectSEOTags(baseHtml, meta as any);
+      const dir = path.join(DIST_DIR, route);
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(path.join(dir, 'index.html'), html, 'utf-8');
+      console.log(`✓ /${route}`);
+      successCount++;
+    } catch (error: any) {
+      console.error(`✗ /${route} - ${error.message}`);
+      failures.push(`${route}: ${error.message}`);
+      errorCount++;
+    }
+  }
+
+  // ── Blog prerendering (requires Supabase) ─────────────────────────────────
   const posts = await fetchPublishedPosts();
 
   if (posts.length === 0) {
-    console.warn('\n⚠️  No posts found to prerender.');
-    console.warn('   Prerendering will be skipped.');
-    console.warn('   The SPA will still work at /blog/:slug (client-side rendering)\n');
-    return;
+    console.warn('\n⚠️  No posts found — skipping blog prerendering.');
+    console.warn('   Blog posts will be served via the blog-seo edge function.\n');
   }
 
   // Create blog directory
@@ -412,10 +503,6 @@ async function prerenderBlogRoutes() {
   if (!fs.existsSync(blogDir)) {
     fs.mkdirSync(blogDir, { recursive: true });
   }
-
-  let successCount = 0;
-  let errorCount = 0;
-  const failures: string[] = [];
 
   // Prerender each blog post
   console.log(`\n📝 Prerendering ${posts.length} blog post pages...\n`);

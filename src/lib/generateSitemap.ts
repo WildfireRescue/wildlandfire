@@ -11,53 +11,44 @@ const supabaseUrl = process.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('⚠️  Missing Supabase environment variables - generating minimal sitemap');
-  
-  // Generate minimal sitemap without blog posts
+  console.warn('⚠️  Missing Supabase environment variables - generating fallback sitemap with known URLs');
+
+  // Known blog post slugs — kept in sync with what is actually published.
+  // Add new slugs here when posts are published without Supabase access at build time.
+  const knownBlogSlugs = [
+    'Wildfire-Defense-Systems',
+    'after-the-flames-what-wildfire-recovery-really-takes-and-how-we-help',
+    'how-does-a-wildfire-start',
+    'what-is-a-wildfire',
+    'what-was-the-worst-wildfire-in-history',
+    'wildfire-resilience',
+  ];
+
+  const today = new Date().toISOString().split('T')[0];
+
+  const staticEntries = [
+    { loc: '/',        priority: '1.0', changefreq: 'weekly'  },
+    { loc: '/donate',  priority: '1.0', changefreq: 'weekly'  },
+    { loc: '/about',   priority: '0.8', changefreq: 'monthly' },
+    { loc: '/blog',    priority: '0.9', changefreq: 'daily'   },
+    { loc: '/stories', priority: '0.7', changefreq: 'weekly'  },
+    { loc: '/grants',  priority: '0.8', changefreq: 'monthly' },
+    { loc: '/contact', priority: '0.6', changefreq: 'monthly' },
+    ...knownBlogSlugs.map(slug => ({
+      loc: `/blog/${slug}`,
+      priority: '0.7',
+      changefreq: 'monthly',
+    })),
+  ];
+
   const minimalSitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://thewildlandfirerecoveryfund.org/</loc>
-    <lastmod>${new Date().toISOString()}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-  </url>
-  <url>
-    <loc>https://thewildlandfirerecoveryfund.org/donate</loc>
-    <lastmod>${new Date().toISOString()}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-  </url>
-  <url>
-    <loc>https://thewildlandfirerecoveryfund.org/about</loc>
-    <lastmod>${new Date().toISOString()}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://thewildlandfirerecoveryfund.org/blog</loc>
-    <lastmod>${new Date().toISOString()}</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://thewildlandfirerecoveryfund.org/stories</loc>
-    <lastmod>${new Date().toISOString()}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://thewildlandfirerecoveryfund.org/grants</loc>
-    <lastmod>${new Date().toISOString()}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://thewildlandfirerecoveryfund.org/contact</loc>
-    <lastmod>${new Date().toISOString()}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
+${staticEntries.map(e => `  <url>
+    <loc>https://thewildlandfirerecoveryfund.org${e.loc}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>${e.changefreq}</changefreq>
+    <priority>${e.priority}</priority>
+  </url>`).join('\n')}
 </urlset>`;
 
   try {
@@ -89,20 +80,39 @@ async function generateSitemap() {
       console.warn('⚠️  Scheduled publish pre-check failed (continuing):', publishError.message);
     }
     
-    // Fetch all published posts
-    const { data: posts, error } = await supabase
-      .from('posts')
-      .select('slug, updated_at, published_at')
-      .eq('status', 'published')
-      .eq('noindex', false)
-      .order('published_at', { ascending: false });
+    // Fetch all published posts AND articles (both feed into /blog/:slug)
+    const [postsResult, articlesResult] = await Promise.all([
+      supabase
+        .from('posts')
+        .select('slug, updated_at, published_at')
+        .eq('status', 'published')
+        .eq('noindex', false)
+        .order('published_at', { ascending: false }),
+      supabase
+        .from('articles')
+        .select('slug, updated_at, published_at')
+        .eq('status', 'published')
+        .order('published_at', { ascending: false })
+        .then((r: any) => r)
+        .catch(() => ({ data: [], error: null })),
+    ]);
 
-    if (error) {
-      console.error('❌ Error fetching posts:', error);
+    if (postsResult.error) {
+      console.error('❌ Error fetching posts:', postsResult.error);
       process.exit(1);
     }
 
-    console.log(`✅ Found ${posts?.length || 0} published posts`);
+    const posts = postsResult.data || [];
+    const articles = ((articlesResult as any).data) || [];
+
+    // Merge, deduplicate by slug (posts take precedence)
+    const slugMap = new Map<string, { slug: string; updated_at?: string; published_at?: string }>();
+    for (const p of [...posts, ...articles]) {
+      if (!slugMap.has(p.slug)) slugMap.set(p.slug, p);
+    }
+    const allBlogPosts = Array.from(slugMap.values());
+
+    console.log(`✅ Found ${posts.length} posts + ${articles.length} articles = ${allBlogPosts.length} unique blog URLs`);
 
     // Define static URLs
     const staticUrls: SitemapUrl[] = [
@@ -115,8 +125,8 @@ async function generateSitemap() {
       { loc: '/contact', priority: 0.6, changefreq: 'monthly' },
     ];
 
-    // Add blog posts
-    const postUrls: SitemapUrl[] = (posts || []).map(post => ({
+    // Add blog posts and articles
+    const postUrls: SitemapUrl[] = allBlogPosts.map(post => ({
       loc: `/blog/${post.slug}`,
       lastmod: post.updated_at || post.published_at,
       changefreq: 'monthly',

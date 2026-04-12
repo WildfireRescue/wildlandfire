@@ -11,7 +11,7 @@ export function DonatePage() {
       <SEOHead
         title="Make a Wildfire Relief Donation | The Wildland Fire Recovery Fund"
         description="Donate to support wildfire survivors. Your tax-deductible gift provides emergency housing, living expenses, and long-term recovery aid to families and firefighters affected by wildfires."
-        url="https://www.thewildlandfirerecoveryfund.org/donate"
+        url="https://thewildlandfirerecoveryfund.org/donate"
       />
       <DonateHero />
       <PremiumTrustBadges />

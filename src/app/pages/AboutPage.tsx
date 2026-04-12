@@ -10,7 +10,7 @@ export function AboutPage() {
       <SEOHead
         title="About The Wildland Fire Recovery Fund | Nonprofit Wildfire Relief"
         description="Learn about The Wildland Fire Recovery Fund, an independent 501(c)(3) nonprofit providing direct financial relief to wildfire survivors, displaced families, and firefighters."
-        url="https://www.thewildlandfirerecoveryfund.org/about"
+        url="https://thewildlandfirerecoveryfund.org/about"
       />
       <AboutHero />
 

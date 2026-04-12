@@ -10,7 +10,7 @@ export function StoriesPage() {
       <SEOHead
         title="Wildfire Survivor Stories | The Wildland Fire Recovery Fund"
         description="Read real stories of wildfire survivors and families helped by The Wildland Fire Recovery Fund. See how your donations rebuild lives after devastating wildfires."
-        url="https://www.thewildlandfirerecoveryfund.org/stories"
+        url="https://thewildlandfirerecoveryfund.org/stories"
       />
       <StoriesHero />
       <MissionInAction />
