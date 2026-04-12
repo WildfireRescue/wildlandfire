@@ -1,5 +1,6 @@
 import { motion } from 'motion/react';
 import { Scale, FileCheck, AlertCircle, UserX, DollarSign, Shield } from 'lucide-react';
+import { SEOHead } from '../components/SEOHead';
 
 export function TermsOfUsePage() {
   const sections = [
@@ -119,6 +120,11 @@ export function TermsOfUsePage() {
 
   return (
     <div className="min-h-screen pt-28 pb-20 bg-background">
+      <SEOHead
+        title="Terms of Use | The Wildland Fire Recovery Fund"
+        description="Read the Terms of Use for The Wildland Fire Recovery Fund. Please review these terms carefully before using our website and making donations."
+        url="https://thewildlandfirerecoveryfund.org/terms"
+      />
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 30 }}

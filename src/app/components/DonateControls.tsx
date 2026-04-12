@@ -73,8 +73,6 @@ export function DonateControls({
       lookupKey: monthly ? `monthly_${amount}` : undefined,
     };
 
-    console.log("checkout payload:", payload);
-
     const res = await fetch("/.netlify/functions/create-checkout-session", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

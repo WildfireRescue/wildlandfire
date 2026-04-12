@@ -1,12 +1,18 @@
 import { motion } from 'motion/react';
 import { Heart, Home, Share2, Mail, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { SEOHead } from '../components/SEOHead';
 import { Button } from '../components/ui/button';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 
 export function ThankYouPage() {
   return (
     <div className="min-h-screen pt-28 pb-20 bg-background relative overflow-hidden">
+      <SEOHead
+        title="Thank You for Your Donation | The Wildland Fire Recovery Fund"
+        description="Thank you for supporting wildfire survivors. Your generous donation helps families and firefighters rebuild their lives after devastating wildfires."
+        url="https://thewildlandfirerecoveryfund.org/thankyou"
+      />
       {/* Background Image */}
       <div className="absolute inset-0 opacity-20">
         <ImageWithFallback

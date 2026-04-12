@@ -2,8 +2,7 @@ import { useEffect } from "react";
 
 export default function AuthCallback() {
   useEffect(() => {
-    console.log("[AuthCallback] PKCE session should already be handled by Supabase");
-
+    // PKCE session should already be handled by Supabase
     // Small delay so Supabase finishes saving session
     setTimeout(() => {
       window.location.replace("/blog/editor");

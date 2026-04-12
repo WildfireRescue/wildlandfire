@@ -3,13 +3,6 @@ import ArticleContent from './ArticleContent';
 
 export default function HostedArticleTemplate({ article }: any) {
   const blocks = article?.article_blocks?.find((b: any) => b.role === 'body')?.blocks || [];
-  
-  console.log('[HostedArticleTemplate] Article:', article?.slug);
-  console.log('[HostedArticleTemplate] Article blocks:', article?.article_blocks?.length);
-  console.log('[HostedArticleTemplate] Body blocks:', blocks?.length);
-  console.log('[HostedArticleTemplate] First block type:', blocks?.[0]?.type);
-  console.log('[HostedArticleTemplate] HTML length:', blocks?.[0]?.html?.length);
-  console.log('[HostedArticleTemplate] First 100 chars:', blocks?.[0]?.html?.substring(0, 100));
 
   return (
     <div className="min-h-screen bg-background pt-20 pb-24">

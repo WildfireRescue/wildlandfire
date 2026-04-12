@@ -179,7 +179,7 @@ export function BlogIndexPage() {
         <meta property="og:title" content="Blog | The Wildland Fire Recovery Fund" />
         <meta property="og:description" content="Latest news, stories, and updates from The Wildland Fire Recovery Fund" />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://thewildlandfirerecoveryfund.org/#blog" />
+        <meta property="og:url" content="https://thewildlandfirerecoveryfund.org/blog" />
         
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />

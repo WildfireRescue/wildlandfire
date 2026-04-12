@@ -1,5 +1,6 @@
 import { motion } from 'motion/react';
 import { Shield, Eye, Lock, UserCheck, FileText, Globe } from 'lucide-react';
+import { SEOHead } from '../components/SEOHead';
 
 export function PrivacyPolicyPage() {
   const sections = [
@@ -103,6 +104,11 @@ export function PrivacyPolicyPage() {
 
   return (
     <div className="min-h-screen pt-28 pb-20 bg-background">
+      <SEOHead
+        title="Privacy Policy | The Wildland Fire Recovery Fund"
+        description="Read The Wildland Fire Recovery Fund's privacy policy to understand how we collect, use, and protect your personal information. Your privacy is important to us."
+        url="https://thewildlandfirerecoveryfund.org/privacy"
+      />
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 30 }}

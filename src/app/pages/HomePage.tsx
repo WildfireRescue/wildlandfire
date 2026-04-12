@@ -1,6 +1,7 @@
 import { useEffect, lazy, Suspense } from 'react';
 import { Hero } from '../components/Hero';
 import { TrustBar } from '../components/TrustBar';
+import { SEOHead } from '../components/SEOHead';
 
 // Below-fold sections: lazy-loaded so they don't block the initial JS parse
 // or delay the LCP hero image. Each section loads independently after hydration.
@@ -44,6 +45,11 @@ export function HomePage() {
 
   return (
     <>
+      <SEOHead
+        title="Wildfire Relief Donations for Long-Term Recovery | The Wildland Fire Recovery Fund"
+        description="Support wildfire relief donations to help families rebuild. The Wildland Fire Recovery Fund provides long-term wildfire recovery aid to displaced families and firefighters. 501(c)(3) nonprofit."
+        url="https://thewildlandfirerecoveryfund.org/"
+      />
       {/* 1 — Hero: LCP-optimised, above the fold, H1 with primary keyword */}
       <Hero />
 

@@ -134,7 +134,7 @@ export function BlogCategoryPage() {
       <Helmet>
         <title>{categoryName} | Blog | The Wildland Fire Recovery Fund</title>
         <meta name="description" content={categoryDescription} />
-        <link rel="canonical" href={`https://thewildlandfirerecoveryfund.org/#blog/category/${categorySlug}`} />
+        <link rel="canonical" href={`https://thewildlandfirerecoveryfund.org/blog/category/${categorySlug}`} />
         <meta name="robots" content="index, follow, max-image-preview:large" />
       </Helmet>
 
