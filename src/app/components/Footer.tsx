@@ -118,6 +118,9 @@ export function Footer() {
         <div className="border-t border-border pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
           <p>
             &copy; {new Date().getFullYear()} The Wildland Fire Recovery Fund. All rights reserved.
+            <span className="block sm:inline sm:ml-2">
+              A registered 501(c)(3) nonprofit &nbsp;•&nbsp; EIN 41-2905752
+            </span>
           </p>
           <div className="flex gap-6">
             <Link to="/privacy" className="hover:text-primary transition-colors">
