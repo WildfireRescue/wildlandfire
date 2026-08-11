@@ -45,7 +45,13 @@ export function resolveCoverImageSrc(cover: unknown): string | null {
     }
     
     // Full URL (http/https) - including Supabase storage URLs
-    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    // Upgrade http:// to https:// to avoid mixed-content warnings on our
+    // (all-https) pages — the browser will otherwise flag the connection
+    // as not fully secure.
+    if (trimmed.startsWith('http://')) {
+      return 'https://' + trimmed.slice('http://'.length);
+    }
+    if (trimmed.startsWith('https://')) {
       return trimmed;
     }
     

@@ -17,10 +17,14 @@ exports.handler = async (event) => {
       return json(400, { error: "Missing frequency" });
     }
 
+    // NOTE: this app uses react-router's BrowserRouter (real paths, not
+    // hash routing), so the redirect targets must be plain paths like
+    // "/thankyou" — a "/#/thankyou" URL just loads the homepage and the
+    // donor never sees the thank-you/confirmation page.
     const success_url =
-      successUrl || `${process.env.URL || "http://localhost:8888"}/#/thankyou`;
+      successUrl || `${process.env.URL || "http://localhost:8888"}/thankyou`;
     const cancel_url =
-      cancelUrl || `${process.env.URL || "http://localhost:8888"}/#/donate`;
+      cancelUrl || `${process.env.URL || "http://localhost:8888"}/donate`;
 
     // ---- Monthly (Subscriptions) ----
     if (frequency === "monthly") {
