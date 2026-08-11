@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Heart, Home, Share2, Mail, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -5,7 +6,31 @@ import { SEOHead } from '../components/SEOHead';
 import { Button } from '../components/ui/button';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 
+declare global {
+  interface Window {
+    dataLayer?: unknown[];
+  }
+}
+
 export function ThankYouPage() {
+  useEffect(() => {
+    // Fire a GTM dataLayer event so Google Ads / GA4 / Meta Pixel (via a
+    // GTM tag configured to listen for this event) can attribute the
+    // donation as a conversion. This page previously wasn't even
+    // reachable after a real donation (see create-checkout-session.js
+    // fix), so no conversion tracking of any kind was firing - this is
+    // the other half of that fix. A GTM tag/trigger still needs to be
+    // configured in the Tag Manager container itself to actually send
+    // this to Google Ads / Meta; this dataLayer.push is the hook it
+    // listens for.
+    const sessionId = new URLSearchParams(window.location.search).get('session_id');
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: 'donation_complete',
+      transaction_id: sessionId || undefined,
+    });
+  }, []);
+
   return (
     <div className="min-h-screen pt-28 pb-20 bg-background relative overflow-hidden">
       <SEOHead
