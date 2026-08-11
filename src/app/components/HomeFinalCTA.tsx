@@ -44,7 +44,7 @@ export function HomeFinalCTA() {
         </a>
 
         <p className="mt-6 text-sm text-muted-foreground">
-          💳 Secure &nbsp;|&nbsp; 🔒 100% Tax-Deductible &nbsp;|&nbsp; ⚡ Rapidly Deployed
+          💳 Secure &nbsp;|&nbsp; 🔒 Tax-Deductible &nbsp;|&nbsp; ⚡ Rapidly Deployed
         </p>
       </div>
     </section>

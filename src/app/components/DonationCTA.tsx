@@ -84,7 +84,7 @@ export function DonationCTA() {
             transition={{ duration: 0.6, delay: 0.5 }}
             className="text-sm text-muted-foreground mt-6"
           >
-            100% tax-deductible • Secure donation processing
+            Tax-deductible • Secure donation processing
           </motion.p>
 
         </div>

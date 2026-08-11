@@ -23,7 +23,7 @@ export function WhyDonateMatters() {
               },
               {
                 icon: Shield,
-                title: "100% Tax Deductible",
+                title: "Tax Deductible",
                 description: "We're a registered 501(c)(3) nonprofit. Your generosity is fully tax-deductible, and you'll receive documentation for your records."
               },
               {

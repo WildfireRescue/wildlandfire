@@ -10,7 +10,7 @@ const OTHER = "other" as const;
 
 export function DonateControls({
   defaultAmount = 50,
-  defaultMonthly = true,
+  defaultMonthly = false,
 }: {
   defaultAmount?: number;
   defaultMonthly?: boolean;
@@ -201,7 +201,7 @@ export function DonateControls({
 
       {/* Trust line */}
       <div className="mt-3 text-center text-xs text-muted-foreground">
-        501(c)(3) • Tax-deductible • Secure checkout • Receipt emailed instantly
+        501(c)(3) Nonprofit • EIN 41-2905752 • Tax-deductible • Secure checkout
       </div>
     </div>
   );

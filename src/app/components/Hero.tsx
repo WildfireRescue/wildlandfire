@@ -198,7 +198,7 @@ export function Hero() {
               href="/donate"
               className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground font-semibold px-8 py-4 rounded-full text-lg hover:bg-primary/90 transition-colors"
             >
-              Donate Now · 100% Tax-Deductible
+              Donate Now · Tax-Deductible
             </a>
             <a
               href="#programs"

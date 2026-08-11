@@ -17,7 +17,7 @@ const faqs = [
   {
     question: 'Is my donation to the wildfire recovery fund tax-deductible?',
     answer:
-      'Yes, your donation is 100% tax-deductible. The Wildland Fire Recovery Fund operates as a registered 501(c)(3) nonprofit organization (EIN: 41-2905752). You will receive a receipt for your records that you can use when filing your taxes. Your generosity helps wildfire survivors and provides you with a tax benefit.',
+      'Yes, your donation is tax-deductible to the fullest extent allowed by law. The Wildland Fire Recovery Fund operates as a registered 501(c)(3) nonprofit organization (EIN: 41-2905752). You will receive a receipt for your records that you can use when filing your taxes. Your generosity helps wildfire survivors and provides you with a tax benefit.',
   },
   {
     question: 'How quickly do wildfire relief donations reach those in need?',
@@ -42,7 +42,7 @@ const faqs = [
   {
     question: 'What makes The Wildland Fire Recovery Fund different from other charities?',
     answer:
-      'Our fund focuses specifically on wildfire relief and recovery, which allows us to develop deep expertise in helping fire-affected communities. We combine immediate emergency response with long-term rebuilding support. We serve both civilian families and firefighter families with equal dedication. Most importantly, we operate with 100% transparency so you always know exactly how your donation is making a difference.',
+      'Our fund focuses specifically on wildfire relief and recovery, which allows us to develop deep expertise in helping fire-affected communities. We combine immediate emergency response with long-term rebuilding support. We serve both civilian families and firefighter families with equal dedication. Most importantly, we are committed to transparency so you always know how your donation is making a difference.',
   },
 ];
 

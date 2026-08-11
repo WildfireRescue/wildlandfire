@@ -44,7 +44,7 @@ export function DonationImpactCards() {
             Explore How Your Wildfire Relief Donations Support Affected Communities
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Every dollar you give goes directly to families, firefighters, and communities rebuilding after the flames.
+            Your donation helps fund direct support for families, firefighters, and communities rebuilding after the flames.
           </p>
         </motion.div>
 

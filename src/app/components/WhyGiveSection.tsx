@@ -14,7 +14,7 @@ const quickPaths = [
   {
     icon: Users,
     title: "See Real Impact: How Donations Transform Lives",
-    description: "From the single mother who received housing assistance to the firefighter family supported after loss, your generosity creates lasting stories of hope.",
+    description: "Whether it's a single mother securing safe housing or a firefighter's family supported after a devastating loss, your generosity is what makes stories of hope possible.",
     path: "/stories",
     color: "from-purple-500/20 to-indigo-500/20",
     borderColor: "border-purple-500/30",
@@ -22,7 +22,7 @@ const quickPaths = [
   },
   {
     icon: Shield,
-    title: "100% Transparency in How We Use Your Donations",
+    title: "Transparency in How We Use Your Donations",
     description: "See exactly where every dollar goes. We keep administrative costs low so more of your money reaches the people who need it most.",
     path: "/about",
     color: "from-blue-500/20 to-cyan-500/20",

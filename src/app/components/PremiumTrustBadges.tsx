@@ -16,8 +16,8 @@ const badges = [
   },
   {
     icon: CheckCircle,
-    title: "Verified",
-    subtitle: "Nonprofit Org",
+    title: "Registered",
+    subtitle: "501(c)(3) Nonprofit",
     color: "text-primary"
   },
   {
@@ -29,7 +29,7 @@ const badges = [
   {
     icon: Heart,
     title: "Transparent",
-    subtitle: "100% Accountability",
+    subtitle: "Accountability",
     color: "text-red-400"
   }
 ];
@@ -46,7 +46,7 @@ export function PremiumTrustBadges() {
           className="text-center mb-8"
         >
           <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">
-            Trusted & Verified
+            Registered 501(c)(3) Nonprofit &nbsp;•&nbsp; EIN 41-2905752
           </p>
           <h3 className="text-xl">Your Donation is Safe & Tax-Deductible</h3>
         </motion.div>
