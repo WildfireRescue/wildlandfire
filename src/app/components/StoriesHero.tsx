@@ -49,7 +49,7 @@ export function StoriesHero() {
             className="inline-flex flex-wrap gap-4 justify-center mb-12"
           >
             {[
-              { text: "Serving families nationwide" },
+              { text: "Ready to serve families nationwide" },
               { text: "Direct, compassionate support" },
               { text: "Dignity-first approach" }
             ].map((value, idx) => (

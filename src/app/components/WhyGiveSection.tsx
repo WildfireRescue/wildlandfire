@@ -13,7 +13,7 @@ const quickPaths = [
   },
   {
     icon: Users,
-    title: "See Real Impact: How Donations Transform Lives",
+    title: "How Your Donation Transforms Lives",
     description: "Whether it's a single mother securing safe housing or a firefighter's family supported after a devastating loss, your generosity is what makes stories of hope possible.",
     path: "/stories",
     color: "from-purple-500/20 to-indigo-500/20",
