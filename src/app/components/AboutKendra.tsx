@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { m as motion } from 'motion/react';
 import kendraImage from '../../assets/Kendra.jpg';
 
 export function AboutKendra() {

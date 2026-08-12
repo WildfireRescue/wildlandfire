@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { m as motion } from 'motion/react';
 import { TrendingUp, Users, Calendar } from 'lucide-react';
 import { useState, useEffect } from 'react';
 

@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { m as motion } from 'motion/react';
 import { AlertCircle, TrendingUp, Heart } from 'lucide-react';
 import { Button } from './ui/button';
 

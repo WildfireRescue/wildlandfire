@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { m as motion } from 'motion/react';
 import { Shield, Clock, Heart, TrendingUp } from 'lucide-react';
 
 const commitments = [

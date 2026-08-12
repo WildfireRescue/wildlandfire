@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { m as motion } from 'motion/react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import familyRubbleImage from '../../assets/fire22222.jpg';
 import idahoMountainImage from '../../assets/fire33333.webp';

@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { m as motion } from 'motion/react';
 import { Scale, FileCheck, AlertCircle, UserX, DollarSign, Shield } from 'lucide-react';
 import { SEOHead } from '../components/SEOHead';
 

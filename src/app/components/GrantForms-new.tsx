@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { m as motion } from 'motion/react';
 import { GraduationCap, Flame, CheckCircle, Clock, Send, Home, AlertCircle } from 'lucide-react';
 import { Button } from './ui/button';
 import { useState } from 'react';

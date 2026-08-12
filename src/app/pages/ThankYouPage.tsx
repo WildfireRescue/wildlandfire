@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { motion } from 'motion/react';
+import { m as motion } from 'motion/react';
 import { Heart, Home, Share2, Mail, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SEOHead } from '../components/SEOHead';

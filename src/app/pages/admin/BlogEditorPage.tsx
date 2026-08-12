@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { motion } from "motion/react";
+import { m as motion } from "motion/react";
 import { supabase } from "../../../lib/supabase";
 import { Button } from "../../components/ui/button";
 import { Mail, LogOut, Save, Eye, AlertCircle, Info, Edit3, X, Menu } from "lucide-react";

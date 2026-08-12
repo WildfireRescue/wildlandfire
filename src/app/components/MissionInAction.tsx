@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { m as motion } from 'motion/react';
 import { Heart, Users, Home, Shield, Clock, TrendingUp } from 'lucide-react';
 
 const impactAreas = [
