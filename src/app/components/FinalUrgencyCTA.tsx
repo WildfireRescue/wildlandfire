@@ -17,8 +17,8 @@ export function FinalUrgencyCTA() {
             Right Now, Someone Needs Your Wildfire Relief Donation
           </h2>
           <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-6 sm:mb-8 leading-relaxed">
-            A family is sleeping in a shelter tonight. A child is wearing borrowed clothes because everything they owned burned. A firefighter is wondering how to rebuild after saving others.{' '}
-            <span className="text-foreground font-semibold">Your donation changes that today.</span>
+            When wildfire destroys a home, families need more than an evacuation notice — they need somewhere safe to sleep, clothing, food, and help rebuilding their lives. Firefighters risk everything to save others and often need support rebuilding their own.{' '}
+            <span className="text-foreground font-semibold">Your donation makes that support possible.</span>
           </p>
           <Button
             asChild
@@ -31,7 +31,7 @@ export function FinalUrgencyCTA() {
             </a>
           </Button>
           <p className="mt-4 sm:mt-6 text-xs sm:text-sm text-muted-foreground">
-            💳 Secure donation • 🔒 100% tax-deductible • ⚡ Rapid deployment to those in need
+            💳 Secure donation • 🔒 Tax-deductible • ⚡ Rapid deployment to those in need
           </p>
         </motion.div>
       </div>

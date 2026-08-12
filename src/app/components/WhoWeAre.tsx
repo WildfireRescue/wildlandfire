@@ -34,7 +34,7 @@ export function WhoWeAre() {
             {/* Detailed Description */}
             <div className="space-y-6 text-muted-foreground leading-relaxed">
               <p>
-                The Wildland Fire Recovery Fund Inc. is a 501(c)(3) non-profit organization based in Caldwell, Idaho. We exist to support the families of fallen firefighters and to provide meaningful relief to individuals and communities affected by wildfires.
+                The Wildland Fire Recovery Fund Inc. is a 501(c)(3) non-profit organization (EIN: 41-2905752) based in Caldwell, Idaho. We exist to support the families of fallen firefighters and to provide meaningful relief to individuals and communities affected by wildfires.
               </p>
 
               <p>

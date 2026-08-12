@@ -7,7 +7,7 @@
 
 const trustItems = [
   { emoji: '🏛️', text: '501(c)(3) Nonprofit' },
-  { emoji: '💳', text: '100% Tax-Deductible' },
+  { emoji: '💳', text: 'Tax-Deductible' },
   { emoji: '⚡', text: 'Rapid Emergency Response' },
   { emoji: '🔍', text: 'Full Financial Transparency' },
   { emoji: '🤝', text: 'Direct Aid to Those in Need' },

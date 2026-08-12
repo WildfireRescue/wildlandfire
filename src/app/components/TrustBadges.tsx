@@ -21,7 +21,7 @@ export function TrustBadges() {
           </div>
           <div className="flex items-center gap-2">
             <Heart className="text-primary" size={20} />
-            <span>100% Tax Deductible</span>
+            <span>Tax Deductible</span>
           </div>
         </motion.div>
       </div>

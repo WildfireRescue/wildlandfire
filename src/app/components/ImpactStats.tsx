@@ -5,7 +5,7 @@ const stats = [
   {
     icon: Heart,
     label: 'Direct Impact',
-    description: 'Your donations fund real wildfire recovery needs: housing, counseling, and rebuilding. Aid is delivered directly to survivors without bureaucratic delays.'
+    description: 'Your donations fund real wildfire recovery needs: housing, counseling, and rebuilding. We work to deliver aid to survivors as quickly as possible.'
   },
   {
     icon: Users,

@@ -3,6 +3,12 @@ import { GraduationCap, Flame, CheckCircle, Clock, Send, Home, AlertCircle } fro
 import { Button } from './ui/button';
 import { useState } from 'react';
 
+function encodeFormData(data: Record<string, string>): string {
+  return Object.keys(data)
+    .map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`)
+    .join('&');
+}
+
 export function GrantForms() {
   const [educationFormData, setEducationFormData] = useState({
     name: '',
@@ -24,14 +30,46 @@ export function GrantForms() {
     description: ''
   });
 
+  const [fireDeptStatus, setFireDeptStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+
   const handleEducationSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     alert('Thank you for your interest! Education grants are currently closed. We will notify you when applications reopen.');
   };
 
-  const handleFireDeptSubmit = (e: React.FormEvent) => {
+  const handleFireDeptSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert('Thank you for your application! We will review your request and contact you as soon as possible.');
+    setFireDeptStatus('submitting');
+    try {
+      // Submits to Netlify Forms - see the hidden "fire-dept-grant" form
+      // stub in index.html that lets Netlify's build bot detect this
+      // form (the real one is client-rendered by React and invisible
+      // to Netlify's static HTML scan).
+      const response = await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: encodeFormData({ 'form-name': 'fire-dept-grant', ...fireDeptFormData }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Form submission failed with status ${response.status}`);
+      }
+
+      setFireDeptStatus('success');
+      setFireDeptFormData({
+        deptName: '',
+        contactName: '',
+        email: '',
+        phone: '',
+        address: '',
+        requestType: '',
+        amount: '',
+        description: ''
+      });
+    } catch (error) {
+      console.error('Fire department grant submission error:', error);
+      setFireDeptStatus('error');
+    }
   };
 
   return (
@@ -399,11 +437,32 @@ export function GrantForms() {
               <Button
                 type="submit"
                 size="lg"
-                className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+                disabled={fireDeptStatus === 'submitting'}
+                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
               >
                 <Send size={20} className="mr-2" />
-                Submit Grant Application
+                {fireDeptStatus === 'submitting' ? 'Submitting...' : 'Submit Grant Application'}
               </Button>
+
+              {fireDeptStatus === 'success' && (
+                <div className="flex items-center gap-2 text-sm text-green-500 justify-center">
+                  <CheckCircle size={16} />
+                  <span>Application received! We'll review your request and be in touch.</span>
+                </div>
+              )}
+
+              {fireDeptStatus === 'error' && (
+                <div className="flex items-center gap-2 text-sm text-red-500 justify-center">
+                  <AlertCircle size={16} />
+                  <span>
+                    Something went wrong submitting this. Please email your request to{' '}
+                    <a href="mailto:info@thewildlandfirerecoveryfund.org" className="underline">
+                      info@thewildlandfirerecoveryfund.org
+                    </a>
+                    .
+                  </span>
+                </div>
+              )}
 
               <p className="text-xs text-muted-foreground text-center">
                 By submitting this application, you certify that all information is accurate and complete.

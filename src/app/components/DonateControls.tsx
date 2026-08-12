@@ -10,7 +10,7 @@ const OTHER = "other" as const;
 
 export function DonateControls({
   defaultAmount = 50,
-  defaultMonthly = true,
+  defaultMonthly = false,
 }: {
   defaultAmount?: number;
   defaultMonthly?: boolean;
@@ -199,9 +199,26 @@ export function DonateControls({
         {ctaText}
       </button>
 
+      {/* Monthly nudge — only shown when one-time is selected */}
+      {!monthly && (
+        <button
+          type="button"
+          onClick={() => {
+            setMonthly(true);
+            const fallback = MONTHLY_AMOUNTS.includes(defaultAmount) ? defaultAmount : 25;
+            setSelected(fallback);
+            setAmount(fallback);
+            setCustomAmount("");
+          }}
+          className="mt-3 w-full text-center text-xs text-muted-foreground hover:text-foreground transition underline underline-offset-2"
+        >
+          Want to provide ongoing support? Choose Monthly.
+        </button>
+      )}
+
       {/* Trust line */}
       <div className="mt-3 text-center text-xs text-muted-foreground">
-        501(c)(3) • Tax-deductible • Secure checkout • Receipt emailed instantly
+        501(c)(3) Nonprofit • EIN 41-2905752 • Tax-deductible • Secure checkout
       </div>
     </div>
   );

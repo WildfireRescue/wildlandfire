@@ -138,6 +138,35 @@
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
     <div id="root"></div>
+
+    <!--
+      Hidden static form so Netlify's build-time bot can detect and
+      register the "contact" form. The real form lives in
+      src/app/pages/ContactPage.tsx and is rendered client-side by
+      React, which Netlify's static HTML scan can't see - without this
+      stub, Netlify never provisions the form and every submission
+      from the live page 404s / silently fails. Field names here must
+      exactly match the `name` attributes used in ContactPage.tsx.
+    -->
+    <form name="contact" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input type="text" name="name" />
+      <input type="email" name="email" />
+      <input type="text" name="subject" />
+      <textarea name="message"></textarea>
+      <input type="text" name="bot-field" />
+    </form>
+    <form name="fire-dept-grant" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input type="text" name="deptName" />
+      <input type="text" name="contactName" />
+      <input type="email" name="email" />
+      <input type="tel" name="phone" />
+      <input type="text" name="address" />
+      <input type="text" name="requestType" />
+      <input type="text" name="amount" />
+      <textarea name="description"></textarea>
+      <input type="text" name="bot-field" />
+    </form>
+
     <script type="module" src="/src/main.tsx"></script>
     
     <!-- Register Service Worker for caching -->

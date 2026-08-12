@@ -27,14 +27,14 @@ export function DonateHero() {
           {/* Active Need Indicator */}
           <div className="flex items-center justify-center gap-2 mb-6 px-5 py-2.5 bg-primary/10 rounded-full inline-flex mx-auto border border-primary/20">
             <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
-            <span className="text-foreground font-medium text-sm">Currently serving families nationwide</span>
+            <span className="text-foreground font-medium text-sm">Standing ready to help wildfire survivors nationwide</span>
           </div>
 
           {/* ✅ Donate controls (above the fold) */}
           <div className="max-w-xl mx-auto mb-10">
             <DonateControls
               defaultAmount={50}
-              defaultMonthly={true}
+              defaultMonthly={false}
             />
           </div>
 

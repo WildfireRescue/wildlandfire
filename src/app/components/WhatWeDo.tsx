@@ -74,7 +74,7 @@ export function WhatWeDo() {
               </p>
 
               <p>
-                Every dollar donated goes directly to those in need. This supports families securing temporary housing, children's education after losing their homes, and honoring fallen firefighters.
+                We keep administrative costs low so more of your donation reaches families securing temporary housing, children navigating life after losing their homes, and the firefighters we honor.
               </p>
 
               <p>

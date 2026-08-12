@@ -40,7 +40,7 @@ export function ImpactHero() {
             {[
               {
                 icon: Eye,
-                title: "100% Transparent",
+                title: "Transparent",
                 description: "See exactly where every dollar goes"
               },
               {

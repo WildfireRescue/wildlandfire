@@ -1,8 +1,14 @@
 import { motion } from 'motion/react';
-import { Mail, Phone, MapPin, Send } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, CheckCircle, AlertCircle } from 'lucide-react';
 import { SEOHead } from '../components/SEOHead';
 import { Button } from '../components/ui/button';
 import { useState } from 'react';
+
+function encodeFormData(data: Record<string, string>): string {
+  return Object.keys(data)
+    .map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`)
+    .join('&');
+}
 
 export function ContactPage() {
   const [formData, setFormData] = useState({
@@ -11,12 +17,30 @@ export function ContactPage() {
     subject: '',
     message: ''
   });
+  const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Integrate with email service (e.g., SendGrid, Netlify Forms)
-    alert('Thank you for reaching out! We\'ll get back to you soon.');
-    setFormData({ name: '', email: '', subject: '', message: '' });
+    setStatus('submitting');
+    try {
+      // Submits to Netlify Forms (see the hidden "contact" form stub in
+      // index.html that lets Netlify's build bot detect this form).
+      const response = await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: encodeFormData({ 'form-name': 'contact', ...formData }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Form submission failed with status ${response.status}`);
+      }
+
+      setStatus('success');
+      setFormData({ name: '', email: '', subject: '', message: '' });
+    } catch (error) {
+      console.error('Contact form submission error:', error);
+      setStatus('error');
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -116,7 +140,7 @@ export function ContactPage() {
                   asChild
                   className="w-full bg-primary hover:bg-primary/90"
                 >
-                  <a href="mailto:info@wildlandfirerecoveryfund.org">
+                  <a href="mailto:info@thewildlandfirerecoveryfund.org">
                     <Mail size={16} className="mr-2" />
                     Email Us Now
                   </a>
@@ -197,11 +221,32 @@ export function ContactPage() {
 
                 <Button
                   type="submit"
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6"
+                  disabled={status === 'submitting'}
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 disabled:opacity-50"
                 >
                   <Send size={18} className="mr-2" />
-                  Send Message
+                  {status === 'submitting' ? 'Sending...' : 'Send Message'}
                 </Button>
+
+                {status === 'success' && (
+                  <div className="flex items-center gap-2 text-sm text-green-500 justify-center">
+                    <CheckCircle size={16} />
+                    <span>Thank you for reaching out! We'll get back to you soon.</span>
+                  </div>
+                )}
+
+                {status === 'error' && (
+                  <div className="flex items-center gap-2 text-sm text-red-500 justify-center">
+                    <AlertCircle size={16} />
+                    <span>
+                      Something went wrong sending your message. Please email us directly at{' '}
+                      <a href="mailto:info@thewildlandfirerecoveryfund.org" className="underline">
+                        info@thewildlandfirerecoveryfund.org
+                      </a>
+                      .
+                    </span>
+                  </div>
+                )}
 
                 <p className="text-xs text-muted-foreground text-center">
                   We respond promptly to all inquiries
