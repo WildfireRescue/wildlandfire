@@ -99,6 +99,34 @@ export default defineConfig({
       output: {
         manualChunks: (id) => {
           // Aggressive code splitting for mobile performance
+          //
+          // IMPORTANT: local shared UI primitives (src/app/components/ui/*,
+          // e.g. button.tsx) must be pinned to their own chunk FIRST. These
+          // files are imported by both eager, public-facing components
+          // (Hero, Navigation, DonateControls, ...) AND by admin-only
+          // components (ArticleEditor, RichTextEditor, ...). Because they
+          // don't match any explicit bucket below, Rollup was left to
+          // decide their physical chunk on its own — and it was folding
+          // them directly into the 'admin' chunk (whichever consumer it
+          // considered first). That forced the ENTIRE ~450 KB admin bundle
+          // (TipTap + ProseMirror + the editor UI) to be a real, eager
+          // import of every public page that merely rendered a <Button>,
+          // completely defeating the admin/db lazy-loading below and
+          // tanking Largest Contentful Paint / Time to Interactive
+          // sitewide. Pinning them here keeps them out of both 'admin'
+          // and 'vendor', in a small shared chunk every page can reuse.
+          if (id.includes('src/app/components/ui/')) {
+            return 'ui-local';
+          }
+          // Same problem, different module: src/lib/* helpers (blogHelpers,
+          // blogTypes, blogImages, supabaseBlog, ...) are shared between
+          // public blog pages/components (BlogPostPage, BlogIndexPage,
+          // BlogBreadcrumbs, ...) and admin-only editor screens
+          // (BlogEditorPage, ArticleList, ...). Same fix: pin them so they
+          // can't be folded into the 'admin' chunk either.
+          if (id.includes('src/lib/')) {
+            return 'app-lib';
+          }
           // Keep admin/editor code out of the public bundle.
           // AdminRoute lazy-loads AuthContext which lazy-loads supabase,
           // so public visitors never load the db chunk.

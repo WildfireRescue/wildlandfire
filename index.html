@@ -4,6 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
+    <!-- ── Preconnect to third-party origins used by GTM/GA/Ads ───────────── -->
+    <!-- Lighthouse flagged these as missing: without them, the browser pays  -->
+    <!-- DNS + TCP + TLS setup cost the first time each origin is hit, on the -->
+    <!-- critical path of the render-blocking GTM script below. -->
+    <link rel="preconnect" href="https://www.googletagmanager.com" />
+    <link rel="preconnect" href="https://www.google-analytics.com" />
+    <link rel="preconnect" href="https://googleads.g.doubleclick.net" crossorigin />
+
     <!-- Google Tag Manager -->
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
     new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
