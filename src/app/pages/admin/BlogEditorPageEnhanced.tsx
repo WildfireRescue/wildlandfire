@@ -4,7 +4,12 @@
 // =====================================================
 
 import { useEffect, useState, useMemo, useRef } from 'react';
-import { motion } from 'motion/react';
+// Uses `m` (not the full `motion` component) so this file doesn't force the
+// full framer-motion component-factory code back into the shared 'motion'
+// chunk that every public page also loads eagerly. This component renders
+// under App.tsx's top-level <LazyMotion features={domAnimation}> provider,
+// which is all `initial`/`animate` here needs (no drag/layout usage).
+import { m as motion } from 'motion/react';
 import { supabase } from '../../../lib/supabase.ts';
 import ArticleEditor from '../../components/ArticleEditor';
 import { createOrUpdateArticle, saveArticleBlocks } from '../../../lib/articles.ts';

@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { m as motion } from 'motion/react';
 import { DollarSign, Shield, Users, CheckCircle } from 'lucide-react';
 
 export function WhyDonateMatters() {

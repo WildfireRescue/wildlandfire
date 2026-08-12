@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { m as motion } from 'motion/react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { Shield, Heart, Users } from 'lucide-react';
 import firefightersImage from '../../assets/8e03279e68063925af6fae8f1b72f359c89244cb.png';

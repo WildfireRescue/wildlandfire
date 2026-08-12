@@ -4,7 +4,7 @@
 // =====================================================
 
 import { Link } from 'react-router-dom';
-import { motion } from 'motion/react';
+import { m as motion } from 'motion/react';
 import { Calendar, Clock } from 'lucide-react';
 import { Button } from '../ui/button';
 import { BlogCategoryBadge } from './BlogCategoryBadge';

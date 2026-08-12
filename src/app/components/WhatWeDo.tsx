@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { m as motion } from 'motion/react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { Target, Coins, Calendar } from 'lucide-react';
 

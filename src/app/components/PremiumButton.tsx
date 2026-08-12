@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { m as motion } from 'motion/react';
 import { LucideIcon } from 'lucide-react';
 
 interface PremiumButtonProps {

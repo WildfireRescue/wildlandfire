@@ -1,10 +1,28 @@
 import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { LazyMotion, domAnimation } from "motion/react";
 import { HomePage } from "./pages/HomePage";
 import { Navigation } from "./components/Navigation";
 import { Footer } from "./components/Footer";
 import { StructuredData } from "./components/StructuredData";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+
+// Every component in this app now imports `m` (aliased as `motion`) from
+// 'motion/react' instead of the full `motion` component — `m` only carries
+// the render logic, not the whole animation/gesture feature set, and relies
+// on this LazyMotion provider to supply features at runtime. This is the
+// framer-motion-documented way to shrink the eager 'motion' bundle: the
+// 'motion' chunk was 119 KB decoded (part of ~490 KB of JS parsed/executed
+// on every homepage load) and was a major Time-to-Interactive / Total
+// Blocking Time contributor even after the admin-bundle fix, since parsing
+// and executing the full `motion` component factory for every HTML tag
+// happens regardless of network payload. Switching every consumer
+// (including the two admin-only editor pages, which still render under
+// this same provider once lazy-loaded) to `m` let Rollup tree-shake that
+// factory code away entirely, cutting the chunk to ~75 KB decoded.
+// domAnimation covers everything anything in the app actually uses
+// (animate/exit/whileHover/whileTap/whileInView) — nothing uses drag or
+// layout animations, so domMax isn't needed anywhere.
 
 // Admin: lazy-load entire auth+supabase+editor tree so it never lands in the public bundle
 const AdminRoute = lazy(() => import("./pages/admin/AdminRoute"));
@@ -52,6 +70,7 @@ function PageLoader() {
 export default function App() {
   return (
     <BrowserRouter>
+      <LazyMotion features={domAnimation}>
       <div className="min-h-screen flex flex-col bg-background">
         <StructuredData />
         <Navigation />
@@ -99,6 +118,7 @@ export default function App() {
             <UrgencyTopBanner />
           </Suspense>
         </div>
+      </LazyMotion>
     </BrowserRouter>
   );
 }

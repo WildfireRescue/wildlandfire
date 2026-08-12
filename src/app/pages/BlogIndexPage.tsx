@@ -5,7 +5,7 @@
 
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'motion/react';
+import { m as motion } from 'motion/react';
 import { Helmet } from 'react-helmet-async';
 import { BlogPostCard } from '../components/blog/BlogPostCard';
 import { BlogPagination } from '../components/blog/BlogPagination';
