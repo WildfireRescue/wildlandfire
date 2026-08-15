@@ -9,26 +9,47 @@ import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 declare global {
   interface Window {
     dataLayer?: unknown[];
+    fbq?: (...args: unknown[]) => void;
   }
 }
 
 export function ThankYouPage() {
   useEffect(() => {
-    // Fire a GTM dataLayer event so Google Ads / GA4 / Meta Pixel (via a
-    // GTM tag configured to listen for this event) can attribute the
-    // donation as a conversion. This page previously wasn't even
-    // reachable after a real donation (see create-checkout-session.js
-    // fix), so no conversion tracking of any kind was firing - this is
-    // the other half of that fix. A GTM tag/trigger still needs to be
-    // configured in the Tag Manager container itself to actually send
-    // this to Google Ads / Meta; this dataLayer.push is the hook it
-    // listens for.
-    const sessionId = new URLSearchParams(window.location.search).get('session_id');
+    // Fire a GTM dataLayer event so Google Ads / GA4 (via a GTM tag
+    // configured to listen for this event) can attribute the donation as
+    // a conversion. This page previously wasn't even reachable after a
+    // real donation (see create-checkout-session.js fix), so no
+    // conversion tracking of any kind was firing - this is the other
+    // half of that fix. A GTM tag/trigger still needs to be configured
+    // in the Tag Manager container itself to actually send this to
+    // Google Ads; this dataLayer.push is the hook it listens for.
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get('session_id');
+    const amount = params.get('amount');
+    const currency = (params.get('currency') || 'usd').toUpperCase();
+
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({
       event: 'donation_complete',
       transaction_id: sessionId || undefined,
+      value: amount ? Number(amount) : undefined,
+      currency,
     });
+
+    // Fire the Meta Pixel "Donate" standard event directly (independent of
+    // GTM) so donation value/volume shows up in Events Manager and can be
+    // used for ad optimization. `amount` comes from the success_url that
+    // create-checkout-session.js builds from the actual Stripe Checkout
+    // Session amount - it isn't cryptographically verified against the
+    // captured charge, so treat it as directionally accurate (standard
+    // for client-side pixels) rather than an audited financial figure.
+    if (typeof window.fbq === 'function') {
+      window.fbq('track', 'Donate', {
+        value: amount ? Number(amount) : undefined,
+        currency,
+        content_name: sessionId || undefined,
+      });
+    }
   }, []);
 
   return (
