@@ -9,7 +9,10 @@ export function DonationCTA() {
       const res = await fetch("/.netlify/functions/create-checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: 50 }), // default $50
+        // frequency is required by create-checkout-session.js - without it
+        // the function always returns 400 "Missing frequency" and this
+        // button silently fails every time it's clicked.
+        body: JSON.stringify({ amount: 50, frequency: "one_time" }), // default $50 one-time
       });
 
       const data = await res.json();
