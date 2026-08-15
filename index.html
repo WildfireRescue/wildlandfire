@@ -11,6 +11,7 @@
     <link rel="preconnect" href="https://www.googletagmanager.com" />
     <link rel="preconnect" href="https://www.google-analytics.com" />
     <link rel="preconnect" href="https://googleads.g.doubleclick.net" crossorigin />
+    <link rel="preconnect" href="https://connect.facebook.net" crossorigin />
 
     <!-- Google Tag Manager -->
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -19,6 +20,30 @@
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-MGS97GBW');</script>
     <!-- End Google Tag Manager -->
+
+    <!-- Meta Pixel Code -->
+    <!-- Loaded eagerly, unlike the deferred GA4 block below: Meta advises   -->
+    <!-- against delaying pixel init, since visitors who bounce quickly     -->
+    <!-- would never be counted, undermining ad audience/conversion         -->
+    <!-- tracking. The injected script tag is already async, so this does   -->
+    <!-- not block rendering. See ThankYouPage.tsx for the paired 'Donate'  -->
+    <!-- conversion event (this block only fires PageView). -->
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '1068975582494306');
+    fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=1068975582494306&ev=PageView&noscript=1"
+    /></noscript>
+    <!-- End Meta Pixel Code -->
 
     <!-- ── User Timing: record the moment the HTML is parsed ─────────────── -->
     <!-- This is the earliest possible performance mark; works before any JS  -->
