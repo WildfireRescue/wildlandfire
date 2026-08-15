@@ -40,7 +40,9 @@ export const handler = async (event) => {
       const session = await stripe.checkout.sessions.create({
         mode: "subscription",
         line_items: [{ price: priceId, quantity: 1 }],
-        success_url: success_url + "?session_id={CHECKOUT_SESSION_ID}",
+        success_url:
+          success_url +
+          `?session_id={CHECKOUT_SESSION_ID}&amount=${encodeURIComponent(amount)}&currency=usd&frequency=monthly`,
         cancel_url,
         // Optional but recommended:
         billing_address_collection: "auto",
@@ -71,7 +73,9 @@ export const handler = async (event) => {
             quantity: 1,
           },
         ],
-        success_url: success_url + "?session_id={CHECKOUT_SESSION_ID}",
+        success_url:
+          success_url +
+          `?session_id={CHECKOUT_SESSION_ID}&amount=${encodeURIComponent(dollars)}&currency=usd&frequency=one_time`,
         cancel_url,
         billing_address_collection: "auto",
       });
