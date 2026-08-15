@@ -18,7 +18,7 @@
  * Debouncing / idempotency is handled by Netlify (it queues/deduplicates concurrent triggers).
  */
 
-exports.handler = async (event) => {
+export const handler = async (event) => {
   // Only accept POST
   if (event.httpMethod !== 'POST') {
     return respond(405, { ok: false, error: 'Method Not Allowed' });
