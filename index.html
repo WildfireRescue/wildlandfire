@@ -27,7 +27,11 @@
     <!-- would never be counted, undermining ad audience/conversion         -->
     <!-- tracking. The injected script tag is already async, so this does   -->
     <!-- not block rendering. See ThankYouPage.tsx for the paired 'Donate'  -->
-    <!-- conversion event (this block only fires PageView). -->
+    <!-- conversion event (this block only fires PageView). The <noscript>  -->
+    <!-- fallback <img> lives in <body> (see below), not here: per the      -->
+    <!-- HTML5 spec a <noscript> inside <head> may only contain <link>,     -->
+    <!-- <style>, and <meta> elements, so an <img> in a head-level          -->
+    <!-- noscript fails parse5/Vite's build-time HTML parser. -->
     <script>
     !function(f,b,e,v,n,t,s)
     {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -40,9 +44,6 @@
     fbq('init', '1068975582494306');
     fbq('track', 'PageView');
     </script>
-    <noscript><img height="1" width="1" style="display:none"
-    src="https://www.facebook.com/tr?id=1068975582494306&ev=PageView&noscript=1"
-    /></noscript>
     <!-- End Meta Pixel Code -->
 
     <!-- ── User Timing: record the moment the HTML is parsed ─────────────── -->
@@ -57,7 +58,7 @@
     <!-- ── LCP hero image preload ─────────────────────────────────────────── -->
     <!--                                                                        -->
     <!-- CRITICAL: This <link rel="preload"> must match the srcset + sizes      -->
-    <!-- used by the <img> in Hero.tsx exactly so the browser pairs the         -->
+    <!-- used by the <img> in Hero.tsx exactly so the browser pairs the        -->
     <!-- preloaded bytes with the rendered element. Any mismatch causes a        -->
     <!-- double-download (preload wasted + fresh fetch on hydration).           -->
     <!--                                                                        -->
@@ -170,6 +171,12 @@
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MGS97GBW"
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
+
+    <!-- Meta Pixel Code (noscript fallback) -->
+    <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=1068975582494306&ev=PageView&noscript=1"
+    /></noscript>
+    <!-- End Meta Pixel Code (noscript fallback) -->
     <div id="root"></div>
 
     <!--
