@@ -1,10 +1,10 @@
-const Stripe = require('stripe');
+import Stripe from 'stripe';
 
 // Public Supabase info (non-secret)
 const projectId = 'qckavajzhqlzicnjphvp';
 const publicAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFja2F2YWp6aHFsemljbmpwaHZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYwNTc3NTAsImV4cCI6MjA4MTYzMzc1MH0.fSeDguIEeKlsG1pP4DxkNnlwJhA6iJihboLiNiyWuD0';
 
-exports.handler = async function (event, context) {
+export const handler = async function (event, context) {
   // Only accept POST
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
