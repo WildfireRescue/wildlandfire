@@ -1,6 +1,6 @@
-const Stripe = require("stripe");
+import Stripe from "stripe";
 
-exports.handler = async (event) => {
+export const handler = async (event) => {
   try {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
