@@ -1,4 +1,4 @@
-const { createClient } = require('@supabase/supabase-js');
+import { createClient } from '@supabase/supabase-js';
 
 const urlCandidates = [
   process.env.SUPABASE_URL,
@@ -59,7 +59,7 @@ function extractProvidedSecret(event) {
   return firstNonEmpty([fromHeader, fromAuthBearer, fromQuery]);
 }
 
-exports.handler = async (event) => {
+export const handler = async (event) => {
   const supabaseUrl = firstNonEmpty(urlCandidates);
   const serviceRoleKey = firstNonEmpty(serviceKeyCandidates);
   const schedulerSecret = firstNonEmpty(schedulerSecretCandidates);
