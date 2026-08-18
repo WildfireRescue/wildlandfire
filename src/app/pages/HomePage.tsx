@@ -63,7 +63,7 @@ export function HomePage() {
           <div className="container mx-auto px-4 max-w-xl text-center">
             <p className="text-xs uppercase tracking-widest text-primary font-semibold mb-2">Make a Donation</p>
             <h2 className="text-2xl font-bold mb-6">Support Wildfire Survivors Today</h2>
-            <DonateControls defaultAmount={50} defaultMonthly={false} />
+            <DonateControls defaultAmount={10} defaultMonthly={false} />
           </div>
         </section>
 
