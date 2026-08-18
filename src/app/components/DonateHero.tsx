@@ -33,7 +33,7 @@ export function DonateHero() {
           {/* ✅ Donate controls (above the fold) */}
           <div className="max-w-xl mx-auto mb-10">
             <DonateControls
-              defaultAmount={50}
+              defaultAmount={10}
               defaultMonthly={false}
             />
           </div>
