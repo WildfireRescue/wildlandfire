@@ -55,24 +55,21 @@
     <!-- ── Resource hints ─────────────────────────────────────────────────── -->
     <!-- LCP hero is now served from local /Images/hero/ — no external origin. -->
 
-    <!-- ── LCP hero image preload ─────────────────────────────────────────── -->
-    <!--                                                                        -->
-    <!-- CRITICAL: This <link rel="preload"> must match the srcset + sizes      -->
-    <!-- used by the <img> in Hero.tsx exactly so the browser pairs the        -->
-    <!-- preloaded bytes with the rendered element. Any mismatch causes a        -->
-    <!-- double-download (preload wasted + fresh fetch on hydration).           -->
-    <!--                                                                        -->
-    <!-- Local WebP assets served from Netlify CDN — zero extra connection.    -->
-    <!-- Mobile DPR note: A Moto G Power (412 px, DPR 2.625) computes a        -->
-    <!-- display size of 480 px (from sizes) → needs 480×2.625 = 1260 px       -->
-    <!-- intrinsic resolution → browser selects the 1200w entry (largest        -->
-    <!-- available).                                                            -->
+        <!-- ── LCP hero image preload ─────────────────────────────────────────── -->
+    <!-- Hero.tsx wraps the LCP <img> in a <picture> with an AVIF <source>      -->
+    <!-- listed first, so AVIF-capable browsers (nearly all current ones)       -->
+    <!-- actually request the AVIF file, not the WebP one. Preloading WebP      -->
+    <!-- here caused a wasted preload + a late, JS-gated fetch of the real      -->
+    <!-- AVIF image, tanking LCP. type="image/avif" makes this preload a       -->
+    <!-- no-op (correctly skipped) for browsers without AVIF support, which    -->
+    <!-- fall back to the unpreloaded WebP <img>, same as before.              -->
     <link
       rel="preload"
       as="image"
-      href="/Images/hero/hero-1200.webp"
-      imagesrcset="/Images/hero/hero-480.webp 480w, /Images/hero/hero-768.webp 768w, /Images/hero/hero-1200.webp 1200w"
+      href="/Images/hero/hero-1200.avif"
+      imagesrcset="/Images/hero/hero-480.avif 480w, /Images/hero/hero-768.avif 768w, /Images/hero/hero-1200.avif 1200w"
       imagesizes="(max-width: 480px) 480px, (max-width: 768px) 768px, 100vw"
+      type="image/avif"
       fetchpriority="high"
     />
     <!-- Preload nav logo (above-the-fold, WebP) -->
