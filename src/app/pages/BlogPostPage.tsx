@@ -717,7 +717,7 @@ export function BlogPostPage() {
                 Donate to Wildfire Relief
               </Link>
             </div>
-            <BlogRelatedPosts category={post.category} currentSlug={post.slug} />
+            <BlogRelatedPosts category={post.category} tags={post.tags} currentSlug={post.slug} />
           </div>
 
           {/* Back Button (bottom) */}
