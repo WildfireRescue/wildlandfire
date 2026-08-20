@@ -540,22 +540,55 @@ export async function getPostsByTag(tag: string, options: PaginationOptions = { 
 }
 
 /**
- * Fetch related posts (same category, exclude current)
- */
-export async function getRelatedPosts(category: string | null, currentSlug: string, limit: number = 3) {
-  if (!category) return { posts: null, error: null };
+ * Fetch related posts (tag overlap first, category as fallback/fill, exclude current)
+  */
+export async function getRelatedPosts(tags: string[] | null, category: string | null, currentSlug: string, limit: number = 3) {
+    if ((!tags || tags.length === 0) && !category) return { posts: null, error: null };
 
-  const { data, error } = await supabase
-    .from('posts')
-    .select(POST_CARD_SELECT)
-    .eq('status', 'published')
-    .eq('noindex', false)
-    .eq('category', category)
-    .neq('slug', currentSlug)
-    .order('published_at', { ascending: false })
-    .limit(limit);
+    let tagPosts: BlogPost[] = [];
 
-  return { posts: data as BlogPost[] | null, error };
+    if (tags && tags.length > 0) {
+          const { data, error } = await supabase
+            .from('posts')
+            .select(POST_CARD_SELECT)
+            .eq('status', 'published')
+            .eq('noindex', false)
+            .overlaps('tags', tags)
+            .neq('slug', currentSlug)
+            .order('published_at', { ascending: false })
+            .limit(limit);
+
+          if (error) return { posts: null, error };
+          tagPosts = (data as BlogPost[]) || [];
+    }
+
+    if (tagPosts.length >= limit || !category) {
+          return { posts: tagPosts, error: null };
+    }
+
+    const haveSlugs = new Set(tagPosts.map((p) => p.slug));
+    const { data: catData, error: catError } = await supabase
+      .from('posts')
+      .select(POST_CARD_SELECT)
+      .eq('status', 'published')
+      .eq('noindex', false)
+      .eq('category', category)
+      .neq('slug', currentSlug)
+      .order('published_at', { ascending: false })
+      .limit(limit + haveSlugs.size);
+
+    if (catError) return { posts: tagPosts, error: null };
+
+    const merged = [...tagPosts];
+    for (const p of (catData as BlogPost[]) || []) {
+          if (merged.length >= limit) break;
+          if (!haveSlugs.has(p.slug)) {
+                  merged.push(p);
+                  haveSlugs.add(p.slug);
+          }
+    }
+
+    return { posts: merged.slice(0, limit), error: null };
 }
 
 /**
