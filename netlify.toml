@@ -8,6 +8,7 @@
 # - VITE_SUPABASE_URL: Supabase project URL
 # - VITE_SUPABASE_ANON_KEY: Supabase anonymous key
 # 
+
 # The build process will:
 # 1. npm run prebuild: Generate sitemap and RSS
 # 2. npm run build (vite build): Build the SPA
@@ -241,9 +242,19 @@
   from = "/blog/after-the-flames-wildfire-recovery"
   to = "/blog/after-the-flames-what-wildfire-recovery-really-takes-and-how-we-help"
   status = 301
-  
+
+# Consolidate near-duplicate blog content into a single canonical URL
+[[redirects]]
+  from = "/blog/how-does-wildfire-start"
+  to = "/blog/how-does-a-wildfire-start"
+  status = 301
+
+[[redirects]]
+  from = "/blog/Air-purifier-for-wildfire-smoke"
+  to = "/blog/best-air-purifier-for-wildfire-smoke"
+  status = 301
 # SPA fallback for all other routes
- [[redirects]]
+[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
