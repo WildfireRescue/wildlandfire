@@ -11,30 +11,31 @@ import { getRelatedPosts } from '../../../lib/supabaseBlog.ts';
 import type { BlogPost } from '../../../lib/blogTypes';
 
 interface BlogRelatedPostsProps {
-  category: string | null;
-  currentSlug: string;
-  limit?: number;
+    category: string | null;
+    tags?: string[] | null;
+    currentSlug: string;
+    limit?: number;
 }
 
-export function BlogRelatedPosts({ category, currentSlug, limit = 3 }: BlogRelatedPostsProps) {
-  const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [loading, setLoading] = useState(true);
+export function BlogRelatedPosts({ category, tags, currentSlug, limit = 3 }: BlogRelatedPostsProps) {
+    const [posts, setPosts] = useState<BlogPost[]>([]);
+    const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function fetchRelated() {
-      if (!category) {
-        setLoading(false);
-        return;
-      }
+    useEffect(() => {
+          async function fetchRelated() {
+                  if (!category && (!tags || tags.length === 0)) {
+                            setLoading(false);
+                            return;
+                  }
 
-      setLoading(true);
-      const { posts: relatedPosts } = await getRelatedPosts(category, currentSlug, limit);
-      setPosts(relatedPosts || []);
-      setLoading(false);
-    }
+                  setLoading(true);
+                  const { posts: relatedPosts } = await getRelatedPosts(tags || null, category, currentSlug, limit);
+                  setPosts(relatedPosts || []);
+                  setLoading(false);
+          }
 
-    fetchRelated();
-  }, [category, currentSlug, limit]);
+          fetchRelated();
+    }, [category, tags, currentSlug, limit]);
 
   if (loading) {
     return (
