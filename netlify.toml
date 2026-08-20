@@ -236,8 +236,14 @@
   to = "/fonts/:splat"
   status = 200
 
-# SPA fallback for all other routes
+# Fix soft-404: old blog slug renamed, redirect to current post URL
 [[redirects]]
+  from = "/blog/after-the-flames-wildfire-recovery"
+  to = "/blog/after-the-flames-what-wildfire-recovery-really-takes-and-how-we-help"
+  status = 301
+  
+# SPA fallback for all other routes
+ [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
